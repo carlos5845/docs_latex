@@ -1,109 +1,93 @@
-\begin{thebibliography}{18}
+\begin{thebibliography}{15}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
 
-\bibitem[{National Institute of Standards and Technology}(2024)]{nist2024csf}
-{National Institute of Standards and Technology}.
-\newblock The nist cybersecurity framework (csf) 2.0.
-\newblock Technical Report NIST CSWP 29, U.S. Department of Commerce, 2024.
-\newblock URL \url{https://doi.org/10.6028/NIST.CSWP.29}.
+\bibitem[{Congreso de la Republica del Peru}(2011)]{peru2011ley29733}
+{Congreso de la Republica del Peru}.
+\newblock Ley nro. 29733: Ley de proteccion de datos personales y su
+  reglamento, 2011.
 
-\bibitem[{MITRE Corporation}(2024{\natexlab{a}})]{mitre2024attack}
-{MITRE Corporation}.
-\newblock Mitre att\&ck® - enterprise matrix, 2024{\natexlab{a}}.
-\newblock URL \url{https://attack.mitre.org/}.
-\newblock Accessed: 2026-09-13.
+\bibitem[{FIRST}(2019)]{first2019cvss}
+{FIRST}.
+\newblock Common vulnerability scoring system v3.1: Specification document,
+  2019.
 
-\bibitem[{MITRE Corporation}(2024{\natexlab{b}})]{mitre_t1195}
-{MITRE Corporation}.
-\newblock Supply chain compromise, technique t1195 - enterprise,
-  2024{\natexlab{b}}.
-\newblock URL \url{https://attack.mitre.org/techniques/T1195/}.
+\bibitem[Howard and LeBlanc(2003)]{howard2003writing}
+Michael Howard and David LeBlanc.
+\newblock \emph{Writing Secure Code}.
+\newblock Microsoft Press, Redmond, WA, 2nd edition, 2003.
 
-\bibitem[{MITRE Corporation}(2024{\natexlab{c}})]{mitre_t1078}
-{MITRE Corporation}.
-\newblock Valid accounts, technique t1078 - enterprise, 2024{\natexlab{c}}.
-\newblock URL \url{https://attack.mitre.org/techniques/T1078/}.
+\bibitem[Hutchins et~al.(2011)Hutchins, Cloppert, and
+  Amin]{hutchins2011intelligence}
+Eric~M Hutchins, Michael~J Cloppert, and Rohan~M Amin.
+\newblock Intelligence-driven computer network defense informed by analysis of
+  adversary campaigns and intrusion kill chains.
+\newblock \emph{Leading Issues in Information Warfare \& Security Research},
+  1\penalty0 (1):\penalty0 80--106, 2011.
 
-\bibitem[{MITRE Corporation}(2024{\natexlab{d}})]{mitre_t1003}
-{MITRE Corporation}.
-\newblock Os credential dumping, technique t1003 - enterprise,
-  2024{\natexlab{d}}.
-\newblock URL \url{https://attack.mitre.org/techniques/T1003/}.
-
-\bibitem[{MITRE Corporation}(2024{\natexlab{e}})]{mitre_t1552}
-{MITRE Corporation}.
-\newblock Unsecured credentials, technique t1552 - enterprise,
-  2024{\natexlab{e}}.
-\newblock URL \url{https://attack.mitre.org/techniques/T1552/}.
-
-\bibitem[{MITRE Corporation}(2024{\natexlab{f}})]{mitre_t1583}
-{MITRE Corporation}.
-\newblock Acquire infrastructure, technique t1583 - enterprise,
-  2024{\natexlab{f}}.
-\newblock URL \url{https://attack.mitre.org/techniques/T1583/}.
-
-\bibitem[{MITRE Corporation}(2024{\natexlab{g}})]{mitre_t1059}
-{MITRE Corporation}.
-\newblock Command and scripting interpreter, technique t1059 - enterprise,
-  2024{\natexlab{g}}.
-\newblock URL \url{https://attack.mitre.org/techniques/T1059/}.
-
-\bibitem[{MITRE Corporation}(2024{\natexlab{h}})]{mitre_t1190}
-{MITRE Corporation}.
-\newblock Exploit public-facing application, technique t1190 - enterprise,
-  2024{\natexlab{h}}.
-\newblock URL \url{https://attack.mitre.org/techniques/T1190/}.
-
-\bibitem[{MITRE Corporation}(2024{\natexlab{i}})]{mitre_t1053}
-{MITRE Corporation}.
-\newblock Scheduled task/job, technique t1053 - enterprise, 2024{\natexlab{i}}.
-\newblock URL \url{https://attack.mitre.org/techniques/T1053/}.
-
-\bibitem[{MITRE Corporation}(2024{\natexlab{j}})]{mitre_t1110}
-{MITRE Corporation}.
-\newblock Brute force, technique t1110 - enterprise, 2024{\natexlab{j}}.
-\newblock URL \url{https://attack.mitre.org/techniques/T1110/}.
-
-\bibitem[{MITRE Corporation}(2024{\natexlab{k}})]{mitre_t1566}
-{MITRE Corporation}.
-\newblock Phishing, technique t1566 - enterprise, 2024{\natexlab{k}}.
-\newblock URL \url{https://attack.mitre.org/techniques/T1566/}.
-
-\bibitem[{MITRE Corporation}(2024{\natexlab{l}})]{mitre_t1486}
-{MITRE Corporation}.
-\newblock Data encrypted for impact (ransomware), technique t1486 - enterprise,
-  2024{\natexlab{l}}.
-\newblock URL \url{https://attack.mitre.org/techniques/T1486/}.
-
-\bibitem[{MITRE Corporation}(2024{\natexlab{m}})]{mitre_t1485}
-{MITRE Corporation}.
-\newblock Data destruction, technique t1485 - enterprise, 2024{\natexlab{m}}.
-\newblock URL \url{https://attack.mitre.org/techniques/T1485/}.
-
-\bibitem[{ISO/IEC}(2022)]{iso27001}
+\bibitem[{ISO/IEC}(2022)]{iso202227001}
 {ISO/IEC}.
-\newblock \emph{ISO/IEC 27001:2022 - Information security, cybersecurity and
-  privacy protection -- Information security management systems --
-  Requirements}.
-\newblock International Organization for Standardization, 2022.
+\newblock Iso/iec 27001:2022 information security, cybersecurity and privacy
+  protection --- information security management systems --- requirements,
+  2022.
 
-\bibitem[{Wazuh Inc.}(2024)]{wazuh}
-{Wazuh Inc.}
-\newblock Wazuh - the open source security platform, 2024.
-\newblock URL \url{https://wazuh.com/}.
+\bibitem[Kohnfelder and Garg(1999)]{kohnfelder1999threats}
+Loren Kohnfelder and Praerit Garg.
+\newblock The threats to our products.
+\newblock Technical report, Microsoft Corporation, 1999.
+\newblock Microsoft Interface Security Report.
 
-\bibitem[Steube(2024)]{hashcat}
-Jens Steube.
-\newblock Hashcat - advanced password recovery, 2024.
-\newblock URL \url{https://hashcat.net/hashcat/}.
+\bibitem[Meier et~al.(2003)Meier, Mackman, Dunner, Vasireddy, Escamilla, and
+  Murukan]{meier2003improving}
+J.~D. Meier, Alex Mackman, Michael Dunner, Srinath Vasireddy, Ray Escamilla,
+  and Anand Murukan.
+\newblock Improving web application security: Threats and countermeasures.
+\newblock Technical report, Microsoft Corporation, 2003.
 
-\bibitem[Lyon(2024)]{nmap}
-Gordon Lyon.
-\newblock Nmap: the network mapper - free security scanner, 2024.
-\newblock URL \url{https://nmap.org/}.
+\bibitem[{NIST}(2012)]{nist2012sp80030}
+{NIST}.
+\newblock Guide for conducting risk assessments.
+\newblock Technical report, NIST Special Publication 800-30 Revision 1, 2012.
+
+\bibitem[{NIST}(2018)]{nist2018cybersecurity}
+{NIST}.
+\newblock Framework for improving critical infrastructure cybersecurity
+  (version 1.1).
+\newblock Technical report, National Institute of Standards and Technology,
+  2018.
+
+\bibitem[{OWASP Foundation}(2020)]{owasp2020threatmodeling}
+{OWASP Foundation}.
+\newblock Threat modeling cheat sheet.
+\newblock Technical report, Open Web Application Security Project, 2020.
+
+\bibitem[{OWASP Foundation}(2021)]{owasp2021top10}
+{OWASP Foundation}.
+\newblock Owasp top 10: 2021 - the ten most critical web application security
+  risks.
+\newblock Technical report, Open Web Application Security Project, 2021.
+
+\bibitem[Scarfone et~al.(2008)Scarfone, Souppaya, Cody, and
+  Orebaugh]{nist2008sp800115}
+Karen Scarfone, Murugiah Souppaya, Amanda Cody, and Angela Orebaugh.
+\newblock Technical guide to information security testing and assessment.
+\newblock Technical report, NIST Special Publication 800-115, 2008.
+
+\bibitem[Shostack(2014)]{shostack2014threat}
+Adam Shostack.
+\newblock \emph{Threat Modeling: Designing for Security}.
+\newblock John Wiley \& Sons, Indianapolis, IN, 2014.
+
+\bibitem[Stallings(2018)]{stallings2018cryptography}
+William Stallings.
+\newblock \emph{Cryptography and Network Security: Principles and Practice}.
+\newblock Pearson, 7th edition, 2018.
+
+\bibitem[{The MITRE Corporation}(2023)]{mitre2023attack}
+{The MITRE Corporation}.
+\newblock Mitre att\&ck enterprise matrix for web applications, 2023.
 
 \end{thebibliography}
