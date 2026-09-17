@@ -460,75 +460,77 @@ color=transparent!90, middle color=transparent!20]
 \titleformat{\section}
 {}
 {}
-{0pt}
+{-.5em}
 {\mysectionformat{#1}}
 
-\titleformat{name=\section,numberless}{}{}{0pt}{\mysectionnonumformat{#1}}
+\titleformat{name=\section,numberless}{}{}{-.5em}{\mysectionnonumformat{#1}}
 
 \newcommand{\mysectionformat}[1]{%
-\def\rad{7pt}%
-\begin{tikzpicture}[baseline=(sec.base)]
+\makebox[0pt][l]{\def\rad{7pt}%
+\begin{tikzpicture}[remember picture]
     \path[fill=outermarginfgcolor,drop shadow={opacity=0.3,shadow xshift=.05cm,shadow yshift=-.05cm}]node[append after command={
     ([xshift=\rad]sec.north west) to[out=180,in=0,looseness=1] ([xshift=-3*\rad]sec.south west) --([xshift=-\rad]sec.south east) to[out=0,in=180,looseness=1] ([xshift=3*\rad]sec.north east) --cycle},
-    text=white,font=\sffamily\large\bfseries,align=center,inner ysep=2mm,inner xsep=3mm] (sec) at (0,0) {Sec\ \thesection};
-    \node[text=black,font=\large\bfseries,anchor=west] (secnum) at ([shift={(3mm,0mm)}]sec.east) {\parbox{0.78\linewidth}{\baselineskip=18pt #1}};
-\end{tikzpicture}%
-}
+    text=white,font=\sffamily\large\bfseries,align=center,inner ysep=2mm] (sec) at (0,0) {Sec\ \thesection};
+    \node[text=black,font=\large\bfseries,below right] (secnum) at ([shift={(0,-1mm)}]sec.north east) {\begin{varwidth}{.85\linewidth}\setlength\baselineskip{18pt}\hspace{.5cm}#1\end{varwidth}};
+\end{tikzpicture}}}
 
 \newcommand{\mysectionnonumformat}[1]{%
-\def\rad{7pt}%
-\begin{tikzpicture}[baseline=(sec.base)]
+\makebox[0pt][l]{\def\rad{7pt}%
+\begin{tikzpicture}[remember picture]
     \path[fill=outermarginfgcolor,drop shadow={opacity=0.3,shadow xshift=.05cm,shadow yshift=-.05cm}]node[append after command={
     ([xshift=\rad]sec.north west) to[out=180,in=0,looseness=1] ([xshift=-3*\rad]sec.south west) --([xshift=-\rad]sec.south east) to[out=0,in=180,looseness=1] ([xshift=3*\rad]sec.north east) --cycle},
-    text=white,font=\sffamily\large\bfseries,align=center,inner ysep=2mm,inner xsep=3mm] (sec) at (0,0) {Sec};
-    \node[text=black,font=\large\bfseries,anchor=west] (secnum) at ([shift={(3mm,0mm)}]sec.east) {\parbox{0.78\linewidth}{\baselineskip=18pt #1}};
-\end{tikzpicture}%
-}
+    text=white,font=\sffamily\large\bfseries,align=center,inner ysep=2mm] (sec) at (0,0) {Sec};
+    \node[text=black,font=\large\bfseries,below right] (secnum) at ([shift={(0,-1mm)}]sec.north east) {\begin{varwidth}{.85\linewidth}\setlength\baselineskip{18pt}\hspace{.5cm}#1\end{varwidth}};
+\end{tikzpicture}}}
 
-\titlespacing*{\section}{0pt}{3.5ex plus 1ex minus .2ex}{2.5ex plus .2ex}
+\titlespacing*{\section}{0pt}{3.5ex plus 1ex minus .2ex}{1.2cm}
 
 
 % /* ------------------------------ Subsection样式 ------------------------------ */
 \usepackage{pifont}
 \newcommand{\subsectionnumstyle}[2]{%
-\def\rad{5pt}%
+\makebox[0pt][l]{\def\rad{5pt}%
 \def\inrad{3pt}%
-\begin{tikzpicture}[baseline=(sec.base)]
-\path[fill=#2,drop shadow={opacity=0.3,shadow xshift=0.5mm,shadow yshift=-0.5mm}]node[append after command={
-([shift={(\rad,\rad)}]sec.north west) arc[start angle=90, end angle=180, radius=\rad] {[rounded corners=\inrad]--(sec.south west)}--([yshift=-3mm]$(sec.south west)!0.5!(sec.south east)$) {[rounded corners=\inrad]--(sec.south east)} -- (sec.north east) arc[start angle=180, end angle=90, radius=\rad]--cycle
-},
-text=white,font=\sffamily\large\bfseries,align=center,inner ysep=1.5mm,inner xsep=2mm] (sec) at (0,0) {\thesubsection};
-\begin{pgfonlayer}{bottom}
-  \fill[#2!30!black!70,opacity=0.8] ([xshift=\rad,yshift=\rad]sec.north east) to[out=0,in=-81,looseness=1.5] ([xshift=1.8*\rad]sec.north east)--(sec.north east) |-cycle;
-\end{pgfonlayer}
-\node[text=black,font=\large\bfseries,anchor=west] (sectitle) at ([shift={(3mm,0mm)}]sec.east) {\parbox{0.82\linewidth}{\baselineskip=16pt #1}};
-\end{tikzpicture}%
-}
+    \begin{tikzpicture}[remember picture]
+    \path[fill=#2,drop shadow={opacity=0.3,shadow xshift=0.5mm,shadow yshift=-0.5mm}]node[append after command={
+    ([shift={(\rad,\rad)}]sec.north west) arc[start angle=90, end angle=180, radius=\rad]  {[rounded corners=\inrad]--(sec.south west)}--([yshift=-3mm]$(sec.south west)!0.5!(sec.south east)$) {[rounded corners=\inrad]--(sec.south east)} -- (sec.north east) arc[start angle=180, end angle=90, radius=\rad]--cycle
+    },
+    text=white,font=\sffamily\large\bfseries,align=center,inner ysep=1.5mm,inner xsep=1mm] (sec) at (0,0) {\thesubsection};
+    \begin{pgfonlayer}{bottom}
+      \fill[#2!30!black!70,opacity=0.8] ([xshift=\rad,yshift=\rad]sec.north east) to[out=0,in=-81,looseness=1.5] ([xshift=1.8*\rad]sec.north east)--(sec.north east) |-cycle;
+      \end{pgfonlayer}
+    \node[text=black,font=\large\bfseries,below right] (sectitle) at ([shift={(2mm,6.5mm)}]sec.south east) {\begin{varwidth}{.9\linewidth}\setlength\baselineskip{18pt}#1\end{varwidth}};
+    \begin{pgfonlayer}{bottom}
+    \draw[gray,dashed,opacity=0.5] (sec.north west) --([xshift=4*\rad]sec.north east);
+    \end{pgfonlayer}
+    \end{tikzpicture}}}
 
 \newcommand{\subsectionnonumstyle}[2]{%
-\def\rad{5pt}%
+\makebox[0pt][l]{\def\rad{5pt}%
 \def\inrad{3pt}%
-\begin{tikzpicture}[baseline=(sec.base)]
-\path[fill=#2,drop shadow={opacity=0.3,shadow xshift=0.5mm,shadow yshift=-0.5mm}]node[append after command={
-([shift={(\rad,\rad)}]sec.north west) arc[start angle=90, end angle=180, radius=\rad] {[rounded corners=\inrad]--(sec.south west)}--([yshift=-3mm]$(sec.south west)!0.5!(sec.south east)$) {[rounded corners=\inrad]--(sec.south east)} -- (sec.north east) arc[start angle=180, end angle=90, radius=\rad] --cycle
-},
-text=white,font=\sffamily\large\bfseries,align=center,inner ysep=1mm,inner xsep=2mm] (sec) at (0,0) {\ding{99}};
-\begin{pgfonlayer}{bottom}
-  \fill[#2!30!black!70,opacity=0.8] ([xshift=\rad,yshift=\rad]sec.north east) to[out=0,in=-81,looseness=1.5] ([xshift=1.8*\rad]sec.north east)--(sec.north east) |-cycle;
-\end{pgfonlayer}
-\node[text=black,font=\large\bfseries,anchor=west] (sectitle) at ([shift={(3mm,0mm)}]sec.east) {\parbox{0.82\linewidth}{\baselineskip=16pt #1}};
-\end{tikzpicture}%
-}
+    \begin{tikzpicture}[remember picture]
+    \path[fill=#2,drop shadow={opacity=0.3,shadow xshift=0.5mm,shadow yshift=-0.5mm}]node[append after command={
+    ([shift={(\rad,\rad)}]sec.north west) arc[start angle=90, end angle=180, radius=\rad]  {[rounded corners=\inrad]--(sec.south west)}--([yshift=-3mm]$(sec.south west)!0.5!(sec.south east)$) {[rounded corners=\inrad]--(sec.south east)} -- (sec.north east) arc[start angle=180, end angle=90, radius=\rad] --cycle
+    },
+    text=white,font=\sffamily\large\bfseries,align=center,inner ysep=0.5mm,inner xsep=1.5mm] (sec) at (0,0) {\Huge\ding{99}};
+    \begin{pgfonlayer}{bottom}
+      \fill[#2!30!black!70,opacity=0.8] ([xshift=\rad,yshift=\rad]sec.north east) to[out=0,in=-81,looseness=1.5] ([xshift=1.8*\rad]sec.north east)--(sec.north east) |-cycle;
+      \end{pgfonlayer}
+    \node[text=black,font=\large\bfseries,below right] (sectitle) at ([shift={(2mm,6.5mm)}]sec.south east) {\begin{varwidth}{.9\linewidth}\setlength\baselineskip{18pt}#1\end{varwidth}};
+    \begin{pgfonlayer}{bottom}
+    \draw[gray,dashed,opacity=0.5] (sec.north west) --([xshift=4*\rad]sec.north east);
+    \end{pgfonlayer}
+    \end{tikzpicture}}}
 
 \titleformat{\subsection}
 {}
 {}
-{0pt}
+{-.5em}
 {\subsectionnumstyle{#1}{outermarginfgcolor}}
 
-\titleformat{name=\subsection,numberless}{}{}{0pt}{\subsectionnonumstyle{#1}{outermarginfgcolor}}
+\titleformat{name=\subsection,numberless}{}{}{-.5em}{\subsectionnonumstyle{#1}{outermarginfgcolor}}
 
-\titlespacing*{\subsection}{0pt}{3ex plus 1ex minus .2ex}{2ex plus .2ex}
+\titlespacing*{\subsection}{0pt}{3ex plus 1ex minus .2ex}{1.1cm}
 
 
 

@@ -33,7 +33,7 @@
 }
 \newtheorem*{remark}{\textbf{Nota}}
 
-% CAJA DE CONSOLA ESTILO MODERNO CON LISTINGS (SOPORTE VERBATIM COMPLETO)
+% CAJA DE CONSOLA ESTILO MODERNO CON LISTINGS
 \newtcblisting{cmdbox}[1]{
     colback=bg!35, 
     colframe=fg,   
@@ -97,8 +97,8 @@
 \pagestyle{scth}
 \pagenumbering{arabic}
 
-\chapter*{Declaración de Ética y Alcance de Evaluación}
-\addcontentsline{toc}{chapter}{Declaración de Ética y Alcance de Evaluación}
+\chapter*{Declaración de Ética}
+\addcontentsline{toc}{chapter}{Declaración de Ética}
 \markboth{Declaración de Ética}{Declaración de Ética}
 
 El presente documento académico y de investigación ha sido elaborado con estricto apego a los principios deontológicos del hacking ético, las directrices de pruebas de seguridad de OWASP (\textit{Open Web Application Security Project}) y los estándares internacionales de ciberseguridad defensiva. 
@@ -116,6 +116,8 @@ El propósito fundamental de este estudio es proporcionar a la Oficina de Tecnol
 
 \chapter{Introducción}
 \label{ch:introduccion}
+
+La gestión de la seguridad informática en entornos universitarios representa uno de los desafíos más complejos de la ingeniería contemporánea, exigiendo un equilibrio riguroso entre la apertura académica y la salvaguarda de infraestructuras críticas.
 
 \section{Contexto Global de la Ciberseguridad en la Educación Superior}
 En la era contemporánea, la transformación digital de las instituciones universitarias ha acelerado la adopción de plataformas web, sistemas de gestión académica y repositorios científicos en la nube. Sin embargo, este proceso de digitalización ha expandido de manera crítica la superficie de ataque institucional. Las universidades gestionan activos de altísimo valor: registros de identidad de miles de estudiantes, calificaciones académicas, patentes e investigaciones confidenciales, y sistemas transaccionales financieros de tesorería y matrícula.
@@ -136,6 +138,8 @@ La sinergia entre STRIDE y Cyber Kill Chain permite no solo clasificar las amena
 
 \chapter{Planteamiento del Problema}
 \label{ch:planteamiento}
+
+El análisis de la seguridad en los servicios digitales de la UNAP requiere una formulación metódica que vincule los riesgos operativos con los vectores de amenaza informática actuales.
 
 \section{Descripción de la Realidad Problemática}
 La Universidad Nacional del Altiplano (UNAP) de Puno administra un ecosistema tecnológico heterogéneo que da soporte a más de 20,000 usuarios entre estudiantes, docentes, investigadores y personal administrativo. Entre sus principales servicios web se encuentran el Sistema Integrado de Información Académica (SIA), el Campus Virtual (Moodle), el portal institucional principal y la pasarela de admisión.
@@ -162,6 +166,8 @@ A pesar de los continuos esfuerzos del área de tecnologías, estos servicios we
 \chapter{Objetivos de la Investigación}
 \label{ch:objetivos}
 
+A fin de orientar el desarrollo metodológico y técnico del presente trabajo, se definen los objetivos generales y específicos que guían la evaluación de seguridad en la UNAP.
+
 \section{Objetivo General}
 Aplicar integralmente las técnicas Cyber Kill Chain y STRIDE para identificar, analizar y estructurar las amenazas de seguridad en los servicios web institucionales autorizados de la Universidad Nacional del Altiplano, proponiendo controles de mitigación fundamentados.
 
@@ -177,6 +183,8 @@ Aplicar integralmente las técnicas Cyber Kill Chain y STRIDE para identificar, 
 \chapter{Justificación}
 \label{ch:justificacion}
 
+La relevancia de esta investigación radica en la necesidad imperativa de proteger los activos digitales universitarios mediante enfoques de ingeniería formal.
+
 \section{Justificación Técnica}
 Desde la perspectiva de la ingeniería de sistemas y la ciberseguridad, el modelado formal de amenazas es una de las prácticas más costo-efectivas para elevar la postura de seguridad. La identificación de vectores de ataque en las capas de aplicación, transporte y almacenamiento permite diseñar controles de seguridad en profundidad (\textit{Defense in Depth}), implementando políticas de autenticación multifactor (MFA), sanitización estricta de entradas y segmentación de redes, reduciendo drásticamente la probabilidad de compromisos críticos.
 
@@ -188,6 +196,8 @@ La salvaguarda de la integridad de las calificaciones, los registros contables y
 
 \chapter{Marco Teórico y Conceptual}
 \label{ch:marco_teorico}
+
+Para fundamentar la evaluación de seguridad, se revisan los principios doctrinales de la seguridad de la información, el modelado formal de amenazas y las taxonomías de ataque modernas.
 
 \section{Pilares Fundamentales de la Seguridad de la Información}
 La seguridad de la información y la ciberseguridad se fundamentan en la protección de los datos y los sistemas mediante la tríada clásica de seguridad (CIA) y sus extensiones:
@@ -289,6 +299,8 @@ Resultado Entregable & Matriz de amenazas clasificadas & Cadena de eventos de at
 \chapter{Metodología de Evaluación}
 \label{ch:metodologia}
 
+En este capítulo se establece el diseño de la investigación aplicada, los criterios de delimitación del alcance y el protocolo de auditoría técnica.
+
 \section{Tipo y Nivel de Investigación}
 El presente trabajo corresponde a una \textbf{investigación aplicada}, orientada a la resolución de problemas de seguridad concretos en una infraestructura real. Posee un nivel \textbf{descriptivo y analítico}, integrando métodos cualitativos (para el modelado y categorización STRIDE) y cuantitativos (en la evaluación del impacto y probabilidad de riesgos).
 
@@ -315,12 +327,10 @@ El procedimiento se divide en tres fases rigurosamente controladas:
     \item \textbf{Fase 3: Simulación de Escenarios Kill Chain:} Reconstrucción teórica y en laboratorio controlado de los vectores de ataque más críticos para definir los puntos de ruptura y defensa.
 \end{enumerate}
 
-% ============================================================================
-% CAPÍTULO 7: DESARROLLO / APLICACIÓN PRÁCTICA
-% ============================================================================
-
 \chapter{Desarrollo y Aplicación Práctica}
 \label{ch:aplicacion_practica}
+
+A continuación, se desarrolla la evaluación experimental y el modelado sistemático sobre la infraestructura web seleccionada de la UNAP.
 
 \section{Reconocimiento del Entorno Autorizado}
 El proceso de evaluación inició con la recolección de información pública y la identificación de la superficie expuesta en el dominio institucional \texttt{unap.edu.pe}. Esta etapa permite conocer la topología lógica sin enviar paquetes invasivos ni generar alertas de intrusión.
