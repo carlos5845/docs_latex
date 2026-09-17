@@ -292,14 +292,9 @@ fuzzy shadow={0.4mm}{-0.4mm}{0mm}{0.2mm}{fill=white!40!gray},%下
   \makebox[0pt][l]{\def\rad{7pt}%
   \begin{tikzpicture}[remember picture, overlay]%
       \begin{pgfonlayer}{bottom}
-        \ifodd\value{page}
-        \shade[right color=outermarginbgcolor!30,middle color=outermarginbgcolor!50,left color=outermarginfgcolor!30] (current page.north west) rectangle ++(\paperwidth,-.2\paperheight+0.3cm); % background odd
-        \else
-        \shade[left color=outermarginbgcolor!30,middle color=outermarginbgcolor!50,right color=outermarginfgcolor!30] (current page.north west) rectangle ++(\paperwidth,-.2\paperheight+0.3cm); % background even
-        \fi
-      \fill[outermarginfgcolor,opacity=.5]([shift={(0,-4.45cm)}]current page.north west) rectangle ++(\paperwidth,-2mm); % line
+        \shade[right color=outermarginbgcolor!30,middle color=outermarginbgcolor!50,left color=outermarginfgcolor!30] (current page.north west) rectangle ++(\paperwidth,-.2\paperheight+0.3cm);
+        \fill[outermarginfgcolor,opacity=.5]([shift={(0,-4.45cm)}]current page.north west) rectangle ++(\paperwidth,-2mm);
       \end{pgfonlayer}
-      \ifodd\value{page}
       \begin{pgfonlayer}{top}
         \fill[outermarginfgcolor,opacity=0.7,rounded corners=5pt]node[append after command={([yshift=2cm]chapnum.north west) rectangle (chapnum.south east)},right,text=white,minimum width=2cm,align=center,font=\sffamily\bfseries] (chapnum) at ([shift={(1.5cm,-2.5cm)}]current page.north west) {\scalebox{3}{\thechapter}};
         \begin{pgfonlayer}{foreground}
@@ -308,64 +303,36 @@ fuzzy shadow={0.4mm}{-0.4mm}{0mm}{0.2mm}{fill=white!40!gray},%下
         \end{pgfonlayer}
         \fill [outermarginfgcolor,path fading=fade up,rounded corners=5pt]%
         ([yshift=2cm]chapnum.north west) rectangle (chapnum.south east);
-        \node[above left,font=\sc\fontsize{20pt}{22pt}\selectfont] (contents name) at ([shift={(-1.2cm,-4.35cm)}]current page.north east) {\parbox{0.68\textwidth}{\raggedleft\baselineskip=2.4ex #1}};
-        \end{pgfonlayer}
-        \begin{pgfonlayer}{bottom}
-        \node[right] (image) at ([shift={(-0.5cm,-2.8cm)}]current page.north west) {\includegraphics[width=7cm]{\@chapimage}};
-        \end{pgfonlayer}
-        \else
-        \begin{pgfonlayer}{top}
-          \fill[outermarginfgcolor,opacity=0.7,rounded corners=5pt]node[append after command={([yshift=2cm]chapnum.north west) rectangle (chapnum.south east)},left,text=white,minimum width=2cm,align=center,font=\sffamily\bfseries] (chapnum) at ([shift={(-1.5cm,-2.5cm)}]current page.north east) {\scalebox{3}{\thechapter}};
-          \begin{pgfonlayer}{foreground}
-          \pattern[pattern=sixpointed stars,pattern color=white,opacity=1.0,rounded corners=5pt]
-          ([yshift=2cm]chapnum.north west) rectangle (chapnum.south east);
-          \end{pgfonlayer}
-          \fill [outermarginfgcolor,path fading=fade up,rounded corners=5pt]%
-          ([yshift=2cm]chapnum.north west) rectangle (chapnum.south east);
-          \node[above right,font=\sc\fontsize{20pt}{22pt}\selectfont] (contents name) at ([shift={(1.2cm,-4.35cm)}]current page.north west) {\parbox{0.68\textwidth}{\raggedright\baselineskip=2.4ex #1}};
-          \end{pgfonlayer}
-      \begin{pgfonlayer}{background}
-      \node[left] (image) at ([shift={(0.5cm,-2.8cm)}]current page.north east) {\includegraphics[width=7cm]{\@chapimage}};
+        \node[above left,font=\sc\fontsize{22pt}{24pt}\selectfont,align=center] (contents name) at ([shift={(-1.2cm,-4.35cm)}]current page.north east) {\parbox{0.7\textwidth}{\baselineskip=2.3ex #1}};
       \end{pgfonlayer}
-        \fi
-        \path[fill=outermarginbgcolor]node[append after command={
+      \begin{pgfonlayer}{bottom}
+        \node[right] (image) at ([shift={(-0.5cm,-2.8cm)}]current page.north west) {\includegraphics[width=7cm]{\@chapimage}};
+      \end{pgfonlayer}
+      \path[fill=outermarginbgcolor]node[append after command={
         ([xshift=-2*\rad]pagenumber.south west)  to[out=0,in=180,looseness=1] ([xshift=\rad]pagenumber.north west) --([xshift=-\rad]pagenumber.north east) to[out=0,in=-180,looseness=1] ([xshift=2*\rad]pagenumber.south east) --cycle},
         text=outermarginfgcolor,font=\sffamily\fontsize{15}{15}\selectfont\bfseries,align=center,minimum height=0.4cm,minimum width=1.3cm,inner sep=1.5mm] (pagenumber) at ([shift={(0,0.3cm)}]current page.south) {\thepage};
-        \end{tikzpicture}}
-    }
+      \end{tikzpicture}}
+}
 \titleformat{name=\chapter,numberless}{\bfseries\huge\filcenter}{}{1em}{
   \makebox[0pt][l]{\def\rad{7pt}%
   \begin{tikzpicture}[remember picture, overlay]%
       \begin{pgfonlayer}{bottom}
-        \ifodd\value{page}
-        \shade[right color=outermarginbgcolor!30,middle color=outermarginbgcolor!50,left color=outermarginfgcolor!30] (current page.north west) rectangle ++(\paperwidth,-.2\paperheight); % background odd
-        \else
-        \shade[left color=outermarginbgcolor!30,middle color=outermarginbgcolor!50,right color=outermarginfgcolor!30] (current page.north west) rectangle ++(\paperwidth,-.2\paperheight); % background even
-        \fi
-      \fill[outermarginfgcolor,opacity=.5]([shift={(0,-4.45cm)}]current page.north west) rectangle ++(\paperwidth,-2mm); % line
+        \shade[right color=outermarginbgcolor!30,middle color=outermarginbgcolor!50,left color=outermarginfgcolor!30] (current page.north west) rectangle ++(\paperwidth,-.2\paperheight);
+        \fill[outermarginfgcolor,opacity=.5]([shift={(0,-4.45cm)}]current page.north west) rectangle ++(\paperwidth,-2mm);
       \end{pgfonlayer}
-      \ifodd\value{page}
       \begin{pgfonlayer}{top}
-        \node[above left,font=\sc\fontsize{20pt}{22pt}\selectfont] (contents name) at ([shift={(-1.2cm,-4.35cm)}]current page.north east) {\parbox{0.75\textwidth}{\raggedleft\baselineskip=2.4ex #1}};
-        \end{pgfonlayer}
-        \begin{pgfonlayer}{bottom}
-        \node[right] (image) at ([shift={(-0.5cm,-2.8cm)}]current page.north west) {\includegraphics[width=7cm]{\@chapimage}};
-        \end{pgfonlayer}
-        \else
-        \begin{pgfonlayer}{top}
-          \node[above right,font=\sc\fontsize{20pt}{22pt}\selectfont] (contents name) at ([shift={(1.2cm,-4.35cm)}]current page.north west) {\parbox{0.75\textwidth}{\raggedright\baselineskip=2.4ex #1}};
-          \end{pgfonlayer}
-      \begin{pgfonlayer}{background}
-      \node[left] (image) at ([shift={(0.5cm,-2.8cm)}]current page.north east) {\includegraphics[width=7cm]{\@chapimage}};
+        \node[above left,font=\sc\fontsize{22pt}{24pt}\selectfont,align=center] (contents name) at ([shift={(-1.2cm,-4.35cm)}]current page.north east) {\parbox{0.75\textwidth}{\baselineskip=2.3ex #1}};
       \end{pgfonlayer}
-        \fi
-        \path[fill=outermarginbgcolor]node[append after command={
-          ([xshift=-2*\rad]pagenumber.south west)  to[out=0,in=180,looseness=1] ([xshift=\rad]pagenumber.north west) --([xshift=-\rad]pagenumber.north east) to[out=0,in=-180,looseness=1] ([xshift=2*\rad]pagenumber.south east) --cycle},
-          text=outermarginfgcolor,font=\sffamily\fontsize{15}{15}\selectfont\bfseries,align=center,minimum height=0.4cm,minimum width=1.3cm,inner sep=1.5mm] (pagenumber) at ([shift={(0,0.3cm)}]current page.south) {\thepage};
-        \end{tikzpicture}}
+      \begin{pgfonlayer}{bottom}
+        \node[right] (image) at ([shift={(-0.5cm,-2.8cm)}]current page.north west) {\includegraphics[width=7cm]{\@chapimage}};
+      \end{pgfonlayer}
+      \path[fill=outermarginbgcolor]node[append after command={
+        ([xshift=-2*\rad]pagenumber.south west)  to[out=0,in=180,looseness=1] ([xshift=\rad]pagenumber.north west) --([xshift=-\rad]pagenumber.north east) to[out=0,in=-180,looseness=1] ([xshift=2*\rad]pagenumber.south east) --cycle},
+        text=outermarginfgcolor,font=\sffamily\fontsize{15}{15}\selectfont\bfseries,align=center,minimum height=0.4cm,minimum width=1.3cm,inner sep=1.5mm] (pagenumber) at ([shift={(0,0.3cm)}]current page.south) {\thepage};
+      \end{tikzpicture}}
 }
-\titlespacing{\chapter}{0pt}{0pt}{70pt}
-\titlespacing{name=\chapter,numberless}{0pt}{0pt}{70pt}
+\titlespacing{\chapter}{0pt}{0pt}{85pt}
+\titlespacing{name=\chapter,numberless}{0pt}{0pt}{85pt}
 
 
 % /* --------------------------------- Part定制 --------------------------------- */
