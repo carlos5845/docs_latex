@@ -1,0 +1,26 @@
+\chapter{Planteamiento del Problema}
+\label{ch:planteamiento}
+
+El análisis de la seguridad en los servicios digitales de la UNAP requiere una formulación metódica que vincule los riesgos operativos con los vectores de amenaza informática actuales.
+
+\section{Descripción de la Realidad Problemática}
+La Universidad Nacional del Altiplano (UNAP) de Puno administra un ecosistema tecnológico heterogéneo que da soporte a más de 20,000 usuarios entre estudiantes, docentes, investigadores y personal administrativo. Entre sus principales servicios web se encuentran el Sistema Integrado de Información Académica (SIA), el Campus Virtual (Moodle), el portal institucional principal y la pasarela de admisión.
+
+A pesar de los continuos esfuerzos del área de tecnologías, estos servicios web enfrentan constantes desafíos de seguridad:
+\begin{itemize}
+    \item \textbf{Vulnerabilidades en Aplicaciones Web:} Exposición potencial a riesgos del \textit{OWASP Top 10}, tales como inyecciones de código (SQLi, XSS), controles de acceso defectuosos (\textit{Broken Access Control}) y desconfiguraciones de seguridad (\textit{Security Misconfiguration}).
+    \item \textbf{Falta de un Modelado de Amenazas Formal:} Ausencia de una metodología documentada que identifique sistemáticamente las amenazas por componente (servidores web, bases de datos, APIs de integración y canales de comunicación).
+    \item \textbf{Visibilidad Defensiva Limitada:} Dificultad para correlacionar eventos de red y determinar en qué fase de una intrusión (reconocimiento, explotación, persistencia) se encuentra una amenaza potencial.
+\end{itemize}
+
+\section{Formulación del Problema}
+\subsection{Problema General}
+¿Cómo pueden las técnicas Cyber Kill Chain y STRIDE contribuir a la identificación, análisis y mitigación estructurada de amenazas de seguridad en los servicios web institucionales de la Universidad Nacional del Altiplano?
+
+\subsection{Problemas Específicos}
+\begin{itemize}
+    \item ¿Cuáles son los principales activos y componentes de software expuestos en el alcance institucional de la UNAP?
+    \item ¿Qué amenazas a la autenticidad, integridad, confidencialidad y disponibilidad pueden descubrirse mediante la aplicación sistemática del modelo STRIDE?
+    \item ¿De qué forma se pueden modelar y simular los escenarios de ataque plausible a través de las siete fases de la Cyber Kill Chain?
+    \item ¿Qué controles de seguridad y mitigaciones técnicas deben priorizarse para interrumpir la progresión de los ataques identificados?
+\end{itemize}

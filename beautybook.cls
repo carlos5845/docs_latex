@@ -288,7 +288,8 @@ fuzzy shadow={0.4mm}{-0.4mm}{0mm}{0.2mm}{fill=white!40!gray},%下
 \ExplSyntaxOff
 
 % /* -------------------------------- Chatper样式 ------------------------------- */
-\titleformat{\chapter}{\huge\bfseries\filcenter}{}{1em}{
+\titleformat{\chapter}{\huge\bfseries\filcenter}{}{1em}{%
+  \thispagestyle{empty}%
   \makebox[0pt][l]{\def\rad{7pt}%
   \begin{tikzpicture}[remember picture, overlay]%
       \begin{pgfonlayer}{bottom}
@@ -303,7 +304,7 @@ fuzzy shadow={0.4mm}{-0.4mm}{0mm}{0.2mm}{fill=white!40!gray},%下
         \end{pgfonlayer}
         \fill [outermarginfgcolor,path fading=fade up,rounded corners=5pt]%
         ([yshift=2cm]chapnum.north west) rectangle (chapnum.south east);
-        \node[above left,font=\sc\fontsize{22pt}{24pt}\selectfont,align=center] (contents name) at ([shift={(-1.2cm,-4.35cm)}]current page.north east) {\parbox{0.7\textwidth}{\baselineskip=2.3ex #1}};
+        \node[above left,font=\rmfamily\bfseries\fontsize{18pt}{22pt}\selectfont] (contents name) at ([shift={(-1.2cm,-4.35cm)}]current page.north east) {\parbox{0.7\textwidth}{\raggedleft\baselineskip=2.3ex \MakeUppercase{#1}}};
       \end{pgfonlayer}
       \begin{pgfonlayer}{bottom}
         \node[right] (image) at ([shift={(-0.5cm,-2.8cm)}]current page.north west) {\includegraphics[width=7cm]{\@chapimage}};
@@ -311,9 +312,10 @@ fuzzy shadow={0.4mm}{-0.4mm}{0mm}{0.2mm}{fill=white!40!gray},%下
       \path[fill=outermarginbgcolor]node[append after command={
         ([xshift=-2*\rad]pagenumber.south west)  to[out=0,in=180,looseness=1] ([xshift=\rad]pagenumber.north west) --([xshift=-\rad]pagenumber.north east) to[out=0,in=-180,looseness=1] ([xshift=2*\rad]pagenumber.south east) --cycle},
         text=outermarginfgcolor,font=\sffamily\fontsize{15}{15}\selectfont\bfseries,align=center,minimum height=0.4cm,minimum width=1.3cm,inner sep=1.5mm] (pagenumber) at ([shift={(0,0.3cm)}]current page.south) {\thepage};
-      \end{tikzpicture}}
+      \end{tikzpicture}}%
 }
-\titleformat{name=\chapter,numberless}{\bfseries\huge\filcenter}{}{1em}{
+\titleformat{name=\chapter,numberless}{\bfseries\huge\filcenter}{}{1em}{%
+  \thispagestyle{empty}%
   \makebox[0pt][l]{\def\rad{7pt}%
   \begin{tikzpicture}[remember picture, overlay]%
       \begin{pgfonlayer}{bottom}
@@ -321,7 +323,7 @@ fuzzy shadow={0.4mm}{-0.4mm}{0mm}{0.2mm}{fill=white!40!gray},%下
         \fill[outermarginfgcolor,opacity=.5]([shift={(0,-4.45cm)}]current page.north west) rectangle ++(\paperwidth,-2mm);
       \end{pgfonlayer}
       \begin{pgfonlayer}{top}
-        \node[above left,font=\sc\fontsize{22pt}{24pt}\selectfont,align=center] (contents name) at ([shift={(-1.2cm,-4.35cm)}]current page.north east) {\parbox{0.75\textwidth}{\baselineskip=2.3ex #1}};
+        \node[above left,font=\rmfamily\bfseries\fontsize{18pt}{22pt}\selectfont] (contents name) at ([shift={(-1.2cm,-4.35cm)}]current page.north east) {\parbox{0.75\textwidth}{\raggedleft\baselineskip=2.3ex \MakeUppercase{#1}}};
       \end{pgfonlayer}
       \begin{pgfonlayer}{bottom}
         \node[right] (image) at ([shift={(-0.5cm,-2.8cm)}]current page.north west) {\includegraphics[width=7cm]{\@chapimage}};
@@ -329,7 +331,7 @@ fuzzy shadow={0.4mm}{-0.4mm}{0mm}{0.2mm}{fill=white!40!gray},%下
       \path[fill=outermarginbgcolor]node[append after command={
         ([xshift=-2*\rad]pagenumber.south west)  to[out=0,in=180,looseness=1] ([xshift=\rad]pagenumber.north west) --([xshift=-\rad]pagenumber.north east) to[out=0,in=-180,looseness=1] ([xshift=2*\rad]pagenumber.south east) --cycle},
         text=outermarginfgcolor,font=\sffamily\fontsize{15}{15}\selectfont\bfseries,align=center,minimum height=0.4cm,minimum width=1.3cm,inner sep=1.5mm] (pagenumber) at ([shift={(0,0.3cm)}]current page.south) {\thepage};
-      \end{tikzpicture}}
+      \end{tikzpicture}}%
 }
 \titlespacing{\chapter}{0pt}{0pt}{85pt}
 \titlespacing{name=\chapter,numberless}{0pt}{0pt}{85pt}

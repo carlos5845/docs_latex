@@ -1,0 +1,30 @@
+\chapter{Metodología de Evaluación}
+\label{ch:metodologia}
+
+En este capítulo se establece el diseño de la investigación aplicada, los criterios de delimitación del alcance y el protocolo de auditoría técnica.
+
+\section{Tipo y Nivel de Investigación}
+El presente trabajo corresponde a una \textbf{investigación aplicada}, orientada a la resolución de problemas de seguridad concretos en una infraestructura real. Posee un nivel \textbf{descriptivo y analítico}, integrando métodos cualitativos (para el modelado y categorización STRIDE) y cuantitativos (en la evaluación del impacto y probabilidad de riesgos).
+
+\section{Área de Estudio y Alcance Autorizado}
+La investigación se circunscribe a la infraestructura de servicios web públicos e internos de la \textbf{Universidad Nacional del Altiplano de Puno}.
+
+\textbf{Delimitación del Perímetro de Evaluación:}
+\begin{itemize}
+    \item \textbf{Dominio Raíz:} \texttt{unap.edu.pe}
+    \item \textbf{Servicios Web Evaluados:}
+    \begin{enumerate}
+        \item \textbf{Portal Académico SIA:} \texttt{sia.unap.edu.pe} (Gestión de actas, notas y matrículas).
+        \item \textbf{Campus Virtual (LMS):} \texttt{vcampus.unap.edu.pe} (Plataforma Moodle para docencia).
+        \item \textbf{Portal de Admisión y Pagos:} \texttt{admision.unap.edu.pe} (Inscripciones y pasarela de cobros).
+        \item \textbf{API de Servicios Institucionales:} \texttt{api.unap.edu.pe} (Integración entre aplicaciones móviles y bases de datos).
+    \end{enumerate}
+\end{itemize}
+
+\section{Procedimiento de Evaluación y Reglas de Compromiso}
+El procedimiento se divide en tres fases rigurosamente controladas:
+\begin{enumerate}
+    \item \textbf{Fase 1: Reconocimiento Pasivo y Arquitectura:} Recopilación de información pública, cabeceras HTTP, certificados SSL/TLS y definición de límites de confianza sin alterar servicios.
+    \item \textbf{Fase 2: Modelado STRIDE por Componente:} Desglose sistemático de cada servicio web y cruce con las seis categorías de amenazas.
+    \item \textbf{Fase 3: Simulación de Escenarios Kill Chain:} Reconstrucción teórica y en laboratorio controlado de los vectores de ataque más críticos para definir los puntos de ruptura y defensa.
+\end{enumerate}
