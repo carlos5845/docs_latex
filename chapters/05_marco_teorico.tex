@@ -4,7 +4,7 @@
 Para fundamentar la evaluación de seguridad, se revisan los principios doctrinales de la seguridad de la información, el modelado formal de amenazas y las taxonomías de ataque modernas.
 
 \section{Pilares Fundamentales de la Seguridad de la Información}
-La seguridad de la información y la ciberseguridad se fundamentan en la protección de los datos y los sistemas mediante la tríada clásica de seguridad (CIA) y sus extensiones:
+La seguridad de la información y la ciberseguridad se fundamentan en la protección de los datos y los sistemas mediante la tríada clásica de seguridad (CIA) y sus extensiones doctrinales \citep{stallings2018cryptography}:
 \begin{itemize}
     \item \textbf{Confidencialidad (\textit{Confidentiality}):} Garantiza que la información solo sea accesible por entidades, procesos o individuos debidamente autorizados. En entornos web, esto involucra criptografía robusta en tránsito (TLS 1.3) y en reposo (AES-256).
     \item \textbf{Integridad (\textit{Integrity}):} Asegura la exactitud y completitud de la información y los métodos de procesamiento, impidiendo modificaciones no autorizadas o maliciosas mediante funciones hash criptográficas (SHA-256) y firmas digitales.
@@ -17,7 +17,7 @@ Es crucial diferenciar con precisión los componentes del análisis de riesgos:
 \begin{itemize}
     \item \textbf{Amenaza (\textit{Threat}):} Cualquier circunstancia o evento con el potencial de causar daño a un sistema mediante la explotación de una debilidad (ej. un atacante buscando credenciales).
     \item \textbf{Vulnerabilidad (\textit{Vulnerability}):} Un fallo, debilidad o defecto en el diseño, implementación o configuración de un sistema que puede ser aprovechado (ej. falta de validación en un campo de texto).
-    \item \textbf{Riesgo (\textit{Risk}):} La probabilidad de que una amenaza concreta explote una vulnerabilidad específica, resultando en una pérdida. Se modela comúnmente como $\text{Riesgo} = \text{Probabilidad} \times \text{Impacto}$.
+    \item \textbf{Riesgo (\textit{Risk}):} La probabilidad de que una amenaza concreta explote una vulnerabilidad específica, resultando en una pérdida. Se modela comúnmente como $\text{Riesgo} = \text{Probabilidad} \times \text{Impacto}$, conforme a las directrices de evaluación de riesgos del NIST SP 800-30 \citep{nist2012sp80030}.
     \item \textbf{Impacto (\textit{Impact}):} La magnitud del daño financiero, operativo, legal o reputacional sufrido en caso de materializarse la amenaza.
 \end{itemize}
 
@@ -25,7 +25,7 @@ Es crucial diferenciar con precisión los componentes del análisis de riesgos:
 El modelado de amenazas es un enfoque estructurado de ingeniería para identificar, cuantificar y priorizar las amenazas de seguridad en un sistema de software. Se basa en el desglose de los Diagramas de Flujo de Datos (DFD) que representan los procesos, almacenes de datos, flujos de datos e interactores externos, estableciendo límites de confianza (\textit{Trust Boundaries}) donde la seguridad puede degradarse.
 
 \section{Metodología STRIDE}
-Desarrollado en Microsoft por Praerit Garg y Loren Kohnfelder, el modelo STRIDE clasifica los vectores de ataque en seis dominios fundamentales:
+Desarrollado en Microsoft por Praerit Garg y Loren Kohnfelder \citep{kohnfelder1999threats,shostack2014threat}, y adoptado ampliamente por la comunidad de seguridad \citep{owasp2020threatmodeling}, el modelo STRIDE clasifica los vectores de ataque en seis dominios fundamentales:
 
 \begin{center}
 \small
