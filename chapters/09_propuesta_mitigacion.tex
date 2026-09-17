@@ -1,0 +1,55 @@
+\chapter{Propuesta de Mitigación y Plan de Acción}
+\label{ch:mitigacion}
+
+A partir de los riesgos identificados, se formula una estrategia integral de mitigación orientada al principio de Defensa en Profundidad (\textit{Defense in Depth}), estableciendo contramedidas que interrumpen la Cyber Kill Chain en sus etapas más tempranas.
+
+\section{Estrategia de Interrupción por Fase de la Kill Chain}
+La eficacia de la seguridad defensiva radica en romper la cadena de ataque antes de que el adversario logre la fase de explotación o instalación:
+
+\begin{itemize}
+    \item \textbf{Anti-Reconocimiento:} Ofuscación de cabeceras HTTP mediante directivas \texttt{server\_tokens off;} en Nginx y deshabilitación de mensajes de depuración en entornos de producción.
+    \item \textbf{Anti-Entrega:} Implementación de un WAF perimetral (ej. Cloudflare / ModSecurity con reglas OWASP Core Rule Set) para neutralizar patrones de inyección SQL, scripts XSS y payloads maliciosos.
+    \item \textbf{Anti-Explotación:} Refactorización del código fuente legado en PHP adoptando consultas preparadas con sentencias parametrizadas (PDO/PostgreSQL) y validación estricta de esquemas de entrada.
+    \item \textbf{Anti-Instalación y C2:} Restricción de privilegios del usuario \texttt{www-data} (montando directorios de carga con la opción \texttt{noexec}) y aplicación de filtrado estricto de tráfico saliente (\textit{Egress Filtering}) en el firewall perimetral.
+\end{itemize}
+
+\section{Matriz de Recomendaciones Técnicas y Plan de Acción}
+La siguiente tabla consolida las acciones preventivas, el nivel de prioridad y el equipo responsable dentro de la UNAP:
+
+\begin{center}
+\small
+\begin{longtable}{>{\bfseries}c p{4.5cm} p{4.0cm} c p{2.2cm}}
+\toprule
+\rowcolor{outermarginbgcolor}
+Hallazgo & Medida de Mitigación Propuesta & Control Técnico Específico & Prioridad & Responsable \\
+\midrule
+\endfirsthead
+\toprule
+\rowcolor{outermarginbgcolor}
+Hallazgo & Medida de Mitigación Propuesta & Control Técnico Específico & Prioridad & Responsable \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+H-01 (SQLi) & Parametrización total de consultas SQL y despliegue de WAF. & Migración a PDO con \textit{Prepared Statements}. & \textbf{Inmediata} & Desarrollo OTI \\
+\midrule
+H-02 (No MFA) & Despliegue de Autenticación Multifactor obligatoria. & Integración de TOTP (Google Authenticator) / OAuth2. & \textbf{Inmediata} & Redes y Sistemas \\
+\midrule
+H-03 (DoS) & Protección de borde y limitación de tasa de peticiones. & Reglas de Rate Limiting en Nginx y proxy inverso. & \textbf{Alta} & Infraestructura \\
+\midrule
+H-04 (IDOR) & Control de acceso basado en roles (RBAC) a nivel de API. & Validación de sesión y pertenencia del recurso en middleware. & \textbf{Alta} & Desarrollo OTI \\
+\midrule
+H-05 (Logs) & Centralización de logs e implementación de SIEM. & Despliegue de stack Wazuh / Elastic para monitoreo activo. & \textbf{Media-Alta} & Seguridad Digital \\
+\midrule
+H-06 (Banners) & Ocultamiento de metadatos y versiones de software. & Configuración de \texttt{expose\_php = Off} y \texttt{server\_tokens off}. & \textbf{Media} & Administradores \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\section{Cronograma y Hoja de Ruta de Implementación}
+Se propone una implementación progresiva dividida en tres fases estratégicas:
+\begin{enumerate}
+    \item \textbf{Fase Corto Plazo (1 a 30 días):} Bloqueo inmediato de inyecciones SQL mediante reglas WAF temporales, ocultamiento de cabeceras y activación de MFA para cuentas con privilegios administrativos.
+    \item \textbf{Fase Mediano Plazo (1 a 3 meses):} Refactorización y auditoría de código seguro (\textit{Static Application Security Testing} - SAST) en el SIA, e implementación de límites de concurrencia para procesos de matrícula.
+    \item \textbf{Fase Largo Plazo (3 a 6 meses):} Despliegue del centro de operaciones de seguridad (SOC) interno con Wazuh SIEM, segmentación micro-perimetral de bases de datos y capacitación continua a docentes y personal en prevención de Phishing.
+\end{enumerate}

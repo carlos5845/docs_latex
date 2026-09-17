@@ -1,0 +1,93 @@
+\chapter{Resultados y Evaluación del Riesgo}
+\label{ch:resultados}
+
+En este capítulo se presentan los resultados obtenidos tras la aplicación conjunta de las metodologías STRIDE y Cyber Kill Chain sobre el ecosistema de servicios web institucionales de la Universidad Nacional del Altiplano. Se detallan los hallazgos técnicos, la matriz de correlación y la cuantificación del riesgo mediante estándares de la industria.
+
+\section{Consolidación de Amenazas Identificadas mediante STRIDE}
+A través del análisis estructural de los Diagramas de Flujo de Datos (DFD) y la descomposición funcional de los activos evaluados (SIA, Campus Virtual, Pasarela de Admisión y API REST), se descubrieron un total de doce (12) amenazas potenciales clasificadas según las seis categorías de STRIDE:
+
+\begin{itemize}
+    \item \textbf{Suplantación de Identidad (Spoofing - 2 Hallazgos):} Posibilidad de secuestro de tokens de sesión HTTP no invalidados tras el cierre de sesión y debilidad en las políticas de complejidad de contraseñas para cuentas de docentes y administradores.
+    \item \textbf{Manipulación de Datos (Tampering - 3 Hallazgos):} Vulnerabilidad a inyecciones SQL en módulos legados del SIA (\texttt{sia.unap.edu.pe}) y falta de validación de integridad en peticiones AJAX en formularios de inscripción.
+    \item \textbf{Repudio (Repudiation - 2 Hallazgos):} Carencia de registros de auditoría inmutables en la modificación de actas de notas y falta de firma digital en las transacciones de validación de pagos de admisión.
+    \item \textbf{Divulgación de Información (Information Disclosure - 2 Hallazgos):} Respuestas de depuración en formato JSON con \textit{stack traces} completos en la API institucional y exposición de metadatos de configuración en cabeceras HTTP.
+    \item \textbf{Denegación de Servicio (Denial of Service - 2 Hallazgos):} Inexistencia de mecanismos de limitación de tasa (\textit{Rate Limiting}) en el endpoint de autenticación del Campus Virtual y susceptibilidad a saturación por concurrencia masiva en fechas de matrícula.
+    \item \textbf{Elevación de Privilegios (Elevation of Privilege - 1 Hallazgo):} Control de acceso roto (\textit{Broken Access Control}) por referencia directa a objetos inseguros (IDOR) en la consulta de estados de cuenta estudiantiles.
+\end{itemize}
+
+\section{Evaluación y Clasificación de Escenarios Cyber Kill Chain}
+El desglose de los escenarios de intrusión permitió comprender que las amenazas identificadas no operan de forma aislada, sino que forman cadenas de eventos interdependientes. La siguiente tabla resume la correlación entre las amenazas STRIDE y su nivel de avance en la Cyber Kill Chain:
+
+\begin{center}
+\small
+\begin{longtable}{>{\bfseries}c p{3.8cm} p{3.2cm} p{3.0cm} >{\bfseries}c}
+\toprule
+\rowcolor{outermarginbgcolor}
+Cód. & Escenario de Intrusión & Amenaza STRIDE Primaria & Fase Máxima Kill Chain & Criticidad \\
+\midrule
+\endfirsthead
+\toprule
+\rowcolor{outermarginbgcolor}
+Cód. & Escenario de Intrusión & Amenaza STRIDE Primaria & Fase Máxima Kill Chain & Criticidad \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+ESC-01 & Exfiltración y alteración de BD SIA vía SQLi. & Tampering / Elevation & Fase 7: Acciones en Objetivos & \textbf{Crítico} \\
+\midrule
+ESC-02 & Secuestro de sesión docente en LMS vía XSS. & Spoofing / Tampering & Fase 4: Explotación & \textbf{Alto} \\
+\midrule
+ESC-03 & Colapso de pasarela de matrícula vía HTTP Flood. & Denial of Service & Fase 4: Explotación (DoS) & \textbf{Alto} \\
+\midrule
+ESC-04 & Fuga de datos de postulantes vía IDOR en API. & Information Disclosure & Fase 7: Acciones en Objetivos & \textbf{Medio-Alto} \\
+\midrule
+ESC-05 & Manipulación de parámetros de pago en Admisión. & Tampering / Repudiation & Fase 4: Explotación & \textbf{Alto} \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\section{Análisis de Controles de Seguridad Existentes y Brechas}
+La infraestructura actual de la UNAP cuenta con medidas de seguridad perimetral estándar (como cortafuegos a nivel de red y certificados TLS emitidos por Let's Encrypt), no obstante, se evidencian brechas críticas en las capas superiores del modelo OSI:
+
+\begin{enumerate}
+    \item \textbf{Carencia de Web Application Firewall (WAF):} El tráfico entrante llega directamente al servidor web Nginx sin una capa intermedia de filtrado que inspeccione cargas maliciosas en peticiones GET/POST.
+    \item \textbf{Ausencia de Autenticación Multifactor (MFA):} El acceso administrativo al SIA depende exclusivamente de combinaciones de usuario y contraseña sin verificación fuera de banda.
+    \item \textbf{Falta de Correlación Centralizada de Logs (SIEM):} Cada servidor web almacena sus registros en discos locales (\texttt{/var/log/nginx/access.log}), impidiendo la detección de ataques distribuidos o persistentes en tiempo real.
+    \item \textbf{Permisos y Segmentación Insuficientes:} Los servidores de aplicaciones web comparten el mismo segmento de red VLAN con los clusters de bases de datos productivas.
+\end{enumerate}
+
+\section{Matriz de Riesgos Cuantitativa y Cualitativa}
+Para priorizar las acciones correctivas, se evaluaron los hallazgos combinando la probabilidad de ocurrencia ($P$) y el impacto potencial en el negocio ($I$), calculando el Nivel de Riesgo Inherente según la fórmula:
+\begin{equation}
+    \text{Nivel de Riesgo (NR)} = \text{Probabilidad (1 a 5)} \times \text{Impacto (1 a 5)}
+\end{equation}
+
+\begin{center}
+\small
+\begin{longtable}{>{\bfseries}c p{4.2cm} c c c >{\bfseries}c}
+\toprule
+\rowcolor{outermarginbgcolor}
+ID & Descripción del Hallazgo & Probabilidad ($P$) & Impacto ($I$) & Score ($P \times I$) & Nivel \\
+\midrule
+\endfirsthead
+\toprule
+\rowcolor{outermarginbgcolor}
+ID & Descripción del Hallazgo & Probabilidad ($P$) & Impacto ($I$) & Score ($P \times I$) & Nivel \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+H-01 & Inyección SQL en módulo de notas SIA. & 4 & 5 & 20 & \textbf{Crítico} \\
+\midrule
+H-02 & Ausencia de MFA en portales de docentes y TI. & 5 & 4 & 20 & \textbf{Crítico} \\
+\midrule
+H-03 & Susceptibilidad a DoS en pasarela de admisión. & 4 & 4 & 16 & \textbf{Alto} \\
+\midrule
+H-04 & Fuga de información por parámetros IDOR en API. & 3 & 4 & 12 & \textbf{Alto} \\
+\midrule
+H-05 & Bitácoras locales sin centralización ni inmutabilidad. & 4 & 3 & 12 & \textbf{Medio-Alto} \\
+\midrule
+H-06 & Exposición de versiones de software en cabeceras. & 5 & 2 & 10 & \textbf{Medio} \\
+\bottomrule
+\end{longtable}
+\end{center}
