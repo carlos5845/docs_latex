@@ -1,0 +1,45 @@
+\babel@toc {spanish}{}\relax 
+\contentsline {part}{El Ciclo de Ciberseguridad (CSF 2.0)}{1}{chapter*.1}%
+\contentsline {chapter}{\numberline {1}Introducción a la Ciberseguridad en la UNAP}{3}{chapter.1}%
+\contentsline {chapter}{\numberline {2}Gobernanza (Govern)}{4}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Fundamento y Categorías NIST CSF 2.0}{4}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Metodologías y Mecanismos de Defensa}{4}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Vector de Ataque y Técnicas Ofensivas (Equipo Rojo (Red Team))}{4}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Herramientas y Controles de Defensa (Equipo Azul (Blue Team))}{5}{section.2.4}%
+\contentsline {section}{\numberline {2.5}Buenas Prácticas y KPIs para la UNAP}{6}{section.2.5}%
+\contentsline {chapter}{\numberline {3}Identificación (Identify)}{7}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Fundamento y Categorías NIST CSF 2.0}{7}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Metodologías y Mecanismos de Defensa}{7}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Vector de Ataque y Técnicas Ofensivas (Equipo Rojo (Red Team))}{8}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Herramientas y Controles de Defensa (Equipo Azul (Blue Team))}{8}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Buenas Prácticas y KPIs para la UNAP}{9}{section.3.5}%
+\contentsline {chapter}{\numberline {4}Protección (Protect)}{10}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Fundamento y Categorías NIST CSF 2.0}{10}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Metodologías y Mecanismos de Defensa}{10}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Vector de Ataque y Técnicas Ofensivas (Equipo Rojo (Red Team))}{11}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Herramientas y Controles de Defensa (Equipo Azul (Blue Team))}{11}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Buenas Prácticas y KPIs para la UNAP}{12}{section.4.5}%
+\contentsline {chapter}{\numberline {5}Detección (Detect)}{13}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Fundamento y Categorías NIST CSF 2.0}{13}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Metodologías y Mecanismos de Defensa}{13}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Vector de Ataque y Técnicas Ofensivas (Equipo Rojo (Red Team))}{14}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Herramientas y Controles de Defensa (Equipo Azul (Blue Team))}{14}{section.5.4}%
+\contentsline {section}{\numberline {5.5}Buenas Prácticas y KPIs para la UNAP}{15}{section.5.5}%
+\contentsline {chapter}{\numberline {6}Respuesta (Respond)}{16}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Fundamento y Categorías NIST CSF 2.0}{16}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Metodologías y Mecanismos de Defensa}{16}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Vector de Ataque y Técnicas Ofensivas (Equipo Rojo (Red Team))}{16}{section.6.3}%
+\contentsline {section}{\numberline {6.4}Herramientas y Controles de Defensa (Equipo Azul (Blue Team))}{17}{section.6.4}%
+\contentsline {section}{\numberline {6.5}Buenas Prácticas y KPIs para la UNAP}{17}{section.6.5}%
+\contentsline {chapter}{\numberline {7}Recuperación (Recover)}{19}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Fundamento y Categorías NIST CSF 2.0}{19}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Metodologías y Mecanismos de Defensa}{19}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Vector de Ataque y Técnicas Ofensivas (Equipo Rojo (Red Team))}{19}{section.7.3}%
+\contentsline {section}{\numberline {7.4}Herramientas y Controles de Defensa (Equipo Azul (Blue Team))}{20}{section.7.4}%
+\contentsline {section}{\numberline {7.5}Buenas Prácticas y KPIs para la UNAP}{20}{section.7.5}%
+\contentsline {chapter}{\numberline {8}Matriz de Integración y Madurez}{22}{chapter.8}%
+\contentsline {chapter}{\numberline {9}Conclusiones y Recomendaciones}{23}{chapter.9}%
+\contentsline {section}{\numberline {9.1}Conclusión del Análisis}{23}{section.9.1}%
+\contentsline {section}{\numberline {9.2}Recomendaciones Finales para la OTI-UNAP}{23}{section.9.2}%
+\contentsline {chapter}{Bibliografía}{24}{section*.2}%
+\contentsfinish 

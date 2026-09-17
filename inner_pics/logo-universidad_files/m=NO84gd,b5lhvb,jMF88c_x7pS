@@ -1,0 +1,19 @@
+loaded_h_0(function(_){var window=this;
+_.v("NO84gd");
+
+_.w();
+_.v("b5lhvb");
+var aSu=function(a){return a instanceof _.Dh?a.getRoot().el():a},bSu=function(){var a=_.HRu;a.Bj.ka.UH()||(a.Bj.start(),window.performance&&a.Bj.vz("ns",Math.round(a.Bj.ka.getStartTime())*-1),a.Bj.vz("uvpbet",0))},cSu=class extends _.m{constructor(a){super(a)}getViewerType(){return _.Dj(this,1)}Ix(a){return _.ai(this,1,a)}},dSu=function(a,b){var c=a.oa.get(b);if(c)return c;c=new Map;a.oa.set(b,c);return c},eSu=async function(a,b,c){var d=(0,_.Uf)(),e=d();d=d(1);try{a.ka.delete(c.getIdentifier());
+let f=dSu(a,c.getIdentifier()),g=f.size===0;f.set(b,c);if(g){let h,k;d(await e((k=(h=a.listener).kFe)==null?void 0:k.call(h,c.getIdentifier())))}else{let h,k;d(await e((k=(h=a.listener).iCd)==null?void 0:k.call(h,c.getIdentifier())))}}finally{e()}},fSu=async function(a,b,c){var d=(0,_.Uf)(),e=d();d=d(1);try{a.ka.delete(c.getIdentifier());dSu(a,c.getIdentifier()).set(b,c);let f,g;d(await e((g=(f=a.listener).iCd)==null?void 0:g.call(f,c.getIdentifier())))}finally{e()}},gSu=async function(a,b,c){var d=
+(0,_.Uf)(),e=d();d=d(1);try{a.ka.delete(c);let f=dSu(a,c);f.delete(b);if(f.size===0){a.oa.delete(c);let g,h;d(await e((h=(g=a.listener).nig)==null?void 0:h.call(g,c)))}else{let g,h;d(await e((h=(g=a.listener).iCd)==null?void 0:h.call(g,c)))}}finally{e()}},hSu=class{constructor(a){this.listener=a;this.oa=new Map;this.ka=new Map}ILa(a){if(this.ka.has(a))return this.ka.get(a);var b;if((b=this.oa.get(a))&&b.size!==0)return b.size===1?b=b.values().next().value:(b=[...b.entries()].sort((c,d)=>_.uKa(aSu(c[0]),
+aSu(d[0]))).map(c=>c[1]).flatMap(c=>c.oa()),b=_.VSd(_.WSd(new _.USd,a),b)),this.ka.set(a,b),b}},iSu=!!(_.Oi[45]&32);var jSu=function(a,b){a.OFb.has(b)||a.OFb.set(b,(0,_.yo)(()=>{a.NFb(b)},1E3))};
+_.gg(_.v3a,class extends _.Ho{static Ra(){return{service:{y$a:_.JRu,sGb:_.IRu}}}constructor(a){super();this.zEb=new hSu(this);this.Kjc=new Set;this.qad=new Set;this.OFb=new Map;this.y$a=a.service.y$a;this.sGb=a.service.sGb;this.Nfb().then(b=>{b.jPe(c=>this.zEb.ILa(c))})}async kFe(){var a=(0,_.Uf)(),b=a();a=a(1);try{if(!iSu){let c=a(await b(this.Nfb()));bSu();c.xRb()}}finally{b()}}olb(a,b){this.Kjc.has(b.getIdentifier())&&jSu(this,b.getIdentifier());return eSu(this.zEb,a,b)}dYe(a,b){this.Kjc.has(b.getIdentifier())&&
+jSu(this,b.getIdentifier());return fSu(this.zEb,a,b)}dPd(a,b){this.Kjc.has(b)&&jSu(this,b);return gSu(this.zEb,a,b)}async CXb(a){var b=(0,_.Uf)(),c=b();b=b(1);try{let d=b(await c(this.Nfb()));iSu&&(bSu(),d.xRb());d.NJc(a)}finally{c()}}async G5(a){var b=(0,_.Uf)(),c=b();b=b(1);try{let g=b(await c(this.ILa(a)));if(g){var d=g.oa().findIndex(h=>h.f2()===a.yw);if(d!==-1){_.Fi(g,2,d);var e=a.BGd;e.id||(e.id=_.Qx());this.Kjc.add(a.streamId);this.OFb.has(a.streamId)&&((0,_.zo)(this.OFb.get(a.streamId)),this.OFb.delete(a.streamId));
+var f=b(await c(this.Nfb()));b(await c(f.Mwb(g,null,a.Xfa??null,a.CGd??null,a.interactionVed??null,a.Di??null,a.userAction??null,a.Vdd,e.id)))}}}finally{c()}}async RRc(a){var b=(0,_.Uf)(),c=b();b=b(1);try{if(!this.qad.has(a)){this.qad.add(a);var d=_.VRu(),e=d.sendMessage,f=new _.RRu,g=(new cSu).Ix(a);var h=_.sj(f,15,_.QRu,g);b(await c(e.call(d,h)))}}finally{c()}}async NFb(a){var b=(0,_.Uf)(),c=b();b=b(1);try{let d=b(await c(this.Nfb()));this.OFb.delete(a);let e=this.zEb.ILa(a);e||=_.WSd(new _.USd,
+a);b(await c(d.NFb(e)))}finally{c()}}Nfb(){return this.y$a.Nfb()}ILa(a){return _.wTd?a.stream:this.zEb.ILa(a.streamId)}});
+_.w();
+_.v("jMF88c");
+_.gg(_.C2a,class extends _.Ho{});
+_.w();
+});
+// Google Inc.

@@ -1,0 +1,99 @@
+\NeedsTeXFormat{LaTeX2e}[1995/12/01]
+\ProvidesPackage{stys/beautybook-cover-en}[2024/07/01,v2.0]
+\usepackage{anyfontsize}
+\usepackage{etoolbox}
+\usepackage[dvipsnames,svgnames,x11names,table]{xcolor}
+\usepackage{tikz}
+\usepackage{graphicx}
+\usetikzlibrary{calc,fadings,patterns}
+\usepackage{adjustbox}
+
+\tikzfading[name=fade right, right color =transparent!100, left color=transparent!50]
+\tikzfading[name=fade left, left color =transparent!100, right color=transparent!50]
+\tikzfading[name=fade up, top color =transparent!100, bottom color=transparent!50]
+\tikzfading[name=fade down, bottom color =transparent!100, top color=transparent!50]
+
+\makeatletter
+\newcommand{\reportcover}{
+    \begin{tikzpicture}[remember picture,overlay]
+        \fill[white] (current page.north west) rectangle (current page.south east);
+        
+        % Encabezado corporativo Azul Marino
+        \fill[coverfgcolor] (current page.north west) rectangle ([yshift=-5.5cm]current page.north east);
+        
+        % Cyber/Network pattern in the top blue header
+        \begin{scope}
+            \clip (current page.north west) rectangle ([yshift=-5.5cm]current page.north east);
+            \foreach \i in {1,...,40} {
+                \pgfmathsetmacro{\x}{rnd*21}
+                \pgfmathsetmacro{\y}{-rnd*5.5}
+                \fill[white, opacity=0.2] ([xshift=\x cm, yshift=\y cm]current page.north west) circle (2pt);
+            }
+            \foreach \i in {1,...,60} {
+                \pgfmathsetmacro{\x}{rnd*21}
+                \pgfmathsetmacro{\y}{-rnd*5.5}
+                \pgfmathsetmacro{\xdir}{rnd>0.5 ? 1 : -1}
+                \pgfmathsetmacro{\ydir}{rnd>0.5 ? 1 : -1}
+                \draw[white, opacity=0.15, thick] ([xshift=\x cm, yshift=\y cm]current page.north west) -- ++(\xdir*1.5cm, 0) -- ++(0, \ydir*1.5cm);
+            }
+        \end{scope}
+        
+        \fill[coverbar] ([yshift=-5.5cm]current page.north west) rectangle ([yshift=-5.7cm]current page.north east);
+        
+        % Pie de página corporativo
+        \fill[coverfgcolor] (current page.south west) rectangle ([yshift=1cm]current page.south east);
+        
+        % Cyber/Network pattern in the bottom blue footer
+        \begin{scope}
+            \clip (current page.south west) rectangle ([yshift=1cm]current page.south east);
+            \foreach \i in {1,...,20} {
+                \pgfmathsetmacro{\x}{rnd*21}
+                \pgfmathsetmacro{\y}{rnd*1}
+                \fill[white, opacity=0.2] ([xshift=\x cm, yshift=\y cm]current page.south west) circle (2pt);
+            }
+            \foreach \i in {1,...,30} {
+                \pgfmathsetmacro{\x}{rnd*21}
+                \pgfmathsetmacro{\y}{rnd*1}
+                \pgfmathsetmacro{\xdir}{rnd>0.5 ? 1 : -1}
+                \draw[white, opacity=0.15, thick] ([xshift=\x cm, yshift=\y cm]current page.south west) -- ++(\xdir*1cm, 0) -- ++(0, 0.5cm);
+            }
+        \end{scope}
+
+        \fill[coverbar] ([yshift=1cm]current page.south west) rectangle ([yshift=1.2cm]current page.south east);
+        
+        % Encabezado Institucional centrado en el bloque azul superior
+        \node[anchor=center, align=center, text=white, font=\rmfamily\Large\bfseries] at ([yshift=-2.75cm]current page.north) {
+            UNIVERSIDAD NACIONAL DEL ALTIPLANO \\[0.8ex]
+            \fontsize{14}{18}\selectfont FACULTAD DE INGENIERÍA MECÁNICA ELÉCTRICA Y \\
+            \fontsize{14}{18}\selectfont DE SISTEMAS
+        };
+
+        % Información principal centrada en el bloque blanco
+        \path (current page.north) -- (current page.south) coordinate[pos=0.5] (midpage);
+        
+        \node[anchor=center, align=center, text=black, font=\rmfamily] at ([yshift=-0.5cm]midpage) {
+            \includegraphics[width=6cm]{\@presslogo} \\[1cm]
+            {\Huge\bfseries \@title} \\[0.8cm]
+            {\Large\bfseries \@subtitle} \\[2cm]
+            {\large \bfseries PRESENTADO POR:}\\[0.5ex]
+            {\large \@author} \\[1.5ex]
+            {\large \bfseries DOCENTE:}\\[0.5ex]
+            {\large TICONA YANQUI FIDEL ERNESTO}\\[1.5ex]
+            {\large \bfseries SEMESTRE: IX}\\[1.5ex]
+            {\large \bfseries PUNO -- 2026}
+        };
+
+    \end{tikzpicture}
+    \newpage\thispagestyle{empty}
+}
+
+\newcommand{\aivcover}{\reportcover}
+\newcommand{\lettercover}{\reportcover}
+
+\newcommand\makecover{
+    \thispagestyle{empty}
+        \ifaivpaper@TF{\aivcover}{\lettercover}
+    {\newpage\thispagestyle{empty}}
+}
+\makeatother
+\endinput
