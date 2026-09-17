@@ -299,12 +299,6 @@ fuzzy shadow={0.4mm}{-0.4mm}{0mm}{0.2mm}{fill=white!40!gray},%下
         \fi
       \fill[outermarginfgcolor,opacity=.5]([shift={(0,-4.45cm)}]current page.north west) rectangle ++(\paperwidth,-2mm); % line
       \end{pgfonlayer}
-      \path[fill=outermarginfgcolor]node[append after command={
-      ([xshift=-3*\rad]chapinfoofpart.north west)  to[out=0,in=-180,looseness=1] ([xshift=\rad]chapinfoofpart.south west) --([xshift=-\rad]chapinfoofpart.south east) to[out=0,in=180,looseness=1] ([xshift=3*\rad]chapinfoofpart.north east) --cycle},
-      text=white,font=\sffamily\large\bfseries,align=center,minimum height=1cm] (chapinfoofpart) at ([shift={(.6\linewidth,-4.95cm)}]current page.north west) {};
-      \begin{pgfonlayer}{bottom}
-        \fill[outermarginfgcolor!90,opacity=0.5] ([shift={(-3*\rad,0)}]chapinfoofpart.north west) to[out=180,in=0,looseness=1] +(-4*\rad,-1.2cm)--([shift={(7*\rad,-1.2cm)}]chapinfoofpart.north east) to[out=-180,in=0,looseness=1] +(-4*\rad,1.2cm); % partnumber shade
-      \end{pgfonlayer}
       \ifodd\value{page}
       \begin{pgfonlayer}{top}
         \fill[outermarginfgcolor,opacity=0.7,rounded corners=5pt]node[append after command={([yshift=2cm]chapnum.north west) rectangle (chapnum.south east)},right,text=white,minimum width=2cm,align=center,font=\sffamily\bfseries] (chapnum) at ([shift={(1.5cm,-2.5cm)}]current page.north west) {\scalebox{3}{\thechapter}};
@@ -314,7 +308,7 @@ fuzzy shadow={0.4mm}{-0.4mm}{0mm}{0.2mm}{fill=white!40!gray},%下
         \end{pgfonlayer}
         \fill [outermarginfgcolor,path fading=fade up,rounded corners=5pt]%
         ([yshift=2cm]chapnum.north west) rectangle (chapnum.south east);
-        \node[above left,font=\sc\fontsize{22pt}{22pt}\selectfont,align=center] (contents name) at ([shift={(0cm,-4.45cm)}]current page.north east) {\parbox{0.7\textwidth}{\baselineskip=2ex #1}};
+        \node[above left,font=\sc\fontsize{20pt}{22pt}\selectfont] (contents name) at ([shift={(-1.2cm,-4.35cm)}]current page.north east) {\parbox{0.68\textwidth}{\raggedleft\baselineskip=2.4ex #1}};
         \end{pgfonlayer}
         \begin{pgfonlayer}{bottom}
         \node[right] (image) at ([shift={(-0.5cm,-2.8cm)}]current page.north west) {\includegraphics[width=7cm]{\@chapimage}};
@@ -328,7 +322,7 @@ fuzzy shadow={0.4mm}{-0.4mm}{0mm}{0.2mm}{fill=white!40!gray},%下
           \end{pgfonlayer}
           \fill [outermarginfgcolor,path fading=fade up,rounded corners=5pt]%
           ([yshift=2cm]chapnum.north west) rectangle (chapnum.south east);
-          \node[above right,font=\sc\fontsize{22pt}{22pt}\selectfont,align=center] (contents name) at ([shift={(0cm,-4.45cm)}]current page.north west) {\parbox{0.7\textwidth}{\baselineskip=2ex #1}};
+          \node[above right,font=\sc\fontsize{20pt}{22pt}\selectfont] (contents name) at ([shift={(1.2cm,-4.35cm)}]current page.north west) {\parbox{0.68\textwidth}{\raggedright\baselineskip=2.4ex #1}};
           \end{pgfonlayer}
       \begin{pgfonlayer}{background}
       \node[left] (image) at ([shift={(0.5cm,-2.8cm)}]current page.north east) {\includegraphics[width=7cm]{\@chapimage}};
@@ -352,14 +346,14 @@ fuzzy shadow={0.4mm}{-0.4mm}{0mm}{0.2mm}{fill=white!40!gray},%下
       \end{pgfonlayer}
       \ifodd\value{page}
       \begin{pgfonlayer}{top}
-        \node[above left,font=\sc\fontsize{25pt}{25pt}\selectfont,align=center] (contents name) at ([shift={(0cm,-4.45cm)}]current page.north east) {\parbox{0.7\textwidth}{\baselineskip=25pt #1}};
+        \node[above left,font=\sc\fontsize{20pt}{22pt}\selectfont] (contents name) at ([shift={(-1.2cm,-4.35cm)}]current page.north east) {\parbox{0.75\textwidth}{\raggedleft\baselineskip=2.4ex #1}};
         \end{pgfonlayer}
         \begin{pgfonlayer}{bottom}
         \node[right] (image) at ([shift={(-0.5cm,-2.8cm)}]current page.north west) {\includegraphics[width=7cm]{\@chapimage}};
         \end{pgfonlayer}
         \else
         \begin{pgfonlayer}{top}
-          \node[above right,font=\sc\fontsize{25pt}{25pt}\selectfont,align=center] (contents name) at ([shift={(0cm,-4.45cm)}]current page.north west) {\parbox{0.7\textwidth}{\baselineskip=25pt #1}};
+          \node[above right,font=\sc\fontsize{20pt}{22pt}\selectfont] (contents name) at ([shift={(1.2cm,-4.35cm)}]current page.north west) {\parbox{0.75\textwidth}{\raggedright\baselineskip=2.4ex #1}};
           \end{pgfonlayer}
       \begin{pgfonlayer}{background}
       \node[left] (image) at ([shift={(0.5cm,-2.8cm)}]current page.north east) {\includegraphics[width=7cm]{\@chapimage}};
