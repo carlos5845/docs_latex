@@ -1,7 +1,7 @@
 \chapter{Resultados y Evaluación del Riesgo}
 \label{ch:resultados}
 
-En este capítulo se presentan los resultados obtenidos tras la aplicación conjunta de las metodologías STRIDE y Cyber Kill Chain sobre el ecosistema de servicios web institucionales de la Universidad Nacional del Altiplano. Se detallan los hallazgos técnicos, la matriz de correlación y la cuantificación del riesgo mediante estándares de la industria.
+En este capítulo se consolidan los resultados de la evaluación técnica sobre los servicios web de la Universidad Nacional del Altiplano. Se presentan las amenazas categorizadas, la evaluación cuantitativa mediante el modelo DREAD y los vectores de severidad CVSS v3.1.
 
 \section{Consolidación de Amenazas Identificadas mediante STRIDE}
 A través del análisis estructural de los Diagramas de Flujo de Datos (DFD) y la descomposición funcional de los activos evaluados (SIA, Campus Virtual, Pasarela de Admisión y API REST), se descubrieron un total de doce (12) amenazas potenciales clasificadas según las seis categorías de STRIDE:
@@ -15,79 +15,57 @@ A través del análisis estructural de los Diagramas de Flujo de Datos (DFD) y l
     \item \textbf{Elevación de Privilegios (Elevation of Privilege - 1 Hallazgo):} Control de acceso roto (\textit{Broken Access Control}) por referencia directa a objetos inseguros (IDOR) en la consulta de estados de cuenta estudiantiles.
 \end{itemize}
 
-\section{Evaluación y Clasificación de Escenarios Cyber Kill Chain}
-El desglose de los escenarios de intrusión permitió comprender que las amenazas identificadas no operan de forma aislada, sino que forman cadenas de eventos interdependientes. La siguiente tabla resume la correlación entre las amenazas STRIDE y su nivel de avance en la Cyber Kill Chain:
+\section{Evaluación Cualitativa y Cuantitativa con el Modelo DREAD}
+El modelo DREAD (desarrollado por Microsoft) evalúa cinco métricas clave ponderadas del 1 al 10:
+\begin{itemize}
+    \item \textbf{D (Damage Potential):} Daño potencial ocasionado en caso de explotación.
+    \item \textbf{R (Reproducibility):} Facilidad y consistencia para replicar el ataque.
+    \item \textbf{E (Exploitability):} Esfuerzo técnico y herramientas requeridas para el exploit.
+    \item \textbf{A (Affected Users):} Porcentaje o proporción de usuarios institucionales afectados.
+    \item \textbf{D (Discoverability):} Facilidad con la que un atacante puede descubrir la debilidad.
+\end{itemize}
 
-\begin{center}
-\small
-\begin{longtable}{>{\bfseries}c p{3.8cm} p{3.2cm} p{3.0cm} >{\bfseries}c}
-\toprule
-\rowcolor{outermarginbgcolor}
-Cód. & Escenario de Intrusión & Amenaza STRIDE Primaria & Fase Máxima Kill Chain & Criticidad \\
-\midrule
-\endfirsthead
-\toprule
-\rowcolor{outermarginbgcolor}
-Cód. & Escenario de Intrusión & Amenaza STRIDE Primaria & Fase Máxima Kill Chain & Criticidad \\
-\midrule
-\endhead
-\bottomrule
-\endfoot
-ESC-01 & Exfiltración y alteración de BD SIA vía SQLi. & Tampering / Elevation & Fase 7: Acciones en Objetivos & \textbf{Crítico} \\
-\midrule
-ESC-02 & Secuestro de sesión docente en LMS vía XSS. & Spoofing / Tampering & Fase 4: Explotación & \textbf{Alto} \\
-\midrule
-ESC-03 & Colapso de pasarela de matrícula vía HTTP Flood. & Denial of Service & Fase 4: Explotación (DoS) & \textbf{Alto} \\
-\midrule
-ESC-04 & Fuga de datos de postulantes vía IDOR en API. & Information Disclosure & Fase 7: Acciones en Objetivos & \textbf{Medio-Alto} \\
-\midrule
-ESC-05 & Manipulación de parámetros de pago en Admisión. & Tampering / Repudiation & Fase 4: Explotación & \textbf{Alto} \\
-\bottomrule
-\end{longtable}
-\end{center}
-
-\section{Análisis de Controles de Seguridad Existentes y Brechas}
-La infraestructura actual de la UNAP cuenta con medidas de seguridad perimetral estándar (como cortafuegos a nivel de red y certificados TLS emitidos por Let's Encrypt), no obstante, se evidencian brechas críticas en las capas superiores del modelo OSI:
-
-\begin{enumerate}
-    \item \textbf{Carencia de Web Application Firewall (WAF):} El tráfico entrante llega directamente al servidor web Nginx sin una capa intermedia de filtrado que inspeccione cargas maliciosas en peticiones GET/POST.
-    \item \textbf{Ausencia de Autenticación Multifactor (MFA):} El acceso administrativo al SIA depende exclusivamente de combinaciones de usuario y contraseña sin verificación fuera de banda.
-    \item \textbf{Falta de Correlación Centralizada de Logs (SIEM):} Cada servidor web almacena sus registros en discos locales (\texttt{/var/log/nginx/access.log}), impidiendo la detección de ataques distribuidos o persistentes en tiempo real.
-    \item \textbf{Permisos y Segmentación Insuficientes:} Los servidores de aplicaciones web comparten el mismo segmento de red VLAN con los clusters de bases de datos productivas.
-\end{enumerate}
-
-\section{Matriz de Riesgos Cuantitativa y Cualitativa}
-Para priorizar las acciones correctivas, se evaluaron los hallazgos combinando la probabilidad de ocurrencia ($P$) y el impacto potencial en el negocio ($I$), calculando el Nivel de Riesgo Inherente según la fórmula:
+La puntuación final se calcula mediante el promedio aritmético:
 \begin{equation}
-    \text{Nivel de Riesgo (NR)} = \text{Probabilidad (1 a 5)} \times \text{Impacto (1 a 5)}
+    \text{Score DREAD} = \frac{D + R + E + A + D}{5}
 \end{equation}
 
 \begin{center}
 \small
-\begin{longtable}{>{\bfseries}c p{4.2cm} c c c >{\bfseries}c}
+\begin{longtable}{>{\bfseries}c p{4.2cm} c c c c c >{\bfseries}c c}
 \toprule
 \rowcolor{outermarginbgcolor}
-ID & Descripción del Hallazgo & Probabilidad ($P$) & Impacto ($I$) & Score ($P \times I$) & Nivel \\
+ID & Amenaza Evaluada & D & R & E & A & D & Prom & Severidad \\
 \midrule
 \endfirsthead
 \toprule
 \rowcolor{outermarginbgcolor}
-ID & Descripción del Hallazgo & Probabilidad ($P$) & Impacto ($I$) & Score ($P \times I$) & Nivel \\
+ID & Amenaza Evaluada & D & R & E & A & D & Prom & Severidad \\
 \midrule
 \endhead
 \bottomrule
 \endfoot
-H-01 & Inyección SQL en módulo de notas SIA. & 4 & 5 & 20 & \textbf{Crítico} \\
+H-01 & Inyección SQL en módulo SIA. & 10 & 9 & 8 & 10 & 8 & \textbf{9.0} & \textbf{Crítica} \\
 \midrule
-H-02 & Ausencia de MFA en portales de docentes y TI. & 5 & 4 & 20 & \textbf{Crítico} \\
+H-02 & Robo de sesión docente vía XSS. & 8 & 8 & 7 & 6 & 8 & \textbf{7.4} & \textbf{Alta} \\
 \midrule
-H-03 & Susceptibilidad a DoS en pasarela de admisión. & 4 & 4 & 16 & \textbf{Alto} \\
+H-03 & DoS Layer 7 en pasarela admisión. & 8 & 10 & 9 & 9 & 7 & \textbf{8.6} & \textbf{Alta} \\
 \midrule
-H-04 & Fuga de información por parámetros IDOR en API. & 3 & 4 & 12 & \textbf{Alto} \\
+H-04 & Fuga de datos de alumnos vía IDOR. & 7 & 8 & 8 & 8 & 6 & \textbf{7.4} & \textbf{Alta} \\
 \midrule
-H-05 & Bitácoras locales sin centralización ni inmutabilidad. & 4 & 3 & 12 & \textbf{Medio-Alto} \\
+H-05 & Logs locales sin centralización. & 5 & 6 & 5 & 4 & 4 & \textbf{4.8} & \textbf{Media} \\
 \midrule
-H-06 & Exposición de versiones de software en cabeceras. & 5 & 2 & 10 & \textbf{Medio} \\
+H-06 & Exposición de banners en cabeceras. & 3 & 10 & 10 & 3 & 9 & \textbf{7.0} & \textbf{Media} \\
 \bottomrule
 \end{longtable}
 \end{center}
+
+\section{Mapeo de Severidad CVSS v3.1}
+Para estandarizar los hallazgos con marcos internacionales (NVD / FIRST), se calcularon los vectores CVSS v3.1:
+
+\begin{itemize}
+    \item \textbf{H-01 (Inyección SQL SIA):} \texttt{CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H} $\rightarrow$ \textbf{Score: 9.8 (Crítico)}
+    \item \textbf{H-02 (Stored XSS en Moodle):} \texttt{CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:C/C:H/I:H/A:N} $\rightarrow$ \textbf{Score: 8.7 (Alto)}
+    \item \textbf{H-03 (DoS Slowloris en Admisión):} \texttt{CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H} $\rightarrow$ \textbf{Score: 7.5 (Alto)}
+    \item \textbf{H-04 (IDOR en API Institucional):} \texttt{CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N} $\rightarrow$ \textbf{Score: 6.5 (Medio)}
+\end{itemize}

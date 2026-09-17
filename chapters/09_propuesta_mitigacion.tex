@@ -13,6 +13,52 @@ La eficacia de la seguridad defensiva radica en romper la cadena de ataque antes
     \item \textbf{Anti-Instalación y C2:} Restricción de privilegios del usuario \texttt{www-data} (montando directorios de carga con la opción \texttt{noexec}) y aplicación de filtrado estricto de tráfico saliente (\textit{Egress Filtering}) en el firewall perimetral.
 \end{itemize}
 
+\section{Configuraciones Técnicas de Endurecimiento (Hardening)}
+
+\subsection{Configuración de Seguridad en Nginx (Cabeceras y Rate Limiting)}
+Se propone desplegar el siguiente bloque de configuración endurecido en los servidores Nginx de la UNAP:
+
+\begin{cmdbox}{Configuración Nginx Endurecida (/etc/nginx/conf.d/security.conf)}
+# 1. Ocultar informacion de version
+server_tokens off;
+more_clear_headers 'Server' 'X-Powered-By';
+
+# 2. Limitacion de tasa contra ataques DoS (Rate Limiting)
+limit_req_zone $binary_remote_addr zone=req_limit:10m rate=10r/s;
+limit_conn_zone $binary_remote_addr zone=conn_limit:10m;
+
+server {
+    listen 443 ssl http2;
+    server_name sia.unap.edu.pe;
+
+    # Aplicar limites
+    limit_req zone=req_limit burst=20 nodelay;
+    limit_conn conn_limit 10;
+
+    # Cabeceras de proteccion
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Content-Security-Policy "default-src 'self';" always;
+}
+\end{cmdbox}
+
+\subsection{Regla de Detección SIEM (Wazuh / Syslog)}
+Para garantizar la visibilidad en la fase de detección temprana, se define una regla personalizada en Wazuh para correlacionar intentos repetidos de inyección SQL:
+
+\begin{cmdbox}{Regla Wazuh para Detección de SQLi (/var/ossec/etc/rules/local\_rules.xml)}
+<group name="web,appsec,">
+  <rule id="100050" level="10">
+    <if_sid>31100</if_sid>
+    <match>UNION SELECT|FROM public.|--</match>
+    <description>Alerta Critica: Intento de Inyeccion SQL detectado en SIA</description>
+    <mitre>
+      <id>T1190</id>
+    </mitre>
+  </rule>
+</group>
+\end{cmdbox}
+
 \section{Matriz de Recomendaciones Técnicas y Plan de Acción}
 La siguiente tabla consolida las acciones preventivas, el nivel de prioridad y el equipo responsable dentro de la UNAP:
 

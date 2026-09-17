@@ -1,0 +1,47 @@
+\chapter*{Anexos}
+\addcontentsline{toc}{chapter}{Anexos}
+\markboth{Anexos}{Anexos}
+
+\section*{Anexo A: Glosario de Términos de Ciberseguridad}
+\begin{itemize}
+    \item \textbf{APT (Advanced Persistent Threat):} Grupo de ciberdelincuentes sofisticado y con recursos que mantiene acceso continuado a una red.
+    \item \textbf{CVSS (Common Vulnerability Scoring System):} Estándar internacional abierto para evaluar la severidad de las vulnerabilidades informáticas.
+    \item \textbf{DREAD:} Modelo de evaluación de riesgos cuantitativo desarrollado por Microsoft.
+    \item \textbf{IDOR (Insecure Direct Object References):} Tipo de vulnerabilidad de control de acceso donde una aplicación expone referencias directas a objetos internos de la base de datos sin autorización previa.
+    \item \textbf{OSINT (Open-Source Intelligence):} Recopilación y análisis de información obtenida de fuentes públicamente accesibles.
+    \item \textbf{SIEM (Security Information and Event Management):} Sistema centralizado para la agregación, correlación y análisis de registros de seguridad en tiempo real.
+    \item \textbf{WAF (Web Application Firewall):} Cortafuegos de capa 7 diseñado para filtrar, monitorear y bloquear tráfico HTTP malicioso hacia una aplicación web.
+\end{itemize}
+
+\section*{Anexo B: Matriz de Mapeo MITRE ATT\&CK Enterprise}
+A continuación, se presenta la correspondencia entre los hallazgos de la investigación y las técnicas del marco MITRE ATT\&CK:
+
+\begin{center}
+\small
+\begin{longtable}{>{\bfseries}p{3.2cm} p{4.2cm} p{7.5cm}}
+\toprule
+\rowcolor{outermarginbgcolor}
+Táctica MITRE & Técnica / ID & Relación con Hallazgos UNAP \\
+\midrule
+\endfirsthead
+\toprule
+\rowcolor{outermarginbgcolor}
+Táctica MITRE & Técnica / ID & Relación con Hallazgos UNAP \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+Acceso Inicial & T1190 - Exploit Public-Facing App & Inyección SQL en módulo del SIA (\texttt{sia.unap.edu.pe}). \\
+\midrule
+Ejecución & T1059.004 - Unix Shell & Ejecución de comandos del sistema operativo vía SQLMap. \\
+\midrule
+Persistencia & T1505.003 - Web Shell & Carga de script PHP malicioso en directorio web público. \\
+\midrule
+Defensa Evasiva & T1070.004 - File Deletion & Borrado de logs locales en servidores no centralizados. \\
+\midrule
+Comando y Control & T1071.001 - Web Protocols & Conexión inversa cifrada HTTPS (puerto 443) hacia servidor C2. \\
+\midrule
+Exfiltración & T1048.003 - Exfiltration Over Web & Extracción del volcado de base de datos comprimido vía HTTP POST. \\
+\bottomrule
+\end{longtable}
+\end{center}
