@@ -11,28 +11,65 @@ $\longrightarrow$ \textbf{Threat Intelligence} (Vigilancia) $\longrightarrow$ \t
 
 \vspace{0.8em}
 
-\section*{Declaración de No Intrusión y Ética Profesional}
-El presente documento constituye un informe técnico y académico formal de ciberseguridad desarrollado con propósitos estrictamente defensivos y de diagnóstico preventivo para la \textbf{Universidad Nacional del Altiplano de Puno (UNAP)}.
+\section{Declaración Ética y de No Intrusión}
+El presente documento, titulado \textbf{``Plan de Ciberseguridad Institucional de la Universidad Nacional del Altiplano de Puno (UNAP)''}, ha sido formulado exclusivamente con fines de investigación académica, auditoría defensiva (\textit{Blue Team}) y diseño de arquitectura de seguridad (\textit{Security by Design}).
 
-Se deja constancia explícita de que:
+Los autores/evaluadores declaran bajo juramento de integridad profesional y académica:
+
 \begin{itemize}
-    \item \textbf{Evaluación Pasiva y No Destructiva:} No se realizaron ataques de denegación de servicio (DoS/DDoS), inyecciones activas en producción, explotación de vulnerabilidades ni alteraciones a bases de datos académicas o financieras.
-    \item \textbf{Sin Acceso No Autorizado:} En ningún momento se vulneraron mecanismos de autenticación ni se accedió a registros privados o datos personales de estudiantes o trabajadores.
-    \item \textbf{Fines de Blindaje Institucional:} Las pruebas se orientaron a evidenciar la postura de seguridad externa y proponer salvaguardas y planes de remediación acordes a las mejores prácticas de la industria.
+    \item \textbf{Ausencia de Pruebas Intrusivas:} En ninguna etapa de la elaboración de este plan se llevaron a cabo análisis de penetración activos (\textit{Pentesting}), pruebas de denegación de servicio (DoS/DDoS), inyecciones de código malicioso, ataques de fuerza bruta contra paneles autenticados, ni explotación de vulnerabilidades en los sistemas de información institucionales.
+    
+    \item \textbf{Preservación de la Continuidad Operativa:} Ninguna de las consultas realizadas generó alteración, interrupción, degradación de rendimiento o indisponibilidad en los servicios informáticos de la UNAP.
+    
+    \item \textbf{Respeto a la Privacidad de los Datos:} No se accedió, extrajo, manipuló ni divulgó información personal, financiera o académica protegida perteneciente a estudiantes, docentes, personal administrativo o autoridades de la universidad. El acceso a las interfaces analizadas se efectuó dentro del marco de sesiones ordinarias y legítimas provistas a los miembros de la comunidad universitaria.
+    
+    \item \textbf{Finalidad Propositiva y Mitigadora:} Los hallazgos y evidencias recopilados tienen el único propósito de justificar técnicamente la necesidad de implementar controles preventivos bajo el marco NIST CSF 2.0, mitigar amenazas modeladas con STRIDE, mapear tácticas adversarias en MITRE ATT\&CK e implementar un modelo de Confianza Cero (\textit{Zero Trust}) que eleve la postura de ciberseguridad de la UNAP.
 \end{itemize}
 
-\section*{Marco Legal Aplicable en el Perú}
-El análisis y desarrollo del plan se enmarcan rigurosamente en la legislación nacional vigente:
-\begin{enumerate}
-    \item \textbf{Ley N° 30096 (Ley de Delitos Informáticos) y su modificatoria Ley N° 30171:} Regula y sanciona el acceso ilícito a sistemas informáticos, atentados a la integridad de datos y sistemas, y fraude informático.
-    \item \textbf{Decreto de Urgencia N° 006-2020:} Establece el Sistema Nacional de Transformación Digital y el Marco de Gobernanza Digital y Seguridad Digital del Estado Peruano, asignando responsabilidades para proteger activos críticos públicos.
-    \item \textbf{Ley N° 29733 (Ley de Protección de Datos Personales):} Exige la implementación de medidas organizativas, legales y técnicas para garantizar la seguridad y confidencialidad de los bancos de datos personales en el ámbito universitario.
-\end{enumerate}
+\section{Marco Legal Aplicable en el Estado Peruano}
+El desarrollo de este plan y la justificación de los controles técnicos se fundamentan en el marco normativo nacional vigente en materia de gobernanza digital, seguridad de la información y delitos informáticos:
 
-\section*{Alcance de las Pruebas y Evidencias Técnicas}
-La recopilación de información se restringió a técnicas de fuentes abiertas (\textit{Open Source Intelligence} - OSINT) e inspección en el lado del cliente:
 \begin{itemize}
-    \item \textbf{Fuentes Abiertas (OSINT):} Uso de registros públicos de transparencia de certificados SSL/TLS (\textit{Certificate Transparency Logs} mediante \texttt{crt.sh}) e inspección pasiva de resolución en servidores de nombres DNS públicos.
-    \item \textbf{Inspección Pasiva en Navegador (DevTools F12):} Revisión de cabeceras HTTP de respuesta pública y análisis de banderas de seguridad en cookies (\texttt{Secure}, \texttt{HttpOnly}, \texttt{SameSite}) mediante sesiones de navegación legítimas sin eludir controles de acceso.
+    \item \textbf{Ley N° 30096 (Ley de Delitos Informáticos) y su modificatoria Ley N° 30171:} La metodología empleada respeta irrestrictamente los artículos referidos al acceso ilícito (Art. 2), atentado a la integridad de datos y sistemas informáticos (Arts. 3 y 4) y fraude informático (Art. 8). Al no existir intrusión ni vulneración de medidas de seguridad perimetral, la recolección de telemetría pasiva no transgrede esta ley.
+    
+    \item \textbf{Decreto de Urgencia N° 006-2020 (Decreto de Urgencia que crea el Sistema Nacional de Transformación Digital):} Establece como deber de todas las entidades públicas peruanas, incluidas las universidades nacionales, la implementación de un Marco de Seguridad y Confianza Digital que proteja los activos de información del Estado.
+    
+    \item \textbf{Decreto Supremo N° 029-2021-PCM (Reglamento del Decreto Legislativo N° 1412, Ley de Gobierno Digital):} Dispone lineamientos mandatorios para la gestión de riesgos de seguridad digital en las plataformas de servicios digitales públicos.
+    
+    \item \textbf{Ley N° 29733 (Ley de Protección de Datos Personales) y su Reglamento (D.S. N° 003-2013-JUS):} Regula el tratamiento y la confidencialidad de los bancos de datos que albergan identificadores personales de estudiantes y trabajadores en los sistemas de matrícula y recursos humanos de la UNAP.
+    
+    \item \textbf{Resoluciones y Directivas de la Secretaría de Gobierno y Transformación Digital (SGTD - PCM):} En su calidad de ente rector nacional en ciberseguridad y coordinador del Centro Nacional de Seguridad Digital (CSIRT Nacional).
 \end{itemize}
+
+\section{Metodología de Evaluación y Recolección de Evidencias}
+Para la identificación de brechas y sustento del análisis de amenazas, se utilizó estrictamente una metodología de evaluación pasiva de fuentes abiertas (OSINT) e inspección de cliente en comunicaciones estándar, desglosada en los siguientes procedimientos:
+
+\subsection{Inteligencia de Fuentes Abiertas y Consulta DNS Pasiva (OSINT)}
+\begin{itemize}
+    \item \textbf{Descubrimiento de Superficie Expuesta:} Se consultaron los registros públicos de Transparencia de Certificados SSL/TLS (\textit{Certificate Transparency Logs} vía \texttt{crt.sh}), identificando la existencia de más de un centenar de subdominios registrados bajo la zona \texttt{*.unap.edu.pe} sin interactuar directamente con los hosts objetivo.
+    
+    \item \textbf{Auditoría de Registros de Correo Institucional:} Se ejecutaron peticiones estándar de resolución de nombres DNS (tipo TXT) mediante la herramienta de diagnóstico de sistemas operativos \texttt{nslookup} apuntando a servidores DNS públicos, con el fin de evaluar la postura de los registros de autenticación de correo:
+    \begin{itemize}
+        \item Verificación de la directiva SPF (\textit{Sender Policy Framework}) en el dominio raíz \texttt{unap.edu.pe}.
+        \item Verificación de la presencia o ausencia de políticas de alineación DMARC (\textit{Domain-based Message Authentication, Reporting, and Conformance}) en el nodo \texttt{\_dmarc.unap.edu.pe}.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Inspección Pasiva del Lado del Cliente (Client-Side Inspection)}
+\begin{itemize}
+    \item \textbf{Análisis de Cabeceras HTTP de Respuesta:} Mediante las herramientas de desarrollo web del navegador (DevTools - F12 / RFC 7230) en el marco de una navegación regular autorizada hacia los portales \texttt{https://matricula.unap.edu.pe} y \texttt{https://campus.unap.edu.pe}, se examinaron los encabezados enviados de forma pública por los servidores web:
+    \begin{itemize}
+        \item Exposición de metadatos de software y versión en el encabezado \texttt{Server} (\texttt{nginx/1.16.1}).
+        \item Comprobación del estado de la directiva de seguridad en el transporte \texttt{Strict-Transport-Security} (HSTS).
+        \item Inspección de cabeceras de defensa contra ataques visuales y de contexto (\texttt{X-Frame-Options}, \texttt{Content-Security-Policy}, \texttt{X-Content-Type-Options}).
+    \end{itemize}
+    
+    \item \textbf{Inspección de Atributos de Almacenamiento de Sesión:} Revisión de las banderas de seguridad asignadas a las cookies de autenticación generadas por el entorno de desarrollo (.NET Core: \texttt{.AspNetCore.Cookies}, \texttt{CookieTempDataProvider}) para evaluar la presencia de los atributos \texttt{HttpOnly}, \texttt{Secure} y \texttt{SameSite}.
+\end{itemize}
+
+\subsection{Modelado de Amenazas y Simulación Teórica (Tabletop Simulation)}
+La articulación de las amenazas no provino de incidentes forzados en producción, sino del cruce sistemático entre las vulnerabilidades de configuración verificadas pasivamente y las matrices estandarizadas de la industria (STRIDE de Microsoft, la taxonomía de técnicas de MITRE ATT\&CK Enterprise v14 y las 7 fases de intrusión de la Cyber Kill Chain de Lockheed Martin).
+
+\vspace{1em}
+\noindent\textbf{Nota de Rigor Académico:} Con este marco queda formalmente establecida la rigurosidad técnica, ética y legal del documento frente a cualquier comisión evaluadora o autoridad universitaria.
 \clearpage
