@@ -9,7 +9,7 @@ La finalidad del presente Plan Institucional de Ciberseguridad es establecer, no
 
 Para alcanzar dicha finalidad, el plan formaliza una arquitectura de defensa en profundidad mediante la sinergia de marcos y metodologías de referencia internacional:
 
-\begin{itemize}[itemsep=4pt,topsep=3pt,parsep=0pt]
+\begin{itemize}[itemsep=3pt,topsep=2pt,parsep=0pt]
     \item \textbf{Gobernanza Estratégica (NIST CSF 2.0):} Institucionalizar la ciberseguridad a nivel transversal en la universidad, estructurando la toma de decisiones, la asignación de recursos y la gestión integral de riesgos tecnológicos dentro de las seis funciones directivas: Gobernar, Identificar, Proteger, Detectar, Responder y Recuperar.
 
     \item \textbf{Modelado Preventivo de Software (STRIDE):} Analizar y mitigar sistemáticamente los vectores de Suplantación (\textit{Spoofing}), Manipulación (\textit{Tampering}), Repudio (\textit{Repudiation}), Fuga de Información (\textit{Information Disclosure}), Denegación de Servicio (\textit{Denial of Service}) y Elevación de Privilegios (\textit{Elevation of Privilege}) en las aplicaciones críticas desarrolladas y operadas por la OTI (con especial énfasis en el flujo \path{matricula.unap.edu.pe}).
@@ -23,19 +23,30 @@ Para alcanzar dicha finalidad, el plan formaliza una arquitectura de defensa en 
     \item \textbf{Controles Operativos Estrictos (Zero Trust Architecture):} Reemplazar la confianza implícita por una verificación continua y granular sobre identidades (MFA obligatorio), dispositivos de acceso, segmentación lógica de redes (VLANs), aplicaciones web blindadas y cifrado mandatorio de datos académicos y financieros, tanto en reposo como en tránsito.
 \end{itemize}
 
+\clearpage
+\enlargethispage{2\baselineskip}
 \section{Objetivos del Plan}
 
 \subsection{Objetivo General}
-Fortalecer la resiliencia operativa y la seguridad de la información de la Universidad Nacional del Altiplano de Puno mediante la catalogación de activos críticos, el modelado formal de amenazas, la aplicación de controles de mínimo privilegio y el establecimiento de protocolos de detección y respuesta continua.
+
+Fortalecer de forma integral la postura de seguridad de la información y la resiliencia operativa de la Universidad Nacional del Altiplano de Puno (UNAP), mediante la identificación rigurosa de activos críticos, el modelado sistemático de amenazas, la implementación de controles defensivos bajo el estándar de Confianza Cero (Zero Trust) y el establecimiento de capacidades institucionales estandarizadas de detección, respuesta y recuperación continua articuladas bajo el marco NIST CSF 2.0.
 
 \subsection{Objetivos Específicos}
-\begin{enumerate}
-    \item \textbf{Inventariar y clasificar:} Identificar y categorizar integralmente el inventario de recursos y activos tecnológicos de la institución según su criticidad.
-    \item \textbf{Modelar amenazas web:} Determinar vulnerabilidades y vectores de amenaza en los servicios web académicos esenciales mediante la metodología STRIDE.
-    \item \textbf{Caracterizar TTPs adversarias:} Mapear las tácticas, técnicas y procedimientos de potenciales atacantes empleando la matriz MITRE ATT\&CK.
-    \item \textbf{Vigilancia proactiva:} Detectar indicadores de compromiso (IoCs) y campañas dirigidas mediante capacidades de Threat Intelligence.
-    \item \textbf{Fortalecer controles preventivos:} Implementar controles perimetrales y de aplicación robustos (WAF, HSTS forzado, EDR centralizado).
-    \item \textbf{Gobierno de identidades Zero Trust:} Desplegar esquemas de autenticación multifactor (MFA) y verificación explícita para docentes y personal administrativo.
-    \item \textbf{Garantizar la privacidad de datos:} Mitigar los riesgos de impacto sobre la privacidad y confidencialidad de la información estudiantil y docente conforme a la Ley N° 29733.
-    \item \textbf{Estandarizar la respuesta a incidentes:} Formalizar la operación y protocolos del Equipo de Respuesta a Incidentes de Seguridad de la UNAP (CSIRT-UNAP).
+
+\begin{enumerate}[itemsep=2.5pt,topsep=2pt,parsep=0pt]
+    \item \textbf{Identificar y clasificar los activos de información:} Catalogar exhaustivamente el 100\% de los recursos tecnológicos, servidores, bases de datos, redes y servicios web asociados al dominio \path{unap.edu.pe}, estratificando su nivel de criticidad (Crítico, Alto, Medio, Bajo) conforme al impacto sobre la continuidad del servicio educativo y la confidencialidad de los datos.
+
+    \item \textbf{Determinar amenazas y vulnerabilidades arquitectónicas:} Ejecutar el modelado preventivo de amenazas mediante la metodología STRIDE sobre los sistemas críticos de la universidad (priorizando el flujo de matrícula y campus virtual), identificando debilidades de configuración, obsolescencia de software (como \path{nginx/1.16.1}) y ausencia de directivas de protección en el transporte (\texttt{Strict-\allowbreak Transport-\allowbreak Security}).
+
+    \item \textbf{Analizar y correlacionar las técnicas empleadas por atacantes:} Caracterizar el comportamiento potencial de ciberadversarios en el contexto universitario mediante la matriz MITRE ATT\&CK Enterprise, traduciendo las técnicas y procedimientos observados en reglas formales de visibilidad, auditoría y monitoreo de eventos.
+
+    \item \textbf{Detectar amenazas reales mediante inteligencia proactiva:} Institucionalizar un flujo operativo de Threat Intelligence para monitorizar activamente campañas de Spear-Phishing, registros fraudulentos de dominios (\textit{typosquatting}), abuso de la reputación institucional derivado de la ausencia de DMARC y explotación de vulnerabilidades conocidas (CVEs).
+
+    \item \textbf{Implementar controles preventivos y perimetrales:} Desplegar mecanismos de mitigación perimetral (Web Application Firewall - WAF, inspección de cabeceras, políticas DNS estrictas SPF: \texttt{-all} y DMARC: \texttt{p=reject}) y capacidades de protección en estaciones de trabajo y servidores mediante soluciones EDR centralizadas.
+
+    \item \textbf{Fortalecer el gobierno de identidades y el control de accesos:} Implementar la directriz de Autenticación Multifactor (MFA) obligatoria para personal administrativo, directivo y docente, combinada con políticas de privilegios mínimos (\textit{Principle of Least Privilege}) y asignación estricta de roles (RBAC) en las plataformas académicas.
+
+    \item \textbf{Reducir los riesgos de exposición y fuga de datos personales:} Blindar los canales de transmisión y repositorios que albergan calificaciones, historiales académicos y datos de identificación personal (DNI, registros biométricos), garantizando el cumplimiento irrestricto de la Ley N° 29733 (Ley de Protección de Datos Personales).
+
+    \item \textbf{Mejorar la capacidad de respuesta y resiliencia ante incidentes:} Formalizar el Equipo de Respuesta a Incidentes de Seguridad Digital de la UNAP (CSIRT-UNAP), definiendo procedimientos operativos estandarizados (\textit{Playbooks}) para minimizar los tiempos medios de detección (MTTD) y contención (MTTR), asegurando la restauración íntegra de servicios mediante copias de seguridad inmutables (estrategia 3-2-1).
 \end{enumerate}

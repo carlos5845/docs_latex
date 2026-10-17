@@ -1,42 +1,118 @@
 \chapter{Alcance del Plan}
 \label{ch:alcance}
 
-El alcance del presente plan abarca formalmente a todos los estamentos, infraestructuras, plataformas y dependencias que conforman el ecosistema tecnológico de la Universidad Nacional del Altiplano.
+El presente Plan Institucional de Ciberseguridad es de aplicación obligatoria, transversal y vinculante para todas las dependencias académicas, de investigación, administrativas y operativas de la Universidad Nacional del Altiplano de Puno.
 
-\section{Comunidad y Personal Universitario}
-\begin{itemize}
-    \item Personal Docente (ordinarios y contratados).
-    \item Personal Administrativo y directivo.
-    \item Comunidad Estudiantil de pregrado y posgrado.
-    \item Personal de servicios, terceros y contratistas con acceso a recursos institucionales.
+Su ámbito de cobertura se desglosa en los siguientes dominios clave de gobernanza y protección tecnológica:
+
+\small
+\begin{longtable}{p{4.6cm} p{4.6cm} p{4.6cm}}
+\toprule
+\rowcolor{fg}
+\multicolumn{3}{c}{\textcolor{white}{\bfseries MATRIZ SINTÉTICA DE ALCANCE INSTITUCIONAL}} \\
+\midrule
+\rowcolor{outermarginbgcolor}
+\textbf{Factor Humano} & \textbf{Infraestructura} & \textbf{Lógica y Datos} \\
+\midrule
+\endfirsthead
+\toprule
+\rowcolor{fg}
+\multicolumn{3}{c}{\textcolor{white}{\bfseries MATRIZ SINTÉTICA DE ALCANCE INSTITUCIONAL (Continuación)}} \\
+\midrule
+\rowcolor{outermarginbgcolor}
+\textbf{Factor Humano} & \textbf{Infraestructura} & \textbf{Lógica y Datos} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\begin{itemize}[leftmargin=*,noitemsep,topsep=1pt,parsep=0pt]
+    \item Estudiantes
+    \item Plana Docente
+    \item Administrativos
+    \item Terceros y Soporte
+\end{itemize} &
+\begin{itemize}[leftmargin=*,noitemsep,topsep=1pt,parsep=0pt]
+    \item Data Center OTI
+    \item Estaciones Administrativas
+    \item Labs de Cómputo
+    \item Core de Red y WAN
+\end{itemize} &
+\begin{itemize}[leftmargin=*,noitemsep,topsep=1pt,parsep=0pt]
+    \item Apps Web (Matrícula/Campus)
+    \item Bases de Datos (PostgreSQL/SQL)
+    \item Correo (\path{@unap.edu.pe})
+    \item Servicios Cloud y Repositorio
+\end{itemize} \\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\section{Factor Humano y Organizacional}
+
+\begin{itemize}[itemsep=3pt,topsep=2pt,parsep=0pt]
+    \item \textbf{Comunidad Estudiantil:} Más de 19,000 alumnos matriculados en programas de pregrado, posgrado y segunda especialidad que hacen uso de credenciales de acceso a portales institucionales.
+
+    \item \textbf{Plana Docente e Investigadores:} Profesores nombrados y contratados con facultades de registro de evaluaciones, gestión curricular e investigación en laboratorios.
+
+    \item \textbf{Personal Administrativo y Directivo:} Autoridades universitarias (Rectorado, Decanatos), personal de tesorería, recaudación, recursos humanos, mesa de partes y logística que gestiona información clasificada y flujos financieros.
+
+    \item \textbf{Proveedores y Contratistas Externos:} Empresas y consultores que brindan servicios de desarrollo de software, mantenimiento de fibra óptica, soporte de hardware o licenciamiento institucional.
 \end{itemize}
 
-\section{Infraestructura de Servidores y Data Center}
-\begin{itemize}
-    \item Servidores físicos y clústeres de virtualización alojados en el Data Center central de la OTI.
-    \item Ambientes de producción, pruebas y contingencia en sistemas operativos Linux y Windows Server.
-    \item Sistemas de almacenamiento centralizado (NAS / SAN) y nodos de cómputo.
+\clearpage
+
+\section{Infraestructura Tecnológica y Hardware}
+
+\begin{itemize}[itemsep=3pt,topsep=2pt,parsep=0pt]
+    \item \textbf{Centro de Procesamiento de Datos (Data Center OTI):} Todos los servidores físicos, chasis blade, sistemas de almacenamiento masivo (NAS/SAN), gabinetes de comunicaciones y sistemas de respaldo energético (UPS/Grupo electrógeno) ubicados en el campus central (Av. Floral).
+
+    \item \textbf{Entornos de Virtualización:} Nodos hipervisores (VMware ESXi, Proxmox, Hyper-V) y contenedores donde se ejecutan los servicios centrales de la universidad.
+
+    \item \textbf{Estaciones de Trabajo Institucionales:} Computadoras de escritorio y portátiles asignadas a oficinas administrativas, decanatos y dependencias funcionales de la universidad.
+
+    \item \textbf{Laboratorios de Cómputo Académicos:} Toda la infraestructura de estaciones de trabajo ubicadas en las 20 facultades destinadas a prácticas de pregrado y posgrado.
 \end{itemize}
 
-\section{Estaciones de Trabajo y Dispositivos Finales}
-\begin{itemize}
-    \item Computadoras de escritorio y portátiles en oficinas administrativas y decanatos.
-    \item Equipos en laboratorios de cómputo de las distintas facultades y escuelas profesionales.
-    \item Dispositivos móviles institucionales y acceso remoto de usuarios autorizados.
+\section{Redes y Comunicaciones}
+
+\begin{itemize}[itemsep=3pt,topsep=2pt,parsep=0pt]
+    \item \textbf{Núcleo de Red (Core Network):} Switches de capa de distribución y núcleo, routers de borde y enlaces troncales de fibra óptica interfacultades en la Ciudad Universitaria.
+
+    \item \textbf{Comunicaciones Inalámbricas (WLAN):} Puntos de acceso (\textit{Access Points}) y controladores Wi-Fi desplegados en áreas comunes, facultades y pabellones administrativos (segmentando el tráfico de invitados del tráfico académico).
+
+    \item \textbf{Perímetro y Conectividad Remota:} Enlaces de salida a Internet gestionados por la OTI, enlaces dedicados WAN hacia centros experimentales (Camacani, Illpa) y canales de acceso remoto seguro (VPNs).
 \end{itemize}
 
-\section{Infraestructura de Comunicaciones y Redes}
-\begin{itemize}
-    \item Switches de distribución y Switch Core central.
-    \item Segmentación lógica de redes mediante VLANs.
-    \item Infraestructura de red inalámbrica (Wi-Fi de campus para alumnos, docentes y administrativos).
-    \item Enlaces de conectividad WAN e interfaces de conexión hacia la Red Dorsal y proveedores de Internet (ISP).
+\clearpage
+
+\section{Aplicaciones y Sistemas de Información}
+
+\begin{itemize}[itemsep=3pt,topsep=2pt,parsep=0pt]
+    \item \textbf{Sistemas Académicos Críticos:} Plataforma de Matrícula e Intranet (\path{matricula.unap.edu.pe}), Plataforma de Campus Virtual Moodle (\path{campus.unap.edu.pe}, \path{aulavirtual.unap.edu.pe}) y subsistemas asociados a la Dirección General de Asuntos Académicos.
+
+    \item \textbf{Sistemas de Gestión Pública y Trámite:} Sistema de Trámite Documentario SITRAD (\path{tramiteapp.unap.edu.pe}), Mesa de Partes Digital y Portal de Transparencia Universitaria.
+
+    \item \textbf{Sistemas de Soporte y Control Institucional:} Módulos de recaudación y pagos de tesorería, portal de Admisión (\path{admision.unap.edu.pe}), servicios biométricos de personal (\url{apibiometrico.unap.edu.pe}) y repositorio DSpace (\path{repositorio.unap.edu.pe}).
+
+    \item \textbf{Entornos de Desarrollo y Homologación:} Servidores intermedios (\path{dev.*}, \path{dev2.*}, \path{prue1.*}) expuestos o internos utilizados por el equipo de sistemas para el despliegue de nuevas funcionalidades.
 \end{itemize}
 
-\section{Plataformas, Sistemas y Datos Institucionales}
-\begin{itemize}
-    \item \textbf{Aplicaciones y portales web institucionales:} Sistema de Matrícula (\path{matricula.unap.edu.pe}), Campus Virtual (\path{campus.unap.edu.pe}), SITRAD (Trámite Documentario), Pasarela de Recaudación y pagos.
-    \item \textbf{Bases de datos:} Repositorios centrales de notas, registros de tesorería, planillas de personal y expedientes estudiantiles.
-    \item \textbf{Servicios de comunicación institucional:} Servicio de correo electrónico institucional (\path{@unap.edu.pe}), repositorios digitales (DSpace) y servicios en la nube.
-    \item \textbf{Proveedores y contratistas:} Servicios tercerizados de desarrollo de software, mantenimiento de telecomunicaciones y soporte de infraestructura.
+\section{Bases de Datos y Almacenamiento de Información}
+
+\begin{itemize}[itemsep=3pt,topsep=2pt,parsep=0pt]
+    \item \textbf{Motores de Bases de Datos Relacionales:} Servidores PostgreSQL, Microsoft SQL Server, MySQL y Oracle que resguardan tablas de matrículas, actas de notas, legajos de personal docente y registros de pago.
+
+    \item \textbf{Repositorios de Almacenamiento Estructurado y No Estructurado:} Expedientes digitalizados, resoluciones rectorales, tesis de grado y respaldos de configuración de red.
+\end{itemize}
+
+\section{Correo Institucional, Mensajería e Identidad Federada}
+
+Todo el dominio de correo \path{@unap.edu.pe} desplegado sobre plataformas de colaboración en la nube (Google Workspace / Microsoft 365), incluyendo los mecanismos de autenticación única (\textit{Single Sign-On} - SSO), repositorios Drive compartidos y listas de distribución oficial institucional.
+
+\section{Servicios en la Nube y Proveedores Tecnológicos}
+
+\begin{itemize}[itemsep=3pt,topsep=2pt,parsep=0pt]
+    \item \textbf{Instancias en la Nube Pública:} Cargas de trabajo en AWS, Azure y Google Cloud, servicios de alojamiento externo, pasarelas de pago bancarias y certificados SSL/TLS emitidos para el dominio de la universidad.
+
+    \item \textbf{Gestión de Terceros y Proveedores:} Contratos de servicios tecnológicos que estipulan acuerdos de confidencialidad (NDA), gestión controlada de accesos remotos y cláusulas de responsabilidad en ciberseguridad conforme al estándar Zero Trust.
 \end{itemize}
