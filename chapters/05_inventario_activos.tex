@@ -1,77 +1,115 @@
 \chapter{Inventario y Clasificación de Activos}
 \label{ch:inventario_activos}
 
-La correcta identificación y categorización de los activos informáticos es la base fundamental para determinar la superficie de exposición y focalizar los controles de seguridad.
+En este capítulo se presenta el inventario exhaustivo de activos de información de la UNAP, la metodología de valoración basada en la tríada CID, los criterios de criticidad y la matriz consolidada de los 20 activos centrales de la universidad.
 
-\section{Procedimiento de Descubrimiento de Activos}
-Para identificar los activos tecnológicos expuestos sin alterar la operatividad de los servidores universitarios, se aplicó un procedimiento pasivo de recolección en fuentes abiertas:
-\begin{enumerate}
-    \item \textbf{Inspección de Registros de Transparencia de Certificados SSL (crt.sh):} Búsqueda sistemática de certificados emitidos para la raíz \texttt{unap.edu.pe}, permitiendo descubrir subdominios históricos y activos.
-    \item \textbf{Consultas de Infraestructura DNS:} Verificación de registros autoritativos \texttt{A}, \texttt{CNAME}, \texttt{NS} y \texttt{MX} para trazar la infraestructura de direccionamiento IP y servidores de nombres.
-    \item \textbf{Identificación de Servicios Expuestos:} Mapeo de tecnologías de frontend y backend asociadas a los nombres de dominio descubiertos.
-\end{enumerate}
+\section{Metodología de Identificación y Valoración}
 
-\section{Categorización de Recursos por Nivel de Criticidad}
-Los activos descubiertos se agrupan en cuatro niveles de criticidad conforme a su impacto en la operación y en la privacidad de datos:
+Para la elaboración del inventario y la matriz de clasificación de activos de la Universidad Nacional del Altiplano de Puno (UNAP), se combinó el relevamiento de activos físicos del Centro de Procesamiento de Datos (Data Center OTI) y dependencias administrativas con una auditoría pasiva de la superficie de exposición externa mediante registros públicos de Transparencia de Certificados SSL/TLS (\textit{Certificate Transparency Logs} vía \path{crt.sh}). Este procedimiento permitió registrar los servicios web, paneles de administración, bases de datos y nodos de red asociados a la zona DNS \path{unap.edu.pe}.
 
-\begin{itemize}
-    \item \textbf{Nivel Crítico:}
-    \begin{itemize}
-        \item Base de Datos Académica Central (PostgreSQL / Oracle).
-        \item Portal y API del Sistema de Matrícula (\texttt{matricula.unap.edu.pe}).
-        \item Campus Virtual Institucional Moodle (\texttt{campus.unap.edu.pe}).
-        \item Switch Core central del Data Center OTI.
-    \end{itemize}
-    \item \textbf{Nivel Alto:}
-    \begin{itemize}
-        \item Servicio de Correo Institucional (\texttt{@unap.edu.pe}).
-        \item Sistema de Trámite Documentario (SITRAD).
-        \item Sistemas financieros de tesorería, cobranza y planillas de remuneraciones.
-    \end{itemize}
-    \item \textbf{Nivel Medio:}
-    \begin{itemize}
-        \item Repositorio Institucional Digital (DSpace).
-        \item Portales web informativos de facultades y direcciones universitarias.
-    \end{itemize}
-    \item \textbf{Nivel Bajo:}
-    \begin{itemize}
-        \item Sitios web estáticos, páginas de eventos pasados y blogs informativos.
-    \end{itemize}
+La valoración de cada activo se determinó evaluando el impacto que sufriría la universidad ante la pérdida o degradación de las tres dimensiones de la seguridad de la información:
+
+\begin{itemize}[itemsep=2.5pt,topsep=1.5pt,parsep=0pt]
+    \item \textbf{Confidencialidad (C):} Impacto derivado de la divulgación no autorizada de datos personales de estudiantes/docentes, registros financieros o propiedad intelectual (conforme a la Ley N° 29733).
+    \item \textbf{Integridad (I):} Impacto provocado por la alteración no autorizada de calificaciones, actas académicas, resoluciones rectorales o tablas contables.
+    \item \textbf{Disponibilidad (D):} Impacto operativo generado por la interrupción temporal o permanente del servicio durante periodos críticos (semanas de matrícula, procesamiento de planillas o sesiones de Consejo Universitario).
 \end{itemize}
 
-\section{Matriz Consolidada de Activos Tecnológicos de la UNAP}
-A continuación, se presenta la matriz representativa de los principales activos evaluados:
+Cada dimensión se califica en una escala ordinal de 1 a 4:
 
-\small
-\begin{longtable}{>{\bfseries}c p{3.8cm} p{4.6cm} p{3.2cm} c}
+\begin{itemize}[itemsep=1.5pt,topsep=1pt,parsep=0pt]
+    \item \textbf{1 (Bajo):} Afectación mínima o insignificante; el daño es subsanable de forma inmediata con impacto operativo nulo.
+    \item \textbf{2 (Medio):} Pérdida de eficiencia operativa en áreas no esenciales o exposición de datos institucionales de carácter público.
+    \item \textbf{3 (Alto):} Afectación severa a procesos administrativos/financieros con consecuencias normativas o daño reputacional institucional significativo.
+    \item \textbf{4 (Crítico):} Parálisis total de las actividades académicas/administrativas, alteración masiva de actas oficiales o contingencia legal directa frente a SUNEDU y entes del Estado.
+\end{itemize}
+
+\section{Criterio de Clasificación Institucional}
+
+El nivel global de criticidad asignado al activo corresponde al valor máximo obtenido entre sus dimensiones individuales:
+\[
+\text{Criticidad} = \max(C,\, I,\, D)
+\]
+Este criterio garantiza que un activo con exigencia crítica en una sola dimensión (por ejemplo, integridad absoluta de notas académicas) reciba el tratamiento prioritario que le corresponde:
+
+\begin{itemize}[itemsep=1.5pt,topsep=1pt,parsep=0pt]
+    \item \textbf{Crítico (Nivel 4):} Activos esenciales para la continuidad académica, la recaudación y la gobernanza de la UNAP. Su compromiso paraliza la institución.
+    \item \textbf{Alto (Nivel 3):} Sistemas de trámite documentario, recaudación, recursos humanos y servicios de comunicación oficial.
+    \item \textbf{Medio (Nivel 2):} Plataformas de divulgación científica, repositorios documentales, portales de escuelas profesionales y estaciones de trabajo administrativas.
+    \item \textbf{Bajo (Nivel 1):} Sitios web puramente informativos, blogs de eventos y páginas estáticas sin interacción con bases de datos internas.
+\end{itemize}
+
+\section{Matriz Consolidada de Clasificación de Activos (UNAP)}
+
+A continuación, se detalla el inventario estructurado de los 20 activos de información evaluados en el ecosistema digital de la UNAP:
+
+\begingroup
+\setlength{\tabcolsep}{2.0pt}
+\scriptsize
+\begin{longtable}{>{\bfseries}p{0.85cm} p{1.75cm} p{1.95cm} p{2.35cm} p{1.85cm} >{\centering\arraybackslash}p{0.22cm} >{\centering\arraybackslash}p{0.22cm} >{\centering\arraybackslash}p{0.22cm} p{1.15cm} p{2.95cm}}
 \toprule
-\rowcolor{outermarginbgcolor}
-ID & Nombre del Activo & Identificador / URL & Función Principal & Criticidad \\
+\rowcolor{fg}
+\textcolor{white}{ID} & \textcolor{white}{Nombre} & \textcolor{white}{Tipo} & \textcolor{white}{Endpoint / Ubic.} & \textcolor{white}{Custodio} & \textcolor{white}{C} & \textcolor{white}{I} & \textcolor{white}{D} & \textcolor{white}{Clasif.} & \textcolor{white}{Justificación de Criticidad} \\
 \midrule
 \endfirsthead
 \toprule
-\rowcolor{outermarginbgcolor}
-ID & Nombre del Activo & Identificador / URL & Función Principal & Criticidad \\
+\rowcolor{fg}
+\textcolor{white}{ID} & \textcolor{white}{Nombre} & \textcolor{white}{Tipo} & \textcolor{white}{Endpoint / Ubic.} & \textcolor{white}{Custodio} & \textcolor{white}{C} & \textcolor{white}{I} & \textcolor{white}{D} & \textcolor{white}{Clasif.} & \textcolor{white}{Justificación de Criticidad} \\
 \midrule
 \endhead
 \bottomrule
 \endfoot
-ACT-01 & BD Académica Central & Servidor de BD Data Center & Almacenamiento central de notas y actas & \textbf{Crítico} \\
+ACT-01 & Base de Datos Académica & Base de Datos (PostgreSQL\,/\allowbreak\,Oracle) & Data Center OTI (VLAN 10) & Admin. BD\,/\allowbreak\,Dir. Asuntos Acad. & 4 & 4 & 4 & \textcolor{red!80!black}{\textbf{Crítico}} & Contiene el historial de notas, créditos y matrículas de más de 19,000 alumnos; daño legal irreversible. \\
 \midrule
-ACT-02 & Sistema de Matrícula & \path{matricula.unap.edu.pe} & Inscripción y carga horaria estudiantil & \textbf{Crítico} \\
+ACT-02 & Sistema de Matrícula & App Web\,/\allowbreak\,API (.NET Core) & \path{matricula.unap.edu.pe} & OTI\,/\allowbreak\,Unidad de Sistemas & 4 & 4 & 4 & \textcolor{red!80!black}{\textbf{Crítico}} & Proceso medular de inicio de semestre; expuesto a picos y alteración de vacantes. \\
 \midrule
-ACT-03 & Campus Virtual (LMS) & \path{campus.unap.edu.pe} & Docencia virtual, foros y evaluaciones & \textbf{Crítico} \\
+ACT-03 & Campus Virtual Moodle & LMS (PHP\,/\allowbreak\,Linux) & \path{campus.unap.edu.pe} & OTI\,/\allowbreak\,Educación Virtual & 3 & 4 & 4 & \textcolor{red!80!black}{\textbf{Crítico}} & Clases, tareas y evaluaciones en línea de pre y posgrado; paraliza la docencia si cae. \\
 \midrule
-ACT-04 & Switch Core de Red & Data Center OTI & Enrutamiento y conmutación de tráfico & \textbf{Crítico} \\
+ACT-04 & Enlaces WAN Switch Core & Redes y Comunicaciones & Data Center OTI Campus Central & Unidad de Redes y Telecom. & 2 & 4 & 4 & \textcolor{red!80!black}{\textbf{Crítico}} & Troncal de fibra y enrutamiento borde; su falla aísla los servidores internos. \\
 \midrule
-ACT-05 & Correo Institucional & \path{mail.unap.edu.pe} & Comunicaciones oficiales y notificaciones & \textbf{Alto} \\
+ACT-05 & Respaldo Local (NAS) & Almacenamiento Respaldo & Data Center OTI (VLAN 15) & Administrador Servidores OTI & 4 & 4 & 4 & \textcolor{red!80!black}{\textbf{Crítico}} & Última línea de defensa institucional ante ataques de ransomware catastróficos. \\
 \midrule
-ACT-06 & SITRAD & \path{sitrad.unap.edu.pe} & Trámite documentario y resoluciones & \textbf{Alto} \\
+ACT-06 & Correo y Suite Cloud & SaaS / Cloud & \path{@unap.edu.pe} (Google\,/\allowbreak\,M365) & OTI\,/\allowbreak\,Secretaría General & 4 & 3 & 3 & \textcolor{orange!90!black}{\textbf{Alto}} & Identidad federada (SSO) y canal legal; vector principal de ataques de Spear-Phishing. \\
 \midrule
-ACT-07 & Repositorio DSpace & \path{repositorio.unap.edu.pe} & Publicación de tesis e investigaciones & \textbf{Medio} \\
+ACT-07 & Trámite (SITRAD) & App Web / BD & \path{tramiteapp.unap.edu.pe} & Secretaría General / Trámite & 3 & 4 & 3 & \textcolor{orange!90!black}{\textbf{Alto}} & Gestión de resoluciones de Consejo Universitario y decretos con valor legal vinculante. \\
 \midrule
-ACT-08 & Portales de Facultades & \path{fimees.unap.edu.pe / *} & Difusión académica e institucional & \textbf{Medio} \\
+ACT-08 & Sistema de Admisión & App Web / BD & \path{admision.unap.edu.pe} & Comisión Permanente Admisión / OTI & 4 & 4 & 4 & \textcolor{red!80!black}{\textbf{Crítico}} & Pagos, vacantes y resultados de exámenes; alto escrutinio público y riesgo de fraude. \\
 \midrule
-ACT-09 & Subdominios Legados/Dev & \path{dev.* / prue1.*} & Ambientes de prueba sin mantenimiento & \textbf{Alto (Riesgo)} \\
+ACT-09 & Tesorería y Caja & Software Financiero / BD & \path{tesoreria.unap.edu.pe} & Dir. General Administración & 4 & 4 & 3 & \textcolor{orange!90!black}{\textbf{Alto}} & Recaudación de tasas educativas, conciliaciones bancarias y transferencias del MEF. \\
+\midrule
+ACT-10 & Planillas y Remunerac. & Software RRHH / BD & \path{remuneraciones.unap.edu.pe} & Oficina de Recursos Humanos & 4 & 4 & 2 & \textcolor{orange!90!black}{\textbf{Alto}} & Custodia cuentas bancarias y haberes de docentes y administrativos (Ley N° 29733). \\
+\midrule
+ACT-11 & Marcación Biométrica & API REST / Microservicio & \path{apibiometrico.unap.edu.pe} & Oficina de Personal / OTI & 3 & 3 & 2 & \textcolor{orange!90!black}{\textbf{Alto}} & Datos sensibles de asistencia de trabajadores; expuesto a manipulación de horarios. \\
+\midrule
+ACT-12 & Firewall UTM & Dispositivo Seguridad & Borde de Red (Gateway) & Unidad de Redes y Ciberseg. & 3 & 4 & 4 & \textcolor{red!80!black}{\textbf{Crítico}} & Filtrado perimetral, inspección y VPN institucional; si cae, colapsa el perímetro. \\
+\midrule
+ACT-13 & Entornos Dev Expuestos & Servidores Web / Staging & \path{dev.unap.edu.pe}, \path{prue1.*} & Desarrollo OTI & 3 & 2 & 1 & \textcolor{orange!90!black}{\textbf{Alto (R.)}} & Aunque su valor operativo es bajo, representa vector vulnerable de entrada a la red. \\
+\midrule
+ACT-14 & Paneles Hosting cPanel & Consolas Web Hosting & \path{cpanel.portal.*}, \path{webdisk.*} & Admin. Web / Facultades & 4 & 4 & 2 & \textcolor{orange!90!black}{\textbf{Alto (R.)}} & Consolas de gestión expuestas a Internet con riesgo de fuerza bruta y toma de control. \\
+\midrule
+ACT-15 & Repositorio DSpace & Gestor Documental & \path{repositorio.unap.edu.pe} & Vicerrectorado Investigación & 1 & 3 & 2 & \textcolor{blue!80!black}{\textbf{Medio}} & Tesis y producción científica; públicos, pero su desfiguración afecta reputación. \\
+\midrule
+ACT-16 & Revistas Científicas & App Web (PHP) & \path{revistas.unap.edu.pe} & Vicerrectorado Investigación & 1 & 3 & 2 & \textcolor{blue!80!black}{\textbf{Medio}} & Publicaciones indexadas; impacto directo en la reputación académica y licenciamiento. \\
+\midrule
+ACT-17 & Portal Institucional & CMS Web Informativo & \path{www.unap.edu.pe} & Oficina Comunicaciones\,/\allowbreak\,OTI & 1 & 3 & 3 & \textcolor{blue!80!black}{\textbf{Medio}} & Rostro digital institucional; blanco habitual de Web Defacement o saturación DoS. \\
+\midrule
+ACT-18 & Portales de Facultades & Sitios Informativos & \path{derecho.unap.edu.pe}, etc. & Coordinadores Web Fac. & 1 & 2 & 1 & \textcolor{teal!80!black}{\textbf{Bajo}} & Información de mallas curriculares; sin transacciones ni autenticación crítica. \\
+\midrule
+ACT-19 & Estaciones Admin. & Endpoints (Windows) & Oficinas Admin. (VLAN 30) & Jefaturas / Usuarios Finales & 3 & 3 & 2 & \textcolor{blue!80!black}{\textbf{Medio}} & Vector común de entrada de malware (phishing/USB); almacena documentos locales. \\
+\midrule
+ACT-20 & Labs Cómputo Alumnos & Endpoints Compartidos & Pabellones Fac. (VLAN 40) & Responsables Lab / Decanatos & 1 & 2 & 2 & \textcolor{blue!80!black}{\textbf{Medio}} & Equipos de alta rotación con riesgo de virus; deben aislarse de la red de servidores. \\
 \bottomrule
 \end{longtable}
+\endgroup
+
+\section{Conclusiones del Inventario de Activos y Brechas Identificadas}
+
+El análisis de criticidad e interdependencia de los 20 activos de la UNAP permite formular las siguientes conclusiones estratégicas de seguridad:
+
+\begin{itemize}[itemsep=3.5pt,topsep=2pt,parsep=0pt]
+    \item \textbf{Sobreexposición de Activos Administrativos en Internet:} Se evidencia la exposición pública de subdominios correspondientes a consolas cPanel, webdisk y endpoints de desarrollo (\path{dev.*}, \path{dev2.*}, \path{prue1.*}). Bajo los lineamientos de Zero Trust, ninguno de estos servicios debe ser accesible directamente desde Internet, sino que deben confinarse a subredes de gestión accesibles únicamente mediante VPN corporativa con autenticación multifactor (MFA).
+
+    \item \textbf{Concentración de Criticidad en el Dominio Académico:} Los activos \textbf{ACT-01} (Base de Datos), \textbf{ACT-02} (Matrícula) y \textbf{ACT-03} (Campus Virtual) concentran la mayor valoración de riesgo ($\text{Criticidad}=4$). Un incidente en cualquiera de ellos bloquea las operaciones académicas de la universidad, lo que fundamenta priorizar el análisis de amenazas STRIDE y la implementación de controles en este segmento.
+
+    \item \textbf{Dependencia de la Identidad Federada:} El correo institucional (\textbf{ACT-06}) actúa como la llave maestra de acceso a múltiples servicios. La ausencia de DMARC detectada en el dominio \path{unap.edu.pe} expone este activo a suplantaciones directas (\textit{Spoofing}), amenazando la integridad del resto del inventario institucional.
+\end{itemize}
