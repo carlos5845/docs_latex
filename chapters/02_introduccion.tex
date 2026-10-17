@@ -1,18 +1,18 @@
 \chapter{Introducción}
 \label{ch:introduccion}
 
-La gestión de la ciberseguridad en el sector universitario contemporáneo exige equilibrar la apertura para la investigación académica con la protección rigurosa de las plataformas tecnológicas.
-
 \section{Contexto y Relevancia Institucional}
-La salvaguarda del ecosistema digital de la Universidad Nacional del Altiplano de Puno (UNAP) constituye un pilar esencial para la continuidad de los servicios educativos, la integridad de los registros académicos oficiales y la protección de los datos personales de miles de estudiantes, docentes y administrativos.
+
+La Universidad Nacional del Altiplano de Puno custodia, gestiona y transfiere permanentemente el patrimonio digital, académico, científico y administrativo de más de 20,000 usuarios activos entre estudiantes, investigadores, plana docente y personal directivo-administrativo. La progresiva consolidación de servicios digitales (como el Sistema de Matrícula en línea, la plataforma de Campus Virtual Moodle, el Sistema de Trámite Documentario SITRAD y los repositorios institucionales de investigación) ha desplazado los límites del campus físico hacia un ecosistema hiperconectado, distribuido y expuesto permanentemente a Internet.
 
 \section{Caracterización de la Superficie Expuesta Universitaria}
-El análisis preliminar de la infraestructura expuesta de la UNAP evidencia una topología amplia y heterogénea:
-\begin{itemize}
-    \item \textbf{Más de 100 subdominios públicos indexados:} Identificados en servidores de nombres autoritativos y registros de transparencia de certificados SSL (\path{crt.sh}).
-    \item \textbf{Coexistencia de plataformas críticas:} Servicios esenciales de alta transaccionalidad como el Sistema de Matrícula (\path{matricula.unap.edu.pe}) y el Campus Virtual Moodle (\path{campus.unap.edu.pe}).
-    \item \textbf{Exposición de entornos legados y de desarrollo:} Presencia pública de subdominios de prueba, servidores de desarrollo y paneles administrativos desactualizados (tales como \path{dev.*}, \path{prue1.*}, \path{cpanel.*}), los cuales carecen de controles perimetrales homogéneos y representan puntos de entrada de alto riesgo.
-\end{itemize}
 
-\section{Transición hacia un Modelo de Defensa en Profundidad}
-El modelo de seguridad perimetral tradicional (basado exclusivamente en un firewall de borde) resulta insuficiente frente a amenazas modernas como el ransomware, el spear-phishing y la exfiltración dirigida. Se justifica plenamente la adopción de un esquema de \textbf{Defensa en Profundidad} (\textit{Defense in Depth}) articulado con una arquitectura \textbf{Zero Trust}, garantizando visibilidad y control estricto en cada capa tecnológica.
+Sin embargo, esta apertura operativa ha expandido correlativamente la superficie de exposición institucional. Las auditorías pasivas y de reconocimiento externo realizadas sobre el dominio \path{unap.edu.pe} constatan una arquitectura heterogénea donde coexisten más de un centenar de subdominios registrados, servidores web con capas de proxy inverso desactualizadas (como \texttt{nginx/1.16.1} en el entorno de matrícula), mecanismos de transporte seguro sin directivas estrictas de mitigación frente a interceptaciones (ausencia de \path{Strict-Transport-Security} --- HSTS) y una vulnerable postura de confianza en la mensajería institucional evidenciada por la inexistencia de directivas DMARC (\texttt{NXDOMAIN}) y mecanismos permisivos de Sender Policy Framework (SPF: \texttt{\string~all}).
+
+\section{Ineficacia del Perímetro Tradicional y Nuevas Amenazas}
+
+En este escenario, el modelo clásico de ``seguridad perimetral'' ---basado en la premisa ingenua de que los recursos dentro de la red interna son confiables por defecto--- resulta completamente ineficaz. La sofisticación de las amenazas actuales, tales como campañas de Spear-Phishing dirigidas al personal administrativo en ventanas críticas de matrícula, infecciones por ransomware que paralizan servidores de gestión pública, y técnicas de movimiento lateral basadas en el abuso de identidades válidas, exige la formulación de una estrategia integral, moderna y resiliente.
+
+\section{Enfoque Holístico de Ciberseguridad y Gobernanza}
+
+El presente Plan de Ciberseguridad Institucional adopta un enfoque multifacético y holístico: acoge al estándar NIST Cybersecurity Framework (CSF) 2.0 como el marco sombrilla de gobernanza; integra el modelado temprano de amenazas mediante STRIDE para los flujos de software; correlaciona los comportamientos y tácticas adversarias observadas con la taxonomía MITRE ATT\&CK Enterprise; incorpora la vigilancia contextual de Threat Intelligence; diseña barreras de contención escalonadas mediante la Cyber Kill Chain; y materializa controles estrictos bajo la doctrina de Zero Trust (\textit{``Nunca confiar, siempre verificar de manera explícita y asumir la brecha''}). Con ello, la UNAP alinea su gestión tecnológica con las exigencias del Decreto de Urgencia N° 006-2020 y asegura la continuidad irrestricta de su servicio educativo superior.

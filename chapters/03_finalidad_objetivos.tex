@@ -4,7 +4,24 @@
 En este capítulo se define el propósito estratégico del plan de seguridad digital y los objetivos medibles formulados para la UNAP.
 
 \section{Finalidad}
-Establecer medidas técnicas, tácticas y organizacionales para prevenir, detectar, responder y recuperarse oportunamente ante incidentes de ciberseguridad, articulando armónicamente las metodologías \textbf{STRIDE}, \textbf{Threat Intelligence}, \textbf{MITRE ATT\&CK}, \textbf{Cyber Kill Chain} y los principios de la arquitectura \textbf{Zero Trust}, todo ello bajo la gobernanza y directrices estructurales de \textbf{NIST CSF 2.0}.
+
+La finalidad del presente Plan Institucional de Ciberseguridad es establecer, normar y articular un conjunto coordinado de medidas técnicas, organizacionales, normativas y procedimentales orientadas a prevenir, identificar, proteger, detectar, responder y recuperarse eficazmente frente a incidentes, amenazas y ataques informáticos que atenten contra la confidencialidad, integridad y disponibilidad del ecosistema tecnológico de la Universidad Nacional del Altiplano de Puno.
+
+Para alcanzar dicha finalidad, el plan formaliza una arquitectura de defensa en profundidad mediante la sinergia de marcos y metodologías de referencia internacional:
+
+\begin{itemize}[itemsep=4pt,topsep=3pt,parsep=0pt]
+    \item \textbf{Gobernanza Estratégica (NIST CSF 2.0):} Institucionalizar la ciberseguridad a nivel transversal en la universidad, estructurando la toma de decisiones, la asignación de recursos y la gestión integral de riesgos tecnológicos dentro de las seis funciones directivas: Gobernar, Identificar, Proteger, Detectar, Responder y Recuperar.
+
+    \item \textbf{Modelado Preventivo de Software (STRIDE):} Analizar y mitigar sistemáticamente los vectores de Suplantación (\textit{Spoofing}), Manipulación (\textit{Tampering}), Repudio (\textit{Repudiation}), Fuga de Información (\textit{Information Disclosure}), Denegación de Servicio (\textit{Denial of Service}) y Elevación de Privilegios (\textit{Elevation of Privilege}) en las aplicaciones críticas desarrolladas y operadas por la OTI (con especial énfasis en el flujo \path{matricula.unap.edu.pe}).
+
+    \item \textbf{Vigilancia Proactiva (Threat Intelligence):} Monitorizar de forma continua indicadores de compromiso (IoCs), registros de suplantación de dominio (\textit{typosquatting}), tácticas dirigidas contra el sector público peruano y vulnerabilidades de día cero para anticiparse a los vectores de intrusión.
+
+    \item \textbf{Caracterización Técnica del Adversario (MITRE ATT\&CK):} Mapear el comportamiento real y las tácticas, técnicas y procedimientos (TTPs) de los atacantes, habilitando capacidades analíticas en registros de auditoría y telemetría de red para transformar los incidentes en reglas de detección temprana en herramientas SIEM.
+
+    \item \textbf{Ruptura del Vector de Intrusión (Cyber Kill Chain):} Diseñar controles específicos y puntos de quiebre defensivo en cada uno de los siete eslabones lineales del ataque, impidiendo que una amenaza en fase de reconocimiento o entrega (como el phishing facilitado por la ausencia de DMARC) culmine en la explotación o el secuestro de información sensible.
+
+    \item \textbf{Controles Operativos Estrictos (Zero Trust Architecture):} Reemplazar la confianza implícita por una verificación continua y granular sobre identidades (MFA obligatorio), dispositivos de acceso, segmentación lógica de redes (VLANs), aplicaciones web blindadas y cifrado mandatorio de datos académicos y financieros, tanto en reposo como en tránsito.
+\end{itemize}
 
 \section{Objetivos del Plan}
 
