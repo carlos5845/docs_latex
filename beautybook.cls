@@ -394,7 +394,7 @@ color=transparent!90, middle color=transparent!20]
             \end{tikzpicture}
         };
         \node[above,font=\sc\huge,shift={(.33\linewidth,.5\barwidth)}] (partname) at (hbar) {};
-        \node[below left,font=\sc\huge,shift={(.146\linewidth,-\barwidth)}] (partcontents) at (partname) {\begin{varwidth}{.9\linewidth}\raggedright\baselineskip=25pt  #1 \end{varwidth}}; % 标题名称
+        \node[below left,font=\rmfamily\bfseries\LARGE,shift={(.146\linewidth,-\barwidth)}] (partcontents) at (partname) {\begin{varwidth}{.9\linewidth}\raggedright\baselineskip=25pt  #1 \end{varwidth}}; % 标题名称
           \begin{pgfonlayer}{background}
             \node[above,shift={(-.4\linewidth,-4*\barwidth)}] at (partname) {\ifdefvoid{\@partimage}{}{\includegraphics[width=1.2\linewidth]{\@partimage}}}; % 图片位置调整
             % % 应用渐变效果
@@ -403,9 +403,9 @@ color=transparent!90, middle color=transparent!20]
 %判断标题文字长度与临界长度的关系
 \ifdim\partstarlen<\criticstarlen
 %如果标题长度小于临界长度则使用(hbar)定位
-\node[below,font=\itshape\fontsize{13}{13}\selectfont,shift={(0,-1.2*\barwidth)}] at (hbar) {\ifdefvoid{\@partabstract}{}{\begin{varwidth}{.9\linewidth}\baselineskip=3ex \@partabstract\end{varwidth}}}; % 简介文字调整
+\node[below,font=\itshape\fontsize{12}{15}\selectfont,shift={(0,-1.8*\barwidth)}] at (hbar) {\ifdefvoid{\@partabstract}{}{\begin{varwidth}{.88\linewidth}\baselineskip=3ex \@partabstract\end{varwidth}}}; % 简介文字调整
 \else
-\node[below,font=\itshape\fontsize{13}{13}\selectfont,shift={(0,-1.2*\barwidth)}] at (partcontents) {\ifdefvoid{\@partabstract}{}{\begin{varwidth}{.9\linewidth}\baselineskip=3ex \@partabstract\end{varwidth}}}; % 简介文字调整
+\node[below,font=\itshape\fontsize{12}{15}\selectfont,shift={(0,-1.8*\barwidth)}] at (partcontents) {\ifdefvoid{\@partabstract}{}{\begin{varwidth}{.88\linewidth}\baselineskip=3ex \@partabstract\end{varwidth}}}; % 简介文字调整
 \fi
           \else 
           \fill [outermarginfgcolor!20]%
@@ -438,7 +438,7 @@ color=transparent!90, middle color=transparent!20]
                   \end{tikzpicture}
               };
               \node[above,font=\sc\huge,shift={(-.31\linewidth,.5\barwidth)}] (partname) at (hbar) {};
-              \node[below right,font=\sc\huge,shift={(-.125\linewidth,-\barwidth)}] (partcontents) at (partname) {\begin{varwidth}{.9\linewidth}\raggedright\baselineskip=25pt  #1 \end{varwidth}}; % 标题名称
+              \node[below right,font=\rmfamily\bfseries\LARGE,shift={(-.125\linewidth,-\barwidth)}] (partcontents) at (partname) {\begin{varwidth}{.9\linewidth}\raggedright\baselineskip=25pt  #1 \end{varwidth}}; % 标题名称
                 \begin{pgfonlayer}{background}
                   \node[above,shift={(.35\linewidth,-4*\barwidth)}] at (partname) {\ifdefvoid{\@partimage}{}{\includegraphics[width=1.2\linewidth]{\@partimage}}}; % 图片位置调整
             % % 应用渐变效果
@@ -447,9 +447,9 @@ color=transparent!90, middle color=transparent!20]
 %判断标题文字长度与临界长度的关系
 \ifdim\partstarlen<\criticstarlen
 %如果标题长度小于临界长度则使用(hbar)定位
-\node[below,font=\itshape\fontsize{13}{13}\selectfont,shift={(0,-1.2*\barwidth)}] at (hbar) {\ifdefvoid{\@partabstract}{}{\begin{varwidth}{.9\linewidth}\baselineskip=3ex \@partabstract\end{varwidth}}}; % 简介文字调整
+\node[below,font=\itshape\fontsize{12}{15}\selectfont,shift={(0,-1.8*\barwidth)}] at (hbar) {\ifdefvoid{\@partabstract}{}{\begin{varwidth}{.88\linewidth}\baselineskip=3ex \@partabstract\end{varwidth}}}; % 简介文字调整
 \else
-\node[below,font=\itshape\fontsize{13}{13}\selectfont,shift={(0,-1.2*\barwidth)}] at (partcontents) {\ifdefvoid{\@partabstract}{}{\begin{varwidth}{.9\linewidth}\baselineskip=3ex \@partabstract\end{varwidth}}}; % 简介文字调整
+\node[below,font=\itshape\fontsize{12}{15}\selectfont,shift={(0,-1.8*\barwidth)}] at (partcontents) {\ifdefvoid{\@partabstract}{}{\begin{varwidth}{.88\linewidth}\baselineskip=3ex \@partabstract\end{varwidth}}}; % 简介文字调整
 \fi
           \fi
     \end{tikzpicture}}
