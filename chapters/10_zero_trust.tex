@@ -1,0 +1,55 @@
+\chapter{Implementación de Arquitectura Zero Trust}
+\label{ch:zero_trust}
+
+En este capítulo se establece la estrategia de transición hacia un modelo Zero Trust, fundamentado en la premisa rectora:
+
+\begin{quote}
+\textit{\large ``Nunca confiar automáticamente; verificar siempre de forma explícita y asumir la brecha''.}
+\end{quote}
+
+\section{Pilares de la Arquitectura Zero Trust en la UNAP}
+La implementación abarca los cinco pilares esenciales de seguridad:
+
+\begin{enumerate}
+    \item \textbf{Pilar Identidad:} Despliegue mandatorio de Autenticación Multifactor (MFA mediante TOTP o llaves FIDO2) para el 100\% de docentes y personal administrativo. Política rigurosa de depuración y eliminación de cuentas inactivas o egresadas.
+    \item \textbf{Pilar Dispositivos:} Verificación previa del estado de salud y cumplimiento del endpoint (\textit{Device Compliance}) antes de permitir la conexión a servicios centrales o bases de datos de la universidad.
+    \item \textbf{Pilar Red (Microsegmentación):} Aislamiento estricto del tráfico de red a nivel de capa 3 mediante VLANs dedicadas con reglas de filtrado en Switch Core y Firewall:
+    \begin{itemize}
+        \item VLAN 10: Servidores de Producción y Data Center (restringida).
+        \item VLAN 20: Personal Administrativo y Tesorería.
+        \item VLAN 30: Salas de Profesores y Docentes.
+        \item VLAN 40: Laboratorios de Cómputo para Estudiantes.
+        \item VLAN 50: Zona Desmilitarizada (DMZ) para servicios públicos.
+        \item VLAN 60: Wi-Fi para Invitados (aislamiento total de la red interna).
+    \end{itemize}
+    \item \textbf{Pilar Aplicaciones:} Inspección continua de tráfico web a través de un Web Application Firewall (WAF) perimetral, transición obligatoria hacia TLS 1.3 con desactivación de suites criptográficas heredadas y endurecimiento (\textit{hardening}) del servidor Nginx.
+    \item \textbf{Pilar Datos:} Cifrado integral de bases de datos tanto en reposo (AES-256) como en tránsito (TLS 1.3), complementado con la aplicación estricta del principio de mínimo privilegio en el acceso a tablas.
+\end{enumerate}
+
+\section{Matriz de Roles, Usuarios y Permisos (RBAC / Zero Trust)}
+
+\begin{center}
+\small
+\begin{longtable}{>{\bfseries}p{3.0cm} p{3.8cm} p{4.2cm} p{4.0cm}}
+\toprule
+\rowcolor{outermarginbgcolor}
+Rol Institucional & Identidades & Ámbito de Acceso Autorizado & Controles Obligatorios \\
+\midrule
+\endfirsthead
+\toprule
+\rowcolor{outermarginbgcolor}
+Rol Institucional & Identidades & Ámbito de Acceso Autorizado & Controles Obligatorios \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+Super Administrador & Personal OTI designado & Consolas de administración, Switch Core y servidores & MFA físico (FIDO2), acceso solo por IP estática y bastion host \\
+\midrule
+Docente & Docentes ordinarios y contratados & Módulo docente del SIA y Campus Virtual institucional & MFA por TOTP, expiración de sesión a 15 min de inactividad \\
+\midrule
+Estudiante & Alumnos matriculados & Consulta de notas, matrícula web y Campus Virtual & Credencial única, captcha y límite de intentos fallidos \\
+\midrule
+Administrativo & Personal de tesorería y mesa de partes & SITRAD y sistemas de recaudación específicos & Acceso restringido a VLAN 20 y horario laboral institucional \\
+\bottomrule
+\end{longtable}
+\end{center}

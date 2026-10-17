@@ -1,0 +1,35 @@
+\chapter{Controles Técnicos de Seguridad}
+\label{ch:controles_seguridad}
+
+En este capítulo se detallan las especificaciones técnicas y el catálogo de implementación de los controles de seguridad seleccionados para blindar el entorno tecnológico de la UNAP.
+
+\section{Catálogo de Especificación Técnica de Controles}
+\begin{enumerate}
+    \item \textbf{Control de Identidad y Acceso:} Implementación generalizada de Autenticación Multifactor (MFA) sobre un esquema de Inicio de Sesión Único (Single Sign-On - SSO) corporativo basado en OpenID Connect / SAML 2.0.
+    \item \textbf{Seguridad Perimetral y de Aplicación:} Despliegue de un Firewall de Siguiente Generación (Next-Generation Firewall - NGFW) en el borde y un Web Application Firewall (WAF) perimetral para inspección de peticiones HTTP/HTTPS (bloqueo de inyecciones SQL, XSS y ataques L7).
+    \item \textbf{Seguridad en Endpoints:} Instalación de agentes de Endpoint Detection and Response (EDR) centralizados en todas las estaciones administrativas y servidores del Data Center para detección de comportamientos anómalos.
+    \item \textbf{Cifrado Criptográfico Estricto:} Forzado del protocolo TLS 1.3 en todos los portales web institucionales, desactivación definitiva de suites criptográficas débiles (SSLv3, TLS 1.0, TLS 1.1) y cifrado de volúmenes de almacenamiento mediante LUKS / BitLocker.
+    \item \textbf{Monitoreo y Auditoría Centralizada:} Plataforma SIEM (Security Information and Event Management) basada en Wazuh para agregación, correlación y análisis de registros de eventos en tiempo real.
+    \item \textbf{Microsegmentación de Redes:} Reglas estrictas de filtrado de tráfico inter-VLAN en el Switch Core central, impidiendo que el tráfico de alumnos acceda a servidores de bases de datos o redes administrativas.
+    \item \textbf{Gestión Continua de Vulnerabilidades:} Ejecución de escaneos periódicos programados mediante OpenVAS / Nessus para identificación y remediación temprana de fallas en servidores y servicios expuestos.
+    \item \textbf{Continuidad Operativa y Respaldos Inmutables:} Automatización de copias de seguridad de bases de datos con retención histórica y almacenamiento inmutable fuera de línea.
+\end{enumerate}
+
+\section{Configuración de Endurecimiento Web en Servidores Nginx}
+A continuación, se presenta la directiva de configuración recomendada para mitigar los hallazgos de información expuesta y falta de HSTS:
+
+\begin{cmdbox}{Configuración Nginx para Hardening (/etc/nginx/conf.d/security.conf)}
+# Desactivar version de servidor
+server_tokens off;
+
+# Cabeceras de proteccion obligatorias
+add_header Strict-Transport-Security 'max-age=31536000; includeSubDomains' always;
+add_header X-Frame-Options 'SAMEORIGIN' always;
+add_header X-Content-Type-Options 'nosniff' always;
+add_header X-XSS-Protection '1; mode=block' always;
+add_header Content-Security-Policy 'default-src \'self\';' always;
+
+# Forzar TLS 1.2 y 1.3 unicamente
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_prefer_server_ciphers on;
+\end{cmdbox}

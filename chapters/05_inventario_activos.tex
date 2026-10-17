@@ -1,0 +1,79 @@
+\chapter{Inventario y Clasificación de Activos}
+\label{ch:inventario_activos}
+
+La correcta identificación y categorización de los activos informáticos es la base fundamental para determinar la superficie de exposición y focalizar los controles de seguridad.
+
+\section{Procedimiento de Descubrimiento de Activos}
+Para identificar los activos tecnológicos expuestos sin alterar la operatividad de los servidores universitarios, se aplicó un procedimiento pasivo de recolección en fuentes abiertas:
+\begin{enumerate}
+    \item \textbf{Inspección de Registros de Transparencia de Certificados SSL (crt.sh):} Búsqueda sistemática de certificados emitidos para la raíz \texttt{unap.edu.pe}, permitiendo descubrir subdominios históricos y activos.
+    \item \textbf{Consultas de Infraestructura DNS:} Verificación de registros autoritativos \texttt{A}, \texttt{CNAME}, \texttt{NS} y \texttt{MX} para trazar la infraestructura de direccionamiento IP y servidores de nombres.
+    \item \textbf{Identificación de Servicios Expuestos:} Mapeo de tecnologías de frontend y backend asociadas a los nombres de dominio descubiertos.
+\end{enumerate}
+
+\section{Categorización de Recursos por Nivel de Criticidad}
+Los activos descubiertos se agrupan en cuatro niveles de criticidad conforme a su impacto en la operación y en la privacidad de datos:
+
+\begin{itemize}
+    \item \textbf{Nivel Crítico:}
+    \begin{itemize}
+        \item Base de Datos Académica Central (PostgreSQL / Oracle).
+        \item Portal y API del Sistema de Matrícula (\texttt{matricula.unap.edu.pe}).
+        \item Campus Virtual Institucional Moodle (\texttt{campus.unap.edu.pe}).
+        \item Switch Core central del Data Center OTI.
+    \end{itemize}
+    \item \textbf{Nivel Alto:}
+    \begin{itemize}
+        \item Servicio de Correo Institucional (\texttt{@unap.edu.pe}).
+        \item Sistema de Trámite Documentario (SITRAD).
+        \item Sistemas financieros de tesorería, cobranza y planillas de remuneraciones.
+    \end{itemize}
+    \item \textbf{Nivel Medio:}
+    \begin{itemize}
+        \item Repositorio Institucional Digital (DSpace).
+        \item Portales web informativos de facultades y direcciones universitarias.
+    \end{itemize}
+    \item \textbf{Nivel Bajo:}
+    \begin{itemize}
+        \item Sitios web estáticos, páginas de eventos pasados y blogs informativos.
+    \end{itemize}
+\end{itemize}
+
+\section{Matriz Consolidada de Activos Tecnológicos de la UNAP}
+A continuación, se presenta la matriz representativa de los principales activos evaluados:
+
+\begin{center}
+\small
+\begin{longtable}{>{\bfseries}c p{4.0cm} p{4.2cm} p{3.2cm} c}
+\toprule
+\rowcolor{outermarginbgcolor}
+ID & Nombre del Activo & Identificador / URL & Función Principal & Criticidad \\
+\midrule
+\endfirsthead
+\toprule
+\rowcolor{outermarginbgcolor}
+ID & Nombre del Activo & Identificador / URL & Función Principal & Criticidad \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+ACT-01 & BD Académica Central & Servidor de BD Data Center & Almacenamiento central de notas y actas & \textbf{Crítico} \\
+\midrule
+ACT-02 & Sistema de Matrícula & \texttt{matricula.unap.edu.pe} & Inscripción y carga horaria estudiantil & \textbf{Crítico} \\
+\midrule
+ACT-03 & Campus Virtual (LMS) & \texttt{campus.unap.edu.pe} & Docencia virtual, foros y evaluaciones & \textbf{Crítico} \\
+\midrule
+ACT-04 & Switch Core de Red & Data Center OTI & Enrutamiento y conmutación de tráfico & \textbf{Crítico} \\
+\midrule
+ACT-05 & Correo Institucional & \texttt{mail.unap.edu.pe} & Comunicaciones oficiales y notificaciones & \textbf{Alto} \\
+\midrule
+ACT-06 & SITRAD & \texttt{sitrad.unap.edu.pe} & Trámite documentario y resoluciones & \textbf{Alto} \\
+\midrule
+ACT-07 & Repositorio DSpace & \texttt{repositorio.unap.edu.pe} & Publicación de tesis e investigaciones & \textbf{Medio} \\
+\midrule
+ACT-08 & Portales de Facultades & \texttt{fimees.unap.edu.pe / *} & Difusión académica e institucional & \textbf{Medio} \\
+\midrule
+ACT-09 & Subdominios Legados/Dev & \texttt{dev.* / prue1.*} & Ambientes de prueba sin mantenimiento & \textbf{Alto (Riesgo)} \\
+\bottomrule
+\end{longtable}
+\end{center}

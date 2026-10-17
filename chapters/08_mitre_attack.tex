@@ -1,0 +1,96 @@
+\chapter{Análisis con MITRE ATT\&CK}
+\label{ch:mitre_attack}
+
+Para caracterizar el comportamiento táctico de los adversarios, se utiliza la matriz \textbf{MITRE ATT\&CK for Enterprise}, permitiendo identificar brechas de visibilidad e implementar reglas de detección precisas.
+
+\section{Estudio de TTPs Aplicables a la Superficie de la UNAP}
+A continuación, se describen las Tácticas, Técnicas y Procedimientos (TTPs) más relevantes para la infraestructura evaluada:
+
+\begin{itemize}
+    \item \textbf{Reconocimiento (TA0043):}
+    \begin{itemize}
+        \item \textbf{T1596 (Search Open Technical Databases):} Identificación de subdominios y certificados mediante plataformas públicas como \texttt{crt.sh}.
+        \item \textbf{T1589 (Gather Victim Identity Info):} Recolección de correos institucionales de autoridades y docentes desde la web institucional.
+    \end{itemize}
+    \item \textbf{Acceso Inicial (TA0001):}
+    \begin{itemize}
+        \item \textbf{T1566.002 (Spearphishing Link):} Envío de enlaces maliciosos simulando comunicaciones del rectorado o la OTI.
+        \item \textbf{T1078 (Valid Accounts):} Acceso a plataformas universitarias utilizando credenciales legítimas comprometidas sin factor MFA.
+    \end{itemize}
+    \item \textbf{Ejecución (TA0002):}
+    \begin{itemize}
+        \item \textbf{T1059 (Command and Scripting Interpreter):} Ejecución no autorizada de comandos en el intérprete del servidor web a través de vulnerabilidades de aplicación.
+    \end{itemize}
+    \item \textbf{Persistencia (TA0003):}
+    \begin{itemize}
+        \item \textbf{T1505.003 (Web Shell):} Carga de archivos maliciosos en directorios de carga (\textit{uploads}) del Campus Virtual o portales web.
+    \end{itemize}
+    \item \textbf{Escalada de Privilegios (TA0004):}
+    \begin{itemize}
+        \item \textbf{T1068 (Exploitation for Privilege Escalation):} Aprovechamiento de fallos en versiones desactualizadas de software base (ej. servidores web Nginx o kernels Linux).
+    \end{itemize}
+    \item \textbf{Descubrimiento (TA0007):}
+    \begin{itemize}
+        \item \textbf{T1046 (Network Service Discovery):} Escaneo de puertos y servicios internos lanzado desde estaciones de cómputo o laboratorios de alumnos.
+    \end{itemize}
+    \item \textbf{Movimiento Lateral (TA0008):}
+    \begin{itemize}
+        \item \textbf{T1021.002 (SMB Shares):} Propagación entre estaciones de trabajo administrativas mediante carpetas compartidas sin segmentar.
+    \end{itemize}
+    \item \textbf{Exfiltración (TA0010):}
+    \begin{itemize}
+        \item \textbf{T1048 (Exfiltration Over Alternative Protocol):} Salida de bases de datos o información confidencial mediante canales web cifrados o protocolos no supervisados.
+    \end{itemize}
+\end{itemize}
+
+\section{Matriz MITRE ATT\&CK Institucional y Brechas de Visibilidad}
+
+\begin{center}
+\small
+\begin{longtable}{>{\bfseries}p{3.2cm} p{4.0cm} p{4.2cm} p{3.2cm}}
+\toprule
+\rowcolor{outermarginbgcolor}
+Táctica MITRE & Técnica / ID & Escenario en la UNAP & Control / Brecha de Visibilidad \\
+\midrule
+\endfirsthead
+\toprule
+\rowcolor{outermarginbgcolor}
+Táctica MITRE & Técnica / ID & Escenario en la UNAP & Control / Brecha de Visibilidad \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+Reconocimiento & T1596 / T1589 & Rastreo pasivo en crt.sh y directorio docente & Brecha: Información expuesta públicamente \\
+\midrule
+Acceso Inicial & T1566.002 / T1078 & Phishing con enlaces apócrifos y cuentas sin MFA & Control: Despliegue de MFA y filtrado de correo \\
+\midrule
+Ejecución & T1059 & Ejecución de scripts en servidores web vulnerables & Control: Restricción de permisos y WAF \\
+\midrule
+Persistencia & T1505.003 & Carga de Web Shell en formularios sin sanitizar & Brecha: Carencia de monitoreo de integridad FIM \\
+\midrule
+Escalada Priv. & T1068 & Exploits en Nginx 1.16.1 o Linux legados & Control: Gestión y parcheo de vulnerabilidades \\
+\midrule
+Descubrimiento & T1046 & Escaneo de red interna desde laboratorios estudiantiles & Brecha: Falta de microsegmentación entre VLANs \\
+\midrule
+Mov. Lateral & T1021.002 & Movimiento vía SMB en redes de oficinas & Control: Deshabilitar SMBv1 y aislar puestos \\
+\midrule
+Exfiltración & T1048 & Extracción de tablas de notas vía HTTPS no filtrado & Control: Inspección TLS y DLP perimetral \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\section{Regla de Detección SIEM (Wazuh / Sysmon)}
+Para mitigar la técnica de ejecución y persistencia (T1505.003 - Web Shell), se define la siguiente regla de correlación:
+
+\begin{cmdbox}{Regla Wazuh para Detección de Creación de Web Shell (/etc/rules/local\_rules.xml)}
+<group name='web,attack,'>
+  <rule id='100250' level='12'>
+    <if_group>syscheck</if_group>
+    <match>/var/www/html/uploads/</match>
+    <description>Alerta Critica: Creacion de archivo ejecutable (.php) en carpeta uploads</description>
+    <mitre>
+      <id>T1505.003</id>
+    </mitre>
+  </rule>
+</group>
+\end{cmdbox}

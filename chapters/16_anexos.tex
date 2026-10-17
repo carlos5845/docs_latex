@@ -1,0 +1,118 @@
+\chapter*{Anexos: Evidencias y Documentación de Soporte}
+\addcontentsline{toc}{chapter}{Anexos: Evidencias y Documentación de Soporte}
+\markboth{Anexos}{Anexos}
+
+En esta sección se compilan las matrices técnicas, evidencias operativas y formatos de gestión que sustentan el plan de ciberseguridad.
+
+\section*{Anexo 1: Inventario de Activos (Mapeo OSINT)}
+Tabla consolidada de los subdominios y servidores identificados mediante fuentes abiertas (\texttt{crt.sh} y DNS):
+
+\begin{center}
+\footnotesize
+\begin{longtable}{>{\bfseries}p{4.0cm} p{3.2cm} p{3.8cm} p{3.0cm}}
+\toprule
+\rowcolor{outermarginbgcolor}
+Subdominio Identificado & Dirección IP & Registro SSL / Origen & Estado Operativo \\
+\midrule
+\endfirsthead
+\toprule
+\rowcolor{outermarginbgcolor}
+Subdominio Identificado & Dirección IP & Registro SSL / Origen & Estado Operativo \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\texttt{matricula.unap.edu.pe} & 161.132.24.61 & Let's Encrypt Authority & Activo (Producción) \\
+\midrule
+\texttt{campus.unap.edu.pe} & 161.132.24.62 & Let's Encrypt Authority & Activo (Producción) \\
+\midrule
+\texttt{sitrad.unap.edu.pe} & 161.132.24.63 & cPanel / Sectigo SSL & Activo (Administrativo) \\
+\midrule
+\texttt{repositorio.unap.edu.pe} & 161.132.24.64 & GlobalSign Root CA & Activo (Académico) \\
+\midrule
+\texttt{dev.unap.edu.pe} & 161.132.24.70 & Certificado autofirmado & Riesgo (Entorno Dev) \\
+\midrule
+\texttt{prue1.unap.edu.pe} & 161.132.24.71 & Certificado expirado & Riesgo (Entorno Legado) \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\section*{Anexo 2: Matriz de Criticidad de Activos (Tríada CIA)}
+Calificación de impacto institucional basada en Confidencialidad (C), Integridad (I) y Disponibilidad (A):
+
+\begin{center}
+\small
+\begin{longtable}{>{\bfseries}p{4.5cm} c c c c}
+\toprule
+\rowcolor{outermarginbgcolor}
+Activo Tecnológico & Confidencialidad & Integridad & Disponibilidad & Nivel Consolidado \\
+\midrule
+\endfirsthead
+\toprule
+\rowcolor{outermarginbgcolor}
+Activo Tecnológico & Confidencialidad & Integridad & Disponibilidad & Nivel Consolidado \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+Base de Datos Central & Muy Alto & Muy Alto & Muy Alto & \textbf{Crítico} \\
+\midrule
+Sistema de Matrícula & Alto & Muy Alto & Muy Alto & \textbf{Crítico} \\
+\midrule
+Campus Virtual Moodle & Medio & Alto & Muy Alto & \textbf{Crítico} \\
+\midrule
+Correo Institucional & Muy Alto & Alto & Alto & \textbf{Alto} \\
+\midrule
+Portal Web de Facultades & Bajo & Medio & Medio & \textbf{Medio} \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\section*{Anexo 3: Matriz STRIDE y Evidencias Técnicas}
+\begin{itemize}
+    \item \textbf{Diagrama de Flujo de Datos (DFD Nivel 1):} Navegador Cliente $\leftrightarrow$ Reverse Proxy Nginx $\leftrightarrow$ Backend ASP.NET Core $\leftrightarrow$ Base de Datos.
+    \item \textbf{Captura de Cabeceras HTTP (DevTools F12):} Exposición pública de la versión del servidor web en \texttt{matricula.unap.edu.pe}:
+\begin{cmdbox}{Evidencia F12: Cabeceras HTTP en matricula.unap.edu.pe}
+HTTP/1.1 200 OK
+Server: nginx/1.16.1
+Date: Sat, 17 Oct 2026 15:20:00 GMT
+Content-Type: text/html; charset=utf-8
+Set-Cookie: .AspNetCore.Cookies=CfDJ8...; path=/; HttpOnly; SameSite=Lax
+# NOTA: Ausencia de cabecera Strict-Transport-Security (HSTS desactivado)
+# NOTA: La bandera 'Secure' no se encuentra forzada en todas las cookies
+\end{cmdbox}
+\end{itemize}
+
+\section*{Anexo 4: Matriz MITRE ATT\&CK y Configuración de Reglas}
+Mapeo sistemático de técnicas adversarias y correspondencia con reglas de detección en el SIEM institucional Wazuh.
+
+\section*{Anexo 5: Cyber Kill Chain y Evidencias de Dominio}
+\begin{itemize}
+    \item \textbf{Flujograma del ataque en 7 etapas:} Reconocimiento $\rightarrow$ Armamento $\rightarrow$ Entrega $\rightarrow$ Explotación $\rightarrow$ Instalación $\rightarrow$ C2 $\rightarrow$ Objetivos.
+    \item \textbf{Evidencia DNS de vulnerabilidad en correo institucional:}
+\begin{cmdbox}{Evidencia DNS: Registros DMARC y SPF en unap.edu.pe}
+$ host -t txt _dmarc.unap.edu.pe
+Host _dmarc.unap.edu.pe not found: 3(NXDOMAIN)
+
+$ host -t txt unap.edu.pe
+unap.edu.pe descriptive text 'v=spf1 ip4:161.132.24.0/24 include:_spf.google.com ~all'
+\end{cmdbox}
+\end{itemize}
+
+\section*{Anexo 6: Matriz Zero Trust y Postura de Red}
+\begin{itemize}
+    \item \textbf{Negociación TLS en campus.unap.edu.pe:} Inspección de certificados que confirma ausencia de precarga HSTS.
+    \item \textbf{Esquema de Microsegmentación:} Aislamiento de VLAN 10 (Servidores), VLAN 20 (Administración), VLAN 30 (Docencia), VLAN 40 (Alumnos) y VLAN 60 (Wi-Fi Invitados).
+\end{itemize}
+
+\section*{Anexo 7: Registro de Incidentes (Boleta Formal)}
+Formato estandarizado para la notificación interna y reporte formal ante el CSIRT-UNAP con campos de fecha, reportante, activo afectado, criticidad y vector preliminar.
+
+\section*{Anexo 8: Cronograma Anual de Implementación}
+Plan de trabajo estructurado a 12 meses (Fase 1: Diagnóstico e inventario; Fase 2: Despliegue de MFA y WAF; Fase 3: Hardening y SIEM; Fase 4: Auditoría y simulaciones de phishing).
+
+\section*{Anexo 9: Cuadro de Mando de Indicadores}
+Matriz de seguimiento de KPIs operativos (MTTD $< 2\text{ h}$, MTTR $< 4\text{ h}$, $100\%$ de cuentas docentes con MFA).
+
+\section*{Anexo 10: Plan de Capacitación y Concientización}
+Calendario temático semestral de talleres para docentes, alumnos y módulos especializados para el equipo técnico de la OTI en OWASP Top 10.

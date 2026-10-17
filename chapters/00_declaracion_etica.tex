@@ -1,1 +1,38 @@
-% Archivo preparado para nuevo contenido: 00_declaracion_etica.tex
+\chapter*{Sección Preliminar: Declaración Ética, Marco Legal y Metodología de Evaluación}
+\addcontentsline{toc}{chapter}{Sección Preliminar: Declaración Ética, Marco Legal y Metodología}
+\markboth{Declaración Ética y Marco Legal}{Declaración Ética y Marco Legal}
+
+\noindent\textbf{Marco de Integración Metodológica Institucional:}
+\begin{center}
+\small
+\textbf{NIST CSF 2.0} (Gestión) $\longrightarrow$ \textbf{STRIDE} (Amenazas) $\longrightarrow$ \textbf{MITRE ATT\&CK} (TTPs) \\
+$\longrightarrow$ \textbf{Threat Intelligence} (Vigilancia) $\longrightarrow$ \textbf{Cyber Kill Chain} (Fases) $\longrightarrow$ \textbf{Zero Trust} (Controles)
+\end{center}
+
+\vspace{0.8em}
+
+\section*{Declaración de No Intrusión y Ética Profesional}
+El presente documento constituye un informe técnico y académico formal de ciberseguridad desarrollado con propósitos estrictamente defensivos y de diagnóstico preventivo para la \textbf{Universidad Nacional del Altiplano de Puno (UNAP)}.
+
+Se deja constancia explícita de que:
+\begin{itemize}
+    \item \textbf{Evaluación Pasiva y No Destructiva:} No se realizaron ataques de denegación de servicio (DoS/DDoS), inyecciones activas en producción, explotación de vulnerabilidades ni alteraciones a bases de datos académicas o financieras.
+    \item \textbf{Sin Acceso No Autorizado:} En ningún momento se vulneraron mecanismos de autenticación ni se accedió a registros privados o datos personales de estudiantes o trabajadores.
+    \item \textbf{Fines de Blindaje Institucional:} Las pruebas se orientaron a evidenciar la postura de seguridad externa y proponer salvaguardas y planes de remediación acordes a las mejores prácticas de la industria.
+\end{itemize}
+
+\section*{Marco Legal Aplicable en el Perú}
+El análisis y desarrollo del plan se enmarcan rigurosamente en la legislación nacional vigente:
+\begin{enumerate}
+    \item \textbf{Ley N° 30096 (Ley de Delitos Informáticos) y su modificatoria Ley N° 30171:} Regula y sanciona el acceso ilícito a sistemas informáticos, atentados a la integridad de datos y sistemas, y fraude informático.
+    \item \textbf{Decreto de Urgencia N° 006-2020:} Establece el Sistema Nacional de Transformación Digital y el Marco de Gobernanza Digital y Seguridad Digital del Estado Peruano, asignando responsabilidades para proteger activos críticos públicos.
+    \item \textbf{Ley N° 29733 (Ley de Protección de Datos Personales):} Exige la implementación de medidas organizativas, legales y técnicas para garantizar la seguridad y confidencialidad de los bancos de datos personales en el ámbito universitario.
+\end{enumerate}
+
+\section*{Alcance de las Pruebas y Evidencias Técnicas}
+La recopilación de información se restringió a técnicas de fuentes abiertas (\textit{Open Source Intelligence} - OSINT) e inspección en el lado del cliente:
+\begin{itemize}
+    \item \textbf{Fuentes Abiertas (OSINT):} Uso de registros públicos de transparencia de certificados SSL/TLS (\textit{Certificate Transparency Logs} mediante \texttt{crt.sh}) e inspección pasiva de resolución en servidores de nombres DNS públicos.
+    \item \textbf{Inspección Pasiva en Navegador (DevTools F12):} Revisión de cabeceras HTTP de respuesta pública y análisis de banderas de seguridad en cookies (\texttt{Secure}, \texttt{HttpOnly}, \texttt{SameSite}) mediante sesiones de navegación legítimas sin eludir controles de acceso.
+\end{itemize}
+\clearpage

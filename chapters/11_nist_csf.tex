@@ -1,0 +1,46 @@
+\chapter{Marco General de Ciberseguridad NIST CSF 2.0}
+\label{ch:nist_csf}
+
+En este capítulo se articula el gobierno de la ciberseguridad universitaria bajo el estándar internacional \textbf{NIST Cybersecurity Framework 2.0}, integrando sus seis funciones fundamentales.
+
+\section{Las Seis Funciones Fundamentales del NIST CSF 2.0 en la UNAP}
+\begin{enumerate}
+    \item \textbf{GOVERN (Gobernar):} Establecimiento y difusión de directivas institucionales de seguridad digital, designación formal del Oficial de Seguridad de la Información (CISO), asignación presupuestal específica y alineamiento con la normativa del Estado Peruano (D.U. N° 006-2020).
+    \item \textbf{IDENTIFY (Identificar):} Catalogación y actualización continua del inventario de activos, evaluación sistemática de riesgos informáticos y análisis de impacto en la operación académica universitaria.
+    \item \textbf{PROTECT (Proteger):} Hardening de servidores Nginx, publicación forzada de cabeceras HSTS, configuración de registros SPF estricto (\texttt{-all}) y DMARC (\texttt{p=reject}), y adopción de autenticación multifactor (MFA).
+    \item \textbf{DETECT (Detectar):} Monitoreo operacional 24/7 mediante la plataforma SIEM centralizada (Wazuh), correlación de anomalías, alertas automáticas por fuerza bruta y recolección inmutable de registros de eventos.
+    \item \textbf{RESPOND (Responder):} Protocolos y playbooks operativos para contención inmediata, aislamiento automático de subredes comprometidas y comunicación institucional con el CSIRT Nacional de la PCM.
+    \item \textbf{RECOVER (Recuperar):} Políticas de respaldo bajo el esquema 3-2-1 con copias de seguridad inmutables fuera de línea (\textit{Air-Gapped}) y ensayos periódicos semestrales de restauración de bases de datos.
+\end{enumerate}
+
+\section{Matriz NIST CSF 2.0 de la UNAP}
+
+\begin{center}
+\small
+\begin{longtable}{>{\bfseries}p{2.5cm} p{4.2cm} p{3.8cm} p{4.5cm}}
+\toprule
+\rowcolor{outermarginbgcolor}
+Función NIST & Acción Estratégica & Responsable & Herramientas / Controles \\
+\midrule
+\endfirsthead
+\toprule
+\rowcolor{outermarginbgcolor}
+Función NIST & Acción Estratégica & Responsable & Herramientas / Controles \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+GOVERN & Políticas y directivas de seguridad & Rectorado / CISO & Comité de Gobierno Digital y normativas \\
+\midrule
+IDENTIFY & Inventario continuo y matriz de riesgos & Unidad de Seguridad & crt.sh, Nessus y matriz de activos \\
+\midrule
+PROTECT & Hardening web, MFA y DMARC & OTI / Redes & Nginx, Let's Encrypt, TOTP, DNS BIND \\
+\midrule
+DETECT & Monitoreo continuo de eventos y logs & CSIRT-UNAP & Wazuh SIEM, Suricata IDS y Syslog \\
+\midrule
+RESPOND & Playbooks de contención de incidentes & CSIRT-UNAP & Procedimientos formales y scripts de aislamiento \\
+\midrule
+RECOVER & Restauración de respaldos 3-2-1 & OTI / Soporte & Almacenamiento Air-Gapped y Veeam Backup \\
+\bottomrule
+\end{longtable}
+\end{center}

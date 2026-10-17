@@ -1,0 +1,39 @@
+\chapter{Gestión y Respuesta a Incidentes}
+\label{ch:gestion_incidentes}
+
+En este capítulo se describe el procedimiento operativo estándar para la gestión, contención y recuperación ante eventos o incidentes de seguridad que afecten a la UNAP.
+
+\section{Procedimiento Operativo Estándar}
+El ciclo de vida de atención a incidentes de seguridad digital sigue la secuencia estándar de seis fases:
+
+\begin{center}
+\small
+\textbf{Detección} $\longrightarrow$ \textbf{Análisis y Triaje} $\longrightarrow$ \textbf{Contención} \\
+$\longrightarrow$ \textbf{Erradicación} $\longrightarrow$ \textbf{Recuperación} $\longrightarrow$ \textbf{Evaluación Post-Mortem}
+\end{center}
+
+\begin{enumerate}
+    \item \textbf{Detección:} Identificación de alertas a través del SIEM, reportes de usuarios o anomalías en el tráfico de red.
+    \item \textbf{Análisis y Triaje:} Determinación del alcance, impacto potencial y severidad del incidente por parte del equipo CSIRT-UNAP.
+    \item \textbf{Contención:} Aplicación de medidas de aislamiento inmediato (aislamiento de VLAN, revocación de tokens, bloqueo perimetral de IPs) para evitar la propagación.
+    \item \textbf{Erradicación:} Eliminación de artefactos maliciosos, cierre de brechas de configuración y revocación de credenciales comprometidas.
+    \item \textbf{Recuperación:} Restauración de servicios a partir de respaldos limpios validados y reactivación paulatina con monitoreo reforzado.
+    \item \textbf{Evaluación Posterior (Post-Mortem):} Elaboración del informe técnico final, identificación de lecciones aprendidas y ajuste de controles preventivos.
+\end{enumerate}
+
+\section{Canales Institucionales de Notificación Rápida}
+Para garantizar la oportuna recepción de reportes sobre comportamientos anómalos, se formalizan los siguientes canales oficiales:
+\begin{itemize}
+    \item \textbf{Correo Electrónico de Seguridad:} \texttt{seguridad.informatica@unap.edu.pe}
+    \item \textbf{Anexo Telefónico de Emergencia OTI:} Anexo interno 1111 (Línea directa del CSIRT-UNAP).
+    \item \textbf{Botón de Reporte en Webmail:} Complemento integrado en el correo institucional para notificar mensajes sospechosos de phishing en un clic.
+\end{itemize}
+
+\section{Clasificación de Incidentes por Tipo de Amenaza}
+\begin{itemize}
+    \item \textbf{Phishing Masivo o Dirigido:} Correos fraudulentos que buscan robar identidades o distribuir malware.
+    \item \textbf{Accesos No Autorizados:} Intentos de inicio de sesión anómalos o explotación de credenciales institucionales.
+    \item \textbf{Infecciones por Malware / Ransomware:} Ejecución de código malicioso en servidores o computadoras de oficinas.
+    \item \textbf{Exfiltración de Información:} Fuga o extracción no autorizada de bases de datos o expedientes sensibles.
+    \item \textbf{Pérdida o Sustracción de Equipos Físicos:} Extravío de portátiles o almacenamiento institucional con datos sensibles.
+\end{itemize}

@@ -1,0 +1,63 @@
+\chapter{Análisis mediante Cyber Kill Chain}
+\label{ch:cyber_kill_chain}
+
+En este capítulo se modela el ciclo de intrusión lineal que un adversario ejecutaría contra el sistema académico y personal de la UNAP, determinando los puntos de interrupción defensiva.
+
+\section{Modelado del Ciclo Lineal de Intrusión}
+El escenario reconstruye un vector de intrusión dirigido hacia el personal docente y la plataforma académica:
+
+\begin{enumerate}
+    \item \textbf{Reconocimiento (Reconnaissance):} Mapeo pasivo de subdominios universitarios (\texttt{matricula.unap.edu.pe}) y extracción de nombres y correos de directores de escuela y docentes mediante fuentes abiertas (OSINT).
+    \item \textbf{Armamento (Weaponization):} Clonación visual fidedigna del formulario de inicio de sesión de \texttt{matricula.unap.edu.pe} montado en un servidor externo bajo dominio tipográfico.
+    \item \textbf{Entrega (Delivery):} Envío masivo de correos electrónicos fraudulentos suplantando al Vicerrectorado Académico, aprovechando la \textbf{ausencia de registro DMARC (NXDOMAIN)} y un registro \textbf{SPF excesivamente permisivo} (\texttt{~all} SoftFail) en el dominio institucional \texttt{unap.edu.pe}.
+    \item \textbf{Explotación (Exploitation):} El docente o alumno hace clic en el enlace malicioso e introduce sus credenciales oficiales en la página clonada apócrifa.
+    \item \textbf{Instalación (Installation):} El atacante captura las credenciales válidas y accede directamente a las plataformas institucionales internas sin requerimiento de segundo factor (MFA).
+    \item \textbf{Comando y Control (C2):} Establecimiento de túneles y sesiones interactivas cifradas HTTPS hacia el exterior que pasan desapercibidas por carecer de inspección TLS profunda.
+    \item \textbf{Acción sobre el Objetivo (Actions on Objectives):} Alteración de calificaciones en actas, reserva irregular de vacantes o exfiltración de tablas con información personal sensible.
+\end{enumerate}
+
+\section{Puntos de Quiebre Defensivo y Controles de Interrupción}
+El principio fundamental de la Cyber Kill Chain establece que neutralizar cualquier fase interrumpe la consumación del ataque:
+
+\begin{center}
+\small
+\begin{longtable}{>{\bfseries}p{3.2cm} p{4.2cm} p{7.5cm}}
+\toprule
+\rowcolor{outermarginbgcolor}
+Fase Kill Chain & Acción del Adversario en UNAP & Control Preventivo / Detectivo de Ruptura \\
+\midrule
+\endfirsthead
+\toprule
+\rowcolor{outermarginbgcolor}
+Fase Kill Chain & Acción del Adversario en UNAP & Control Preventivo / Detectivo de Ruptura \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+1. Reconocimiento & Rastreo de subdominios y correos & Vigilancia OSINT, reducción de huella digital y monitoreo DNS \\
+\midrule
+2. Armamento & Montaje de web clonada de matrícula & Detección temprana de typosquatting vía Threat Intelligence \\
+\midrule
+3. Entrega & Envío de correo apócrifo de la UNAP & Publicación de registro DMARC estricto (\texttt{p=reject}) y SPF con \texttt{-all} \\
+\midrule
+4. Explotación & Clic en enlace apócrifo de correo & Filtrado web en endpoints y concientización antispam en usuarios \\
+\midrule
+5. Instalación & Inicio de sesión con credencial robada & Autenticación Multifactor obligatoria (MFA/TOTP) que bloquea el acceso \\
+\midrule
+6. C2 & Túnel HTTPS saliente no filtrado & Inspección profunda SSL/TLS en firewall NGFW y bloqueo de IPs C2 \\
+\midrule
+7. Objetivos & Extracción y alteración de notas & Control RBAC estricto, inmutabilidad de actas y alertas SIEM \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\begin{cmdbox}{Evidencia Técnica DNS: Ausencia de DMARC y SPF Permisivo}
+# Consulta de registro DMARC en el dominio institucional
+$ dig _dmarc.unap.edu.pe TXT +short
+;; Got SERVFAIL or NXDOMAIN (Registro DMARC inexistente)
+
+# Consulta de registro SPF en unap.edu.pe
+$ dig unap.edu.pe TXT +short
+'v=spf1 ip4:161.132.24.0/24 include:_spf.google.com ~all'
+# Diagnostico: El modificador ~all (SoftFail) permite suplantacion sin rechazo forzado
+\end{cmdbox}

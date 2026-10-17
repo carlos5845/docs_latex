@@ -1,0 +1,54 @@
+\chapter{Inteligencia de Amenazas (Threat Intelligence)}
+\label{ch:threat_intelligence}
+
+En este capítulo se estructura el modelo de vigilancia activa de amenazas para anticipar ataques dirigidos contra el entorno universitario.
+
+\section{Fuentes y Vectores de Vigilancia}
+El programa de Inteligencia de Amenazas de la UNAP se enfoca en el monitoreo continuo de los siguientes riesgos críticos:
+\begin{itemize}
+    \item \textbf{Phishing de Credenciales Institucionales:} Campañas dirigidas a capturar cuentas de correo \texttt{@unap.edu.pe} y accesos a matrícula.
+    \item \textbf{Dominios Tipográficos (Typosquatting):} Detección temprana de registros maliciosos que imitan los portales oficiales (ej. dominios apócrifos como \texttt{unap-matricula.*}, \texttt{unap-portal.*}).
+    \item \textbf{Vulnerabilidades y Exploits Conocidos:} Alertas sobre fallos que afectan al stack tecnológico observado, en especial exploits dirigidos a \texttt{Nginx 1.16.1} y componentes web legados.
+    \item \textbf{Fuentes de Información Especializadas:} Monitoreo de feeds del CSIRT Nacional (Perú), catálogo CISA KEV (Known Exploited Vulnerabilities) y comunidades globales de inteligencia (AlienVault OTX).
+\end{itemize}
+
+\section{Procedimiento de Gestión de Inteligencia}
+El flujo operativo para transformar datos de amenazas en contramedidas defensivas sigue un ciclo de 6 etapas:
+
+\begin{center}
+\small
+\textbf{Recopilación} $\longrightarrow$ \textbf{Correlación Logs} $\longrightarrow$ \textbf{Clasificación Criticidad} \\
+$\longrightarrow$ \textbf{Generación IoCs} $\longrightarrow$ \textbf{Actualización WAF} $\longrightarrow$ \textbf{Comunicación Interna}
+\end{center}
+
+\begin{enumerate}
+    \item \textbf{Recopilación:} Captura de feeds de IoCs (direcciones IP maliciosas, hashes de malware, dominios fraudulentos).
+    \item \textbf{Correlación de Logs:} Búsqueda retrospectiva en la plataforma SIEM para verificar si los IoCs tuvieron contacto con la red interna.
+    \item \textbf{Clasificación de Criticidad:} Evaluación del impacto potencial de la amenaza reportada sobre los activos de la UNAP.
+    \item \textbf{Generación de IoCs:} Creación de firmas y listas negras institucionales.
+    \item \textbf{Actualización en Firewall/WAF:} Ingesta automática de bloqueos en el firewall perimetral y reglas del WAF.
+    \item \textbf{Comunicación Interna:} Emisión de alertas tempranas y boletines preventivos dirigidos a los usuarios.
+\end{enumerate}
+
+\section{Producto de la Sección: Boletín de Inteligencia de Amenazas}
+
+\begin{cmdbox}{Boletín de Inteligencia de Amenazas: Alerta Spear-Phishing y Suplantación}
+[ALERTA DE SEGURIDAD DIGITAL - CSIRT-UNAP / OTI]
+Codigo de Alerta: ALERTA-TI-2026-004
+Nivel de Severidad: ALTO (CVSS: 7.8)
+Fecha de Emision: 17 de Octubre de 2026
+
+AMENAZA DETECTADA:
+Campana de Spear-Phishing dirigida a docentes y alumnos mediante dominios de
+typosquatting que emulan el sistema oficial de matricula (ej. inap-matricula.com).
+
+INDICADORES DE COMPROMISO (IoCs):
+* Dominios detectados: unap-matricula.online, portal-unap.org
+* IPs de origen C2: 198.51.100.45, 203.0.113.88
+* Asunto de correos fraudulentos: 'URGENTE: Actualizacion de Datos Matricula 2026-I'
+
+ACCIONES PREVENTIVAS EJECUTADAS:
+1. Bloqueo de dominios e IPs en Firewall de borde y servidores DNS internos.
+2. Ingesta de reglas de deteccion en Wazuh SIEM para correlacionar accesos.
+3. Notificacion a los administradores de correo para aislamiento de mensajes.
+\end{cmdbox}

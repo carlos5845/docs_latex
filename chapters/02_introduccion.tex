@@ -1,0 +1,18 @@
+\chapter{Introducción}
+\label{ch:introduccion}
+
+La gestión de la ciberseguridad en el sector universitario contemporáneo exige equilibrar la apertura para la investigación académica con la protección rigurosa de las plataformas tecnológicas.
+
+\section{Contexto y Relevancia Institucional}
+La salvaguarda del ecosistema digital de la Universidad Nacional del Altiplano de Puno (UNAP) constituye un pilar esencial para la continuidad de los servicios educativos, la integridad de los registros académicos oficiales y la protección de los datos personales de miles de estudiantes, docentes y administrativos.
+
+\section{Caracterización de la Superficie Expuesta Universitaria}
+El análisis preliminar de la infraestructura expuesta de la UNAP evidencia una topología amplia y heterogénea:
+\begin{itemize}
+    \item \textbf{Más de 100 subdominios públicos indexados:} Identificados en servidores de nombres autoritativos y registros de transparencia de certificados SSL (\texttt{crt.sh}).
+    \item \textbf{Coexistencia de plataformas críticas:} Servicios esenciales de alta transaccionalidad como el Sistema de Matrícula (\texttt{matricula.unap.edu.pe}) y el Campus Virtual Moodle (\texttt{campus.unap.edu.pe}).
+    \item \textbf{Exposición de entornos legados y de desarrollo:} Presencia pública de subdominios de prueba, servidores de desarrollo y paneles administrativos desactualizados (tales como \texttt{dev.*}, \texttt{prue1.*}, \texttt{cpanel.*}), los cuales carecen de controles perimetrales homogéneos y representan puntos de entrada de alto riesgo.
+\end{itemize}
+
+\section{Transición hacia un Modelo de Defensa en Profundidad}
+El modelo de seguridad perimetral tradicional (basado exclusivamente en un firewall de borde) resulta insuficiente frente a amenazas modernas como el ransomware, el spear-phishing y la exfiltración dirigida. Se justifica plenamente la adopción de un esquema de \textbf{Defensa en Profundidad} (\textit{Defense in Depth}) articulado con una arquitectura \textbf{Zero Trust}, garantizando visibilidad y control estricto en cada capa tecnológica.
