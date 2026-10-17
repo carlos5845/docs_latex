@@ -1,63 +1,285 @@
 \chapter{Análisis de Amenazas mediante STRIDE}
 \label{ch:analisis_stride}
 
-En este capítulo se aplica el modelado formal de amenazas de Microsoft (STRIDE) sobre el sistema más crítico de la universidad.
+En este capítulo se formaliza la descomposición funcional y el modelado preventivo de amenazas bajo el marco STRIDE sobre el sistema más crítico de la UNAP: la plataforma transaccional de matrícula académica.
 
-\section{Sistema Seleccionado y Definición Arquitectónica (DFD)}
-El análisis se focaliza en el \textbf{Portal y API del Sistema de Matrícula} (\path{https://matricula.unap.edu.pe}), responsable del procesamiento masivo de datos académicos y personales.
+\section{Metodología de Modelado STRIDE}
 
-\noindent\textbf{Diagrama de Flujo de Datos (DFD Nivel 1):}
-\begin{center}
-\small
-\textbf{[Navegador Cliente]} $\xleftrightarrow{\text{HTTPS / TLS}}$ \textbf{[Reverse Proxy Nginx]} \\
-$\xleftrightarrow{\text{HTTP}}$ \textbf{[Backend ASP.NET Core]} $\xleftrightarrow{\text{TCP / SQL}}$ \textbf{[Base de Datos]}
-\end{center}
-
-\section{Identificación de Componentes y Límites de Confianza}
-\begin{itemize}
-    \item \textbf{Límite de Confianza 1 (Internet $\leftrightarrow$ Proxy Inverso):} Cruza la frontera entre las redes externas no confiables y el DMZ universitario.
-    \item \textbf{Límite de Confianza 2 (Proxy Inverso $\leftrightarrow$ Backend ASP.NET Core):} Comunica el balanceador/proxy con los servidores de aplicaciones internos.
-    \item \textbf{Límite de Confianza 3 (Backend $\leftrightarrow$ Base de Datos):} Conecta la lógica de negocio con el repositorio de datos de estudiantes y actas.
-\end{itemize}
-
-\section{Análisis de las Seis Categorías STRIDE (Hallazgos Reales)}
-Al contrastar la arquitectura y las evidencias recopiladas con las 6 categorías de STRIDE, se identificaron los siguientes hallazgos:
-
-\begin{enumerate}
-    \item \textbf{S (Spoofing - Suplantación de Identidad):} Ausencia de autenticación multifactor (MFA) obligatoria en el acceso de docentes y alumnos, junto con debilidad en el manejo de cookies de sesión temporales, lo que facilita el secuestro de sesiones.
-    \item \textbf{T (Tampering - Alteración de Información):} Riesgo de ataques Man-in-the-Middle y alteración del tráfico web debido a la ausencia de la cabecera HSTS (\texttt{Strict-Transport-Security: Desactivado}), permitiendo ataques de degradación de SSL (SSL Stripping).
-    \item \textbf{R (Repudiation - Repudio):} Carencia de registros de auditoría centralizados e inmutables que certifiquen de manera fehaciente las modificaciones de matrículas, retiro de asignaturas o rectificación de notas.
-    \item \textbf{I (Information Disclosure - Fuga de Información):} Exposición explícita de tecnologías y versiones desactualizadas en cabeceras de respuesta HTTP públicas (ej. cabecera observada \texttt{Server: nginx/1.16.1}), lo que brinda a atacantes vectores conocidos de explotación.
-    \item \textbf{D (Denial of Service - Denegación de Servicio):} Susceptibilidad ante picos masivos de concurrencia simultánea en ventanas de matrícula sin mecanismos de rate-limiting en WAF ni balanceo elástico de carga.
-    \item \textbf{E (Elevation of Privilege - Escalada de Privilegios):} Riesgo de manipulación de parámetros de rol e identificadores de usuario (vulnerabilidades IDOR) en endpoints de la API REST interna (ej. rutas como \path{/matricula/alumno/*}).
+La metodología STRIDE (desarrollada originalmente por Praerit Garg y Loren Kohnfelder en Microsoft) se fundamenta en la descomposición funcional de un sistema para responder de forma sistemática a cuatro interrogantes operativas:
+\begin{enumerate}[itemsep=2pt,topsep=1.5pt,parsep=0pt]
+    \item \textbf{¿En qué estamos trabajando?} Construcción del Diagrama de Flujo de Datos (DFD).
+    \item \textbf{¿Qué puede salir mal?} Mapeo de categorías STRIDE sobre los elementos y límites de confianza.
+    \item \textbf{¿Qué vamos a hacer al respecto?} Definición de controles preventivos y correctivos.
+    \item \textbf{¿Hicimos un buen trabajo?} Evaluación residual del riesgo y verificación de controles.
 \end{enumerate}
 
-\section{Matriz STRIDE del Sistema de Matrícula}
+El análisis modela las seis categorías de amenazas frente a las propiedades clásicas de seguridad de la información:
 
-\footnotesize
-\begin{longtable}{>{\bfseries}c p{2.2cm} p{4.2cm} p{3.2cm} p{4.0cm}}
+\small
+\begin{longtable}{>{\bfseries}p{2.8cm} >{\bfseries}p{2.6cm} p{9.0cm}}
 \toprule
-\rowcolor{outermarginbgcolor}
-Cat. & Vector de Amenaza & Hallazgo Específico & Impacto Potencial & Control de Remediación \\
+\rowcolor{fg}
+\textcolor{white}{Categoría STRIDE} & \textcolor{white}{Propiedad Violada} & \textcolor{white}{Definición en el Contexto del Software} \\
 \midrule
 \endfirsthead
 \toprule
-\rowcolor{outermarginbgcolor}
-Cat. & Vector de Amenaza & Hallazgo Específico & Impacto Potencial & Control de Remediación \\
+\rowcolor{fg}
+\textcolor{white}{Categoría STRIDE} & \textcolor{white}{Propiedad Violada} & \textcolor{white}{Definición en el Contexto del Software} \\
 \midrule
 \endhead
 \bottomrule
 \endfoot
-S & Spoofing & Credenciales de usuario único sin MFA y cookies vulnerables & Suplantación de identidad de estudiantes/docentes & Despliegue de MFA (TOTP) y banderas \texttt{Secure; HttpOnly; SameSite} \\
+S --- Spoofing & Autenticación & Un actor malicioso finge ser un usuario legítimo (estudiante/docente) o suplanta un servicio del sistema. \\
 \midrule
-T & Tampering & Ausencia de cabecera HSTS en el servidor web & Intercepción y alteración de tráfico en tránsito & HSTS forzado con \texttt{max-age=31536000; includeSubDomains} \\
+T --- Tampering & Integridad & Modificación malintencionada y no autorizada de datos en tránsito, en memoria o en reposo. \\
 \midrule
-R & Repudiation & Logs locales sin firma digital ni inmutabilidad & Imposibilidad de determinar autoría en cambios & Centralización de logs de auditoría en SIEM con timestamping \\
+R --- Repudiation & No Repudio & Un usuario realiza una acción transaccional y el sistema carece de evidencia inmutable para adjudicarle la autoría. \\
 \midrule
-I & Info Disclosure & Exposición de versión en cabecera \texttt{Server: nginx/1.16.1} & Fingerprinting y selección de exploits específicos & Ocultamiento de versiones con \texttt{server\_tokens off;} \\
+I --- Info Disclosure & Confidencialidad & Exposición de credenciales, tokens, datos personales o metadatos de arquitectura a entidades no autorizadas. \\
 \midrule
-D & Denial of Service & Saturación de conexiones HTTP en días de matrícula & Indisponibilidad del servicio de matrícula & Configurar WAF perimetral y directivas \texttt{limit\_req} en Nginx \\
+D --- Denial of Service & Disponibilidad & Saturación o degradación intencional de recursos (red, CPU, memoria, hilos web) para impedir el servicio legítimo. \\
 \midrule
-E & Elevation of Priv. & Parámetros manipulables en API REST (\path{/matricula/alumno/*}) & Escalada horizontal o acceso a expedientes ajenos & Validación estricta de autorización y tokens JWT por rol \\
+E --- Elevation of Priv. & Autorización & Un usuario con permisos limitados elude controles para ejecutar funciones de mayor privilegio administrativo. \\
 \bottomrule
 \end{longtable}
+\normalsize
+
+\section{Selección y Alcance del Sistema Objetivo}
+
+\begin{itemize}[itemsep=1.5pt,topsep=1pt,parsep=0pt]
+    \item \textbf{Sistema Evaluado:} Portal y API Transaccional de Matrícula (\url{https://matricula.unap.edu.pe}).
+    \item \textbf{Capa de Borde:} Proxy inverso web \texttt{nginx/1.16.1} (Linux) encargado de la terminación TLS y enrutamiento perimetral.
+    \item \textbf{Capa de Aplicación:} Servicio web compilado en ASP.NET Core (C\#) ejecutándose sobre Kestrel/Linux, identificado mediante las cookies de sesión \path{.AspNetCore.Cookies} (fragmentadas en chunks) y el proveedor de estado temporal \path{.AspNetCore.Mvc.CookieTempDataProvider}.
+    \item \textbf{Capa de Persistencia:} Motor de Base de Datos Académica Central (PostgreSQL / Oracle) alojado en el segmento privado del Data Center OTI.
+    \item \textbf{Usuarios del Sistema:} Estudiantes de pregrado/posgrado ($\approx$20,000 usuarios recurrentes), docentes y administradores de la Oficina de Tecnologías de la Información.
+\end{itemize}
+
+\section{Diagrama de Flujo de Datos (DFD) y Límites de Confianza}
+
+El modelado STRIDE exige delimitar claramente las fronteras de confianza (\textit{Trust Boundaries}), que representan transiciones lógicas o físicas donde los privilegios cambian y el nivel de control disminuye.
+
+\subsection{Elementos del DFD Nivel 1}
+\begin{itemize}[itemsep=1.5pt,topsep=1pt,parsep=0pt]
+    \item \textbf{Entidades Externas (EE):} \texttt{EE-01:} Estudiante / Docente (Navegador Web / Cliente HTTP).
+    \item \textbf{Procesos (P):}
+    \begin{itemize}[itemsep=0.8pt,topsep=0.5pt,parsep=0pt]
+        \item \texttt{P-01:} Recepción, Terminación TLS y Reverse Proxy (Nginx 1.16.1).
+        \item \texttt{P-02:} Gestión de Sesión y Autenticación (Middleware ASP.NET Core Identity).
+        \item \texttt{P-03:} Consulta y Despliegue de Horario/Oferta (Endpoint \path{/matricula/alumno/horario}).
+        \item \texttt{P-04:} Lógica de Inscripción y Validación de Reglas (Cálculo de créditos, prerrequisitos y vacantes).
+    \end{itemize}
+    \item \textbf{Almacenes de Datos (D):}
+    \begin{itemize}[itemsep=0.8pt,topsep=0.5pt,parsep=0pt]
+        \item \texttt{D-01:} Almacén de Estado Temporal / Sesiones en Memoria (\texttt{CookieTempDataProvider}).
+        \item \texttt{D-02:} Base de Datos Académica Central (Tablas: Alumnos, Cursos, Actas, Cupos).
+    \end{itemize}
+    \item \textbf{Flujos de Datos (F):}
+    \begin{itemize}[itemsep=0.8pt,topsep=0.5pt,parsep=0pt]
+        \item \texttt{F-01:} Petición inicial HTTPS / Envío de credenciales o cookies (Cliente $\rightarrow$ Nginx).
+        \item \texttt{F-02:} Petición interna HTTP proxy-pass / Encabezados \texttt{X-Forwarded-*} (Nginx $\rightarrow$ ASP.NET Core).
+        \item \texttt{F-03:} Lectura/Escritura de estado de sesión (ASP.NET Core $\leftrightarrow$ D-01).
+        \item \texttt{F-04:} Consultas transaccionales SQL / Stored Procedures (ASP.NET Core $\leftrightarrow$ D-02).
+        \item \texttt{F-05:} Retorno de payload JSON con horario y estado HTTP 200 (ASP.NET Core $\rightarrow$ Nginx $\rightarrow$ Cliente).
+    \end{itemize}
+\end{itemize}
+
+\clearpage
+
+\subsection{Esquema Arquitectónico del DFD Nivel 1}
+
+\begin{cmdbox}{Arquitectura DFD Nivel 1 y Límites de Confianza (matricula.unap.edu.pe)}
+[ EE-01: Estudiante / Docente ]
+               |
+               |  F-01: HTTPS / GET /matricula/alumno/horario + Cookies
+               v
+=== [ LIMITE DE CONFIANZA 1: Internet / Red Publica ] ==================
+               |
+               v
++----------------------------------------------------------------------+
+| P-01: Proxy Inverso (Nginx 1.16.1)                                   |
+|   - Terminacion SSL/TLS 1.2                                          |
+|   - Enrutamiento interno hacia socket Kestrel                        |
++----------------------------------+-----------------------------------+
+                                   |
+                                   |  F-02: HTTP Forwarded (Cleartext)
+                                   v
++----------------------------------------------------------------------+
+| SERVIDOR DE APLICACION ASP.NET CORE                                  |
+|                                                                      |
+|  +------------------------+      F-03      +----------------------+  |
+|  | P-02: Middleware Auth  | <------------> | D-01: Almacen Sesion |  |
+|  | (.AspNetCore.Cookies)  |                | (TempDataProvider)   |  |
+|  +-----------+------------+                +----------------------+  |
+|              | Identidad validada                                    |
+|              v                                                       |
+|  +------------------------+                +----------------------+  |
+|  | P-03: API Controller   | -------------> | P-04: Motor Reglas   |  |
+|  | (horario?start=...&end)|                | (Cupos, Cruces, Req) |  |
+|  +------------------------+                +----------+-----------+  |
++-------------------------------------------------------|--------------+
+                                                        |
+=== [ LIMITE DE CONFIANZA 2: DMZ / Red Privada LAN ] ===|===============
+                                                        |
+                                                        |  F-04: SQL
+                                                        v
+                                             +-------------------------+
+                                             | D-02: BD Central UNAP   |
+                                             | (PostgreSQL / Oracle)   |
+                                             +-------------------------+
+\end{cmdbox}
+
+\clearpage
+
+\section{Evaluación de Riesgos (Criterio DREAD Adaptado)}
+
+Para cuantificar objetivamente la severidad de las amenazas identificadas en el sistema de matrícula, se aplica el modelo DREAD de Microsoft, evaluando cinco dimensiones con puntajes del 1 al 10:
+\[
+\text{Riesgo Global} = \frac{\text{Damage} + \text{Reproducibility} + \text{Exploitability} + \text{Affected Users} + \text{Discoverability}}{5}
+\]
+
+\begin{itemize}[itemsep=3pt,topsep=2pt,parsep=0pt]
+    \item \textbf{Damage (Daño potencial):} Perjuicio si el ataque tiene éxito (1 = Mínimo; 10 = Secuestro total de datos o parálisis institucional).
+    \item \textbf{Reproducibility (Reproducibilidad):} Facilidad de replicar el ataque una vez descubierto (1 = Muy difícil o circunstancial; 10 = Funciona el 100\% de las veces).
+    \item \textbf{Exploitability (Facilidad de explotación):} Destreza y herramientas requeridas (1 = Habilidades avanzadas de kernel/0-day; 10 = Petición HTTP simple con script público).
+    \item \textbf{Affected Users (Usuarios afectados):} Proporción de la universidad impactada (1 = Un usuario individual; 10 = Toda la comunidad universitaria).
+    \item \textbf{Discoverability (Descubribilidad):} Facilidad para hallar la debilidad (1 = Requiere código fuente; 10 = Visible en cabeceras HTTP públicas).
+\end{itemize}
+
+\noindent\textbf{Escala de Severidad Cualitativa:}
+\textbf{Bajo:} $1.0 - 4.9$ \quad$\vert$\quad
+\textbf{Medio:} $5.0 - 6.9$ \quad$\vert$\quad
+\textbf{Alto:} $7.0 - 8.9$ \quad$\vert$\quad
+\textbf{Crítico:} $9.0 - 10.0$.
+
+\section{Matriz de Análisis STRIDE del Sistema de Matrícula (UNAP)}
+
+La siguiente matriz documenta las amenazas concretas detectadas a partir de las vulnerabilidades verificadas en el relevamiento perimetral:
+
+\begingroup
+\setlength{\tabcolsep}{2.5pt}
+\scriptsize
+\begin{longtable}{>{\bfseries\centering\arraybackslash}p{0.6cm} p{2.5cm} p{1.4cm} p{2.6cm} >{\centering\arraybackslash}p{1.4cm} p{5.0cm}}
+\toprule
+\rowcolor{fg}
+\textcolor{white}{Cat.} & \textcolor{white}{Amenaza Identificada} & \textcolor{white}{Comp.} & \textcolor{white}{Vulnerabilidad Base} & \textcolor{white}{DREAD / Nivel} & \textcolor{white}{Controles de Mitigación Propuestos} \\
+\midrule
+\endfirsthead
+\toprule
+\rowcolor{fg}
+\textcolor{white}{Cat.} & \textcolor{white}{Amenaza Identificada} & \textcolor{white}{Comp.} & \textcolor{white}{Vulnerabilidad Base} & \textcolor{white}{DREAD / Nivel} & \textcolor{white}{Controles de Mitigación Propuestos} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+S & Suplantación de Sesión: Robo de cookies \path{.AspNetCore.Cookies} e impersonación de identidad del alumno. & F-01, EE-01, P-02 & Sin binding de sesión a IP/huella TLS; sin revocación forzada tras logout. & \textbf{7.4} \newline \textcolor{orange!90!black}{\textbf{Alto}} \newline \tiny(8,7,6,9,7) & 1. Revocación de tokens JWT / claims en Redis.\newline 2. MFA obligatorio para docentes y condicional alumnos.\newline 3. Binding de cookie a huella criptográfica de conexión. \\
+\midrule
+T & Manipulación en Tránsito (SSL Stripping): Interceptación en texto plano de parámetros y cookies en Wi-Fi. & F-01, Límite 1 & Ausencia de HSTS (\texttt{Strict-\allowbreak Transport-\allowbreak Security}) en cabeceras web. & \textbf{8.0} \newline \textcolor{orange!90!black}{\textbf{Alto}} \newline \tiny(8,8,7,8,9) & 1. Inyectar directiva HSTS estricta en Nginx (\texttt{max-age=31536000; preload}).\newline 2. Redirección HTTP $\rightarrow$ HTTPS forzada (código 301). \\
+\midrule
+T & Manipulación de Horario y Cruces: Peticiones alteradas en \texttt{horario?start} para forzar cupos colapsados. & P-03, P-04, F-04 & Validación de reglas en cliente sin doble chequeo atómico en backend. & \textbf{7.4} \newline \textcolor{orange!90!black}{\textbf{Alto}} \newline \tiny(7,9,8,6,7) & 1. Validación transaccional atómica en backend y base de datos (nivel Serializable).\newline 2. Verificación criptográfica de parámetros cliente. \\
+\midrule
+R & Repudio de Matrícula: Estudiante alega que el sistema no registró su matrícula o notas sin refutación técnica. & P-02, D-02, F-04 & Logs web volátiles; solo registran código 200 sin User-ID ni hash transaccional. & \textbf{5.8} \newline \textcolor{blue!80!black}{\textbf{Medio}} \newline \tiny(6,6,5,7,5) & 1. Bitácora transaccional inmutable (WORM) con User-ID, IP, timestamp NTP y hash del evento.\newline 2. Envío centralizado a servidor Syslog / SIEM externo. \\
+\midrule
+I & Fuga de Versiones Obsoletas: Atacantes obtienen tecnología exacta para descargar exploits públicos. & P-01, Límite 1 & Cabecera expuesta: \texttt{Server: nginx/1.16.1} (versión 2019 con CVEs acumulados). & \textbf{8.8} \newline \textcolor{orange!90!black}{\textbf{Alto}} \newline \tiny(7,10,8,9,10) & 1. Ocultar firma con \texttt{server\_tokens off;} en Nginx.\newline 2. Actualizar binario de Nginx a rama estable 1.26+.\newline 3. Desplegar reglas de inspección perimetral WAF. \\
+\midrule
+I & Fuga de Sesión Temporal: Interceptación de cookie \texttt{.AspNetCore.\allowbreak Mvc.\allowbreak CookieTemp\allowbreak DataProvider}. & D-01, F-01 & Cookie temporal no incluye atributo \texttt{Secure} en directiva \texttt{Set-Cookie}. & \textbf{7.0} \newline \textcolor{orange!90!black}{\textbf{Alto}} \newline \tiny(6,7,6,8,8) & 1. Endurecer política de cookies en \texttt{Program.cs}:\newline \texttt{SecurePolicy = CookieSecurePolicy.Always;}\newline \texttt{SameSite = SameSiteMode.Strict;}. \\
+\midrule
+D & DoS por Agotamiento de Hilos: Colapso de proxy Nginx o cola Kestrel por concurrencia masiva en apertura. & P-01, P-03, D-02 & Sin limitación de tasa (\textit{Rate Limiting}) por IP ni arquitectura elástica. & \textbf{9.0} \newline \textcolor{red!80!black}{\textbf{Crítico}} \newline \tiny(9,9,8,10,9) & 1. Configurar rate limiting en Nginx (\texttt{limit\_req\_zone}).\newline 2. Balanceador de carga con instancias API redundantes.\newline 3. Implementar sala de espera virtual (\textit{Waiting Room}). \\
+\midrule
+E & Elevación de Privilegios (IDOR): Modificación de IDs de usuario en URL para acceder a rutas de docentes. & P-03, P-04, F-04 & Control de acceso basado en URL sin verificación de claims de rol en backend. & \textbf{7.4} \newline \textcolor{orange!90!black}{\textbf{Alto}} \newline \tiny(9,7,7,8,6) & 1. Autorización basada en políticas de claims (\texttt{[Authorize(Roles = "Docente,Admin")]}).\newline 2. Validación de pertenencia obligatoria entre sesión y recurso. \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\clearpage
+
+\section{Procedimiento de Implementación de Controles Mitigadores}
+
+Para transformar los hallazgos de la matriz STRIDE en salvaguardas operativas inmediatas dentro de la infraestructura de la UNAP, se establecen tres niveles de acción técnica:
+
+\subsection{A. Hardening Inmediato en Servidor Web Nginx (P-01)}
+Se debe modificar el bloque de configuración perimetral en el archivo institucional \texttt{/etc/\allowbreak nginx/\allowbreak sites-available/\allowbreak matricula.\allowbreak unap.\allowbreak edu.\allowbreak pe}:
+
+\begin{cmdbox}{Configuración Nginx de Mitigación STRIDE - matricula.unap.edu.pe}
+# Mitigacion STRIDE: Information Disclosure (Ocultamiento de version)
+server_tokens off;
+
+# Mitigacion STRIDE: Tampering y Spoofing (HSTS y proteccion de cabeceras)
+add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+add_header X-Frame-Options "SAMEORIGIN" always;
+add_header X-Content-Type-Options "nosniff" always;
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+# Mitigacion STRIDE: Denial of Service (Proteccion contra rafagas DoS)
+limit_req_zone $binary_remote_addr zone=api_matricula:20m rate=15r/s;
+
+server {
+    listen 443 ssl http2;
+    server_name matricula.unap.edu.pe;
+
+    location / {
+        limit_req zone=api_matricula burst=25 nodelay;
+        proxy_pass http://127.0.0.1:5000; # Backend Kestrel ASP.NET Core
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+\end{cmdbox}
+
+\subsection{B. Aseguramiento del Manejo de Sesiones en ASP.NET Core (P-02 / D-01)}
+En el archivo de inicialización del backend (\texttt{Program.cs}), forzar el endurecimiento de las cookies transaccionales:
+
+\begin{cmdbox}{Endurecimiento de Cookies y Autenticación en Program.cs}
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    // Mitigacion STRIDE: Information Disclosure y Tampering en Cookies
+    options.HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always;
+    options.Secure = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
+    options.MinimumSameSitePolicy = Microsoft.AspNetCore.Http.SameSiteMode.Strict;
+});
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "__Host-UNAP-Auth"; // Cookie de prefijo seguro
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
+        options.SlidingExpiration = true;
+    });
+\end{cmdbox}
+
+\clearpage
+
+\subsection{C. Control Transaccional en Base de Datos (P-04 / D-02)}
+Para mitigar la manipulación de prerrequisitos y vacantes (\textit{Tampering} y \textit{Elevation of Privilege}), toda inscripción debe ejecutarse dentro de un procedimiento almacenado transaccional que valide atómicamente el cupo con bloqueo pesimista:
+
+\begin{cmdbox}{Función SQL Transaccional con Bloqueo FOR UPDATE contra Race Conditions}
+-- Mitigacion STRIDE: Tampering (Bloqueo pesimista contra condiciones de carrera)
+CREATE OR REPLACE FUNCTION sp_inscribir_asignatura(
+    p_alumno_id INT,
+    p_curso_id INT,
+    p_grupo_id INT
+) RETURNS BOOLEAN AS $$
+DECLARE
+    v_vacantes INT;
+    v_inscritos INT;
+BEGIN
+    SELECT vacantes_totales INTO v_vacantes 
+    FROM oferta_academica 
+    WHERE grupo_id = p_grupo_id FOR UPDATE;
+
+    SELECT COUNT(*) INTO v_inscritos 
+    FROM matricula_detalle 
+    WHERE grupo_id = p_grupo_id;
+
+    IF v_inscritos < v_vacantes THEN
+        INSERT INTO matricula_detalle(alumno_id, curso_id, grupo_id, fecha_registro)
+        VALUES (p_alumno_id, p_curso_id, p_grupo_id, NOW());
+        RETURN TRUE;
+    ELSE
+        RAISE EXCEPTION 'Cupo colapsado: no hay vacantes disponibles';
+        RETURN FALSE;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+\end{cmdbox}
