@@ -4,7 +4,7 @@
 En este capítulo se aplica el modelado formal de amenazas de Microsoft (STRIDE) sobre el sistema más crítico de la universidad.
 
 \section{Sistema Seleccionado y Definición Arquitectónica (DFD)}
-El análisis se focaliza en el \textbf{Portal y API del Sistema de Matrícula} (\texttt{https://matricula.unap.edu.pe}), responsable del procesamiento masivo de datos académicos y personales.
+El análisis se focaliza en el \textbf{Portal y API del Sistema de Matrícula} (\path{https://matricula.unap.edu.pe}), responsable del procesamiento masivo de datos académicos y personales.
 
 \noindent\textbf{Diagrama de Flujo de Datos (DFD Nivel 1):}
 \begin{center}
@@ -29,12 +29,11 @@ Al contrastar la arquitectura y las evidencias recopiladas con las 6 categorías
     \item \textbf{R (Repudiation - Repudio):} Carencia de registros de auditoría centralizados e inmutables que certifiquen de manera fehaciente las modificaciones de matrículas, retiro de asignaturas o rectificación de notas.
     \item \textbf{I (Information Disclosure - Fuga de Información):} Exposición explícita de tecnologías y versiones desactualizadas en cabeceras de respuesta HTTP públicas (ej. cabecera observada \texttt{Server: nginx/1.16.1}), lo que brinda a atacantes vectores conocidos de explotación.
     \item \textbf{D (Denial of Service - Denegación de Servicio):} Susceptibilidad ante picos masivos de concurrencia simultánea en ventanas de matrícula sin mecanismos de rate-limiting en WAF ni balanceo elástico de carga.
-    \item \textbf{E (Elevation of Privilege - Escalada de Privilegios):} Riesgo de manipulación de parámetros de rol e identificadores de usuario (vulnerabilidades IDOR) en endpoints de la API REST interna (ej. rutas como \texttt{/matricula/alumno/*}).
+    \item \textbf{E (Elevation of Privilege - Escalada de Privilegios):} Riesgo de manipulación de parámetros de rol e identificadores de usuario (vulnerabilidades IDOR) en endpoints de la API REST interna (ej. rutas como \path{/matricula/alumno/*}).
 \end{enumerate}
 
 \section{Matriz STRIDE del Sistema de Matrícula}
 
-\begin{center}
 \footnotesize
 \begin{longtable}{>{\bfseries}c p{2.2cm} p{4.2cm} p{3.2cm} p{4.0cm}}
 \toprule
@@ -59,7 +58,6 @@ I & Info Disclosure & Exposición de versión en cabecera \texttt{Server: nginx/
 \midrule
 D & Denial of Service & Saturación de conexiones HTTP en días de matrícula & Indisponibilidad del servicio de matrícula & Configurar WAF perimetral y directivas \texttt{limit\_req} en Nginx \\
 \midrule
-E & Elevation of Priv. & Parámetros manipulables en API REST (\texttt{/matricula/alumno/*}) & Escalada horizontal o acceso a expedientes ajenos & Validación estricta de autorización y tokens JWT por rol \\
+E & Elevation of Priv. & Parámetros manipulables en API REST (\path{/matricula/alumno/*}) & Escalada horizontal o acceso a expedientes ajenos & Validación estricta de autorización y tokens JWT por rol \\
 \bottomrule
 \end{longtable}
-\end{center}

@@ -7,9 +7,8 @@ En esta sección se compilan las matrices técnicas, evidencias operativas y for
 \section*{Anexo 1: Inventario de Activos (Mapeo OSINT)}
 Tabla consolidada de los subdominios y servidores identificados mediante fuentes abiertas (\texttt{crt.sh} y DNS):
 
-\begin{center}
 \footnotesize
-\begin{longtable}{>{\bfseries}p{4.0cm} p{3.2cm} p{3.8cm} p{3.0cm}}
+\begin{longtable}{>{\bfseries}p{4.6cm} p{2.8cm} p{3.8cm} p{3.0cm}}
 \toprule
 \rowcolor{outermarginbgcolor}
 Subdominio Identificado & Dirección IP & Registro SSL / Origen & Estado Operativo \\
@@ -22,25 +21,23 @@ Subdominio Identificado & Dirección IP & Registro SSL / Origen & Estado Operati
 \endhead
 \bottomrule
 \endfoot
-\texttt{matricula.unap.edu.pe} & 161.132.24.61 & Let's Encrypt Authority & Activo (Producción) \\
+\path{matricula.unap.edu.pe} & 161.132.24.61 & Let's Encrypt Authority & Activo (Producción) \\
 \midrule
-\texttt{campus.unap.edu.pe} & 161.132.24.62 & Let's Encrypt Authority & Activo (Producción) \\
+\path{campus.unap.edu.pe} & 161.132.24.62 & Let's Encrypt Authority & Activo (Producción) \\
 \midrule
-\texttt{sitrad.unap.edu.pe} & 161.132.24.63 & cPanel / Sectigo SSL & Activo (Administrativo) \\
+\path{sitrad.unap.edu.pe} & 161.132.24.63 & cPanel / Sectigo SSL & Activo (Administrativo) \\
 \midrule
-\texttt{repositorio.unap.edu.pe} & 161.132.24.64 & GlobalSign Root CA & Activo (Académico) \\
+\path{repositorio.unap.edu.pe} & 161.132.24.64 & GlobalSign Root CA & Activo (Académico) \\
 \midrule
-\texttt{dev.unap.edu.pe} & 161.132.24.70 & Certificado autofirmado & Riesgo (Entorno Dev) \\
+\path{dev.unap.edu.pe} & 161.132.24.70 & Certificado autofirmado & Riesgo (Entorno Dev) \\
 \midrule
-\texttt{prue1.unap.edu.pe} & 161.132.24.71 & Certificado expirado & Riesgo (Entorno Legado) \\
+\path{prue1.unap.edu.pe} & 161.132.24.71 & Certificado expirado & Riesgo (Entorno Legado) \\
 \bottomrule
 \end{longtable}
-\end{center}
 
 \section*{Anexo 2: Matriz de Criticidad de Activos (Tríada CIA)}
 Calificación de impacto institucional basada en Confidencialidad (C), Integridad (I) y Disponibilidad (A):
 
-\begin{center}
 \small
 \begin{longtable}{>{\bfseries}p{4.5cm} c c c c}
 \toprule
@@ -66,7 +63,6 @@ Correo Institucional & Muy Alto & Alto & Alto & \textbf{Alto} \\
 Portal Web de Facultades & Bajo & Medio & Medio & \textbf{Medio} \\
 \bottomrule
 \end{longtable}
-\end{center}
 
 \section*{Anexo 3: Matriz STRIDE y Evidencias Técnicas}
 \begin{itemize}

@@ -7,9 +7,9 @@ En este capítulo se modela el ciclo de intrusión lineal que un adversario ejec
 El escenario reconstruye un vector de intrusión dirigido hacia el personal docente y la plataforma académica:
 
 \begin{enumerate}
-    \item \textbf{Reconocimiento (Reconnaissance):} Mapeo pasivo de subdominios universitarios (\texttt{matricula.unap.edu.pe}) y extracción de nombres y correos de directores de escuela y docentes mediante fuentes abiertas (OSINT).
-    \item \textbf{Armamento (Weaponization):} Clonación visual fidedigna del formulario de inicio de sesión de \texttt{matricula.unap.edu.pe} montado en un servidor externo bajo dominio tipográfico.
-    \item \textbf{Entrega (Delivery):} Envío masivo de correos electrónicos fraudulentos suplantando al Vicerrectorado Académico, aprovechando la \textbf{ausencia de registro DMARC (NXDOMAIN)} y un registro \textbf{SPF excesivamente permisivo} (\texttt{~all} SoftFail) en el dominio institucional \texttt{unap.edu.pe}.
+    \item \textbf{Reconocimiento (Reconnaissance):} Mapeo pasivo de subdominios universitarios (\path{matricula.unap.edu.pe}) y extracción de nombres y correos de directores de escuela y docentes mediante fuentes abiertas (OSINT).
+    \item \textbf{Armamento (Weaponization):} Clonación visual fidedigna del formulario de inicio de sesión de \path{matricula.unap.edu.pe} montado en un servidor externo bajo dominio tipográfico.
+    \item \textbf{Entrega (Delivery):} Envío masivo de correos electrónicos fraudulentos suplantando al Vicerrectorado Académico, aprovechando la \textbf{ausencia de registro DMARC (NXDOMAIN)} y un registro \textbf{SPF excesivamente permisivo} (\path{~all} SoftFail) en el dominio institucional \path{unap.edu.pe}.
     \item \textbf{Explotación (Exploitation):} El docente o alumno hace clic en el enlace malicioso e introduce sus credenciales oficiales en la página clonada apócrifa.
     \item \textbf{Instalación (Installation):} El atacante captura las credenciales válidas y accede directamente a las plataformas institucionales internas sin requerimiento de segundo factor (MFA).
     \item \textbf{Comando y Control (C2):} Establecimiento de túneles y sesiones interactivas cifradas HTTPS hacia el exterior que pasan desapercibidas por carecer de inspección TLS profunda.
@@ -19,7 +19,6 @@ El escenario reconstruye un vector de intrusión dirigido hacia el personal doce
 \section{Puntos de Quiebre Defensivo y Controles de Interrupción}
 El principio fundamental de la Cyber Kill Chain establece que neutralizar cualquier fase interrumpe la consumación del ataque:
 
-\begin{center}
 \small
 \begin{longtable}{>{\bfseries}p{3.2cm} p{4.2cm} p{7.5cm}}
 \toprule
@@ -49,7 +48,6 @@ Fase Kill Chain & Acción del Adversario en UNAP & Control Preventivo / Detectiv
 7. Objetivos & Extracción y alteración de notas & Control RBAC estricto, inmutabilidad de actas y alertas SIEM \\
 \bottomrule
 \end{longtable}
-\end{center}
 
 \begin{cmdbox}{Evidencia Técnica DNS: Ausencia de DMARC y SPF Permisivo}
 # Consulta de registro DMARC en el dominio institucional

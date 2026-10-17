@@ -1,8 +1,10 @@
-\chapter*{Sección Preliminar: Declaración Ética, Marco Legal y Metodología de Evaluación}
+\chapter*{Declaración Ética, Marco Legal y Metodología}
 \addcontentsline{toc}{chapter}{Sección Preliminar: Declaración Ética, Marco Legal y Metodología}
 \markboth{Declaración Ética y Marco Legal}{Declaración Ética y Marco Legal}
 
-\noindent\textbf{Marco de Integración Metodológica Institucional:}
+\vspace*{1.2cm}
+
+\noindent\textbf{Sección Preliminar: Marco de Integración Metodológica Institucional}
 \begin{center}
 \small
 \textbf{NIST CSF 2.0} (Gestión) $\longrightarrow$ \textbf{STRIDE} (Amenazas) $\longrightarrow$ \textbf{MITRE ATT\&CK} (TTPs) \\
@@ -11,12 +13,29 @@ $\longrightarrow$ \textbf{Threat Intelligence} (Vigilancia) $\longrightarrow$ \t
 
 \vspace{0.8em}
 
-\section{Declaración Ética y de No Intrusión}
+\newcommand{\prelimsec}[2]{%
+  \par\vspace{0.9em}%
+  \noindent\tikz[baseline=(sec.base)]{
+    \node[fill=outermarginfgcolor,text=white,font=\sffamily\bfseries\large,inner xsep=3.5mm,inner ysep=1.8mm,rounded corners=3pt] (sec) {#1};
+    \node[text=black,font=\large\bfseries,right=3mm of sec,anchor=west] {\parbox{0.82\textwidth}{\raggedright #2}};
+  }\par\vspace{0.5em}\noindent%
+}
+
+\newcommand{\prelimsubsec}[2]{%
+  \par\vspace{0.7em}%
+  \noindent\tikz[baseline=(sec.base)]{
+    \node[fill=outermarginfgcolor!80,text=white,font=\sffamily\bfseries,inner xsep=2.5mm,inner ysep=1.2mm,rounded corners=2pt] (sec) {#1};
+    \node[text=black,font=\bfseries,right=2.5mm of sec,anchor=west] {\parbox{0.84\textwidth}{\raggedright #2}};
+  }\par\vspace{0.4em}\noindent%
+}
+
+\prelimsec{1}{Declaración Ética y de No Intrusión}
+
 El presente documento, titulado \textbf{``Plan de Ciberseguridad Institucional de la Universidad Nacional del Altiplano de Puno (UNAP)''}, ha sido formulado exclusivamente con fines de investigación académica, auditoría defensiva (\textit{Blue Team}) y diseño de arquitectura de seguridad (\textit{Security by Design}).
 
 Los autores/evaluadores declaran bajo juramento de integridad profesional y académica:
 
-\begin{itemize}
+\begin{itemize}[itemsep=3pt,topsep=3pt,parsep=0pt]
     \item \textbf{Ausencia de Pruebas Intrusivas:} En ninguna etapa de la elaboración de este plan se llevaron a cabo análisis de penetración activos (\textit{Pentesting}), pruebas de denegación de servicio (DoS/DDoS), inyecciones de código malicioso, ataques de fuerza bruta contra paneles autenticados, ni explotación de vulnerabilidades en los sistemas de información institucionales.
     
     \item \textbf{Preservación de la Continuidad Operativa:} Ninguna de las consultas realizadas generó alteración, interrupción, degradación de rendimiento o indisponibilidad en los servicios informáticos de la UNAP.
@@ -26,10 +45,13 @@ Los autores/evaluadores declaran bajo juramento de integridad profesional y acad
     \item \textbf{Finalidad Propositiva y Mitigadora:} Los hallazgos y evidencias recopilados tienen el único propósito de justificar técnicamente la necesidad de implementar controles preventivos bajo el marco NIST CSF 2.0, mitigar amenazas modeladas con STRIDE, mapear tácticas adversarias en MITRE ATT\&CK e implementar un modelo de Confianza Cero (\textit{Zero Trust}) que eleve la postura de ciberseguridad de la UNAP.
 \end{itemize}
 
-\section{Marco Legal Aplicable en el Estado Peruano}
+\clearpage
+
+\prelimsec{2}{Marco Legal Aplicable en el Estado Peruano}
+
 El desarrollo de este plan y la justificación de los controles técnicos se fundamentan en el marco normativo nacional vigente en materia de gobernanza digital, seguridad de la información y delitos informáticos:
 
-\begin{itemize}
+\begin{itemize}[itemsep=3pt,topsep=3pt,parsep=0pt]
     \item \textbf{Ley N° 30096 (Ley de Delitos Informáticos) y su modificatoria Ley N° 30171:} La metodología empleada respeta irrestrictamente los artículos referidos al acceso ilícito (Art. 2), atentado a la integridad de datos y sistemas informáticos (Arts. 3 y 4) y fraude informático (Art. 8). Al no existir intrusión ni vulneración de medidas de seguridad perimetral, la recolección de telemetría pasiva no transgrede esta ley.
     
     \item \textbf{Decreto de Urgencia N° 006-2020 (Decreto de Urgencia que crea el Sistema Nacional de Transformación Digital):} Establece como deber de todas las entidades públicas peruanas, incluidas las universidades nacionales, la implementación de un Marco de Seguridad y Confianza Digital que proteja los activos de información del Estado.
@@ -41,35 +63,49 @@ El desarrollo de este plan y la justificación de los controles técnicos se fun
     \item \textbf{Resoluciones y Directivas de la Secretaría de Gobierno y Transformación Digital (SGTD - PCM):} En su calidad de ente rector nacional en ciberseguridad y coordinador del Centro Nacional de Seguridad Digital (CSIRT Nacional).
 \end{itemize}
 
-\section{Metodología de Evaluación y Recolección de Evidencias}
+\clearpage
+
+\prelimsec{3}{Metodología de Evaluación y Recolección de Evidencias}
+
 Para la identificación de brechas y sustento del análisis de amenazas, se utilizó estrictamente una metodología de evaluación pasiva de fuentes abiertas (OSINT) e inspección de cliente en comunicaciones estándar, desglosada en los siguientes procedimientos:
 
-\subsection{Inteligencia de Fuentes Abiertas y Consulta DNS Pasiva (OSINT)}
-\begin{itemize}
-    \item \textbf{Descubrimiento de Superficie Expuesta:} Se consultaron los registros públicos de Transparencia de Certificados SSL/TLS (\textit{Certificate Transparency Logs} vía \texttt{crt.sh}), identificando la existencia de más de un centenar de subdominios registrados bajo la zona \texttt{*.unap.edu.pe} sin interactuar directamente con los hosts objetivo.
+\prelimsubsec{A}{Inteligencia de Fuentes Abiertas y Consulta DNS Pasiva (OSINT)}
+
+\begin{itemize}[itemsep=1.5pt,topsep=1.5pt,parsep=0pt,partopsep=0pt]
+    \item \textbf{Descubrimiento de Superficie Expuesta:} Se consultaron los registros públicos de Transparencia de Certificados SSL/TLS (\textit{Certificate Transparency Logs} vía \texttt{crt.sh}), identificando la existencia de más de un centenar de subdominios registrados bajo la zona \path{*.unap.edu.pe} sin interactuar directamente con los hosts objetivo.
     
     \item \textbf{Auditoría de Registros de Correo Institucional:} Se ejecutaron peticiones estándar de resolución de nombres DNS (tipo TXT) mediante la herramienta de diagnóstico de sistemas operativos \texttt{nslookup} apuntando a servidores DNS públicos, con el fin de evaluar la postura de los registros de autenticación de correo:
-    \begin{itemize}
-        \item Verificación de la directiva SPF (\textit{Sender Policy Framework}) en el dominio raíz \texttt{unap.edu.pe}.
-        \item Verificación de la presencia o ausencia de políticas de alineación DMARC (\textit{Domain-based Message Authentication, Reporting, and Conformance}) en el nodo \texttt{\_dmarc.unap.edu.pe}.
+    \begin{itemize}[itemsep=1pt,topsep=1pt,parsep=0pt,partopsep=0pt]
+        \item Verificación de la directiva SPF (\textit{Sender Policy Framework}) en el dominio raíz \path{unap.edu.pe}.
+        \item Verificación de la presencia o ausencia de políticas de alineación DMARC (\textit{Domain-based Message Authentication, Reporting, and Conformance}) en el nodo \path{_dmarc.unap.edu.pe}.
     \end{itemize}
 \end{itemize}
 
-\subsection{Inspección Pasiva del Lado del Cliente (Client-Side Inspection)}
-\begin{itemize}
-    \item \textbf{Análisis de Cabeceras HTTP de Respuesta:} Mediante las herramientas de desarrollo web del navegador (DevTools - F12 / RFC 7230) en el marco de una navegación regular autorizada hacia los portales \texttt{https://matricula.unap.edu.pe} y \texttt{https://campus.unap.edu.pe}, se examinaron los encabezados enviados de forma pública por los servidores web:
-    \begin{itemize}
+\prelimsubsec{B}{Inspección Pasiva del Lado del Cliente (Client-Side Inspection)}
+
+\begin{itemize}[itemsep=1.5pt,topsep=1.5pt,parsep=0pt,partopsep=0pt]
+    \item \textbf{Análisis de Cabeceras HTTP de Respuesta:} Mediante las herramientas de desarrollo web del navegador (DevTools - F12 / RFC 7230) en el marco de una navegación regular autorizada hacia los portales \path{https://matricula.unap.edu.pe} y \path{https://campus.unap.edu.pe}, se examinaron los encabezados enviados de forma pública por los servidores web:
+    \begin{itemize}[itemsep=1pt,topsep=1pt,parsep=0pt,partopsep=0pt]
         \item Exposición de metadatos de software y versión en el encabezado \texttt{Server} (\texttt{nginx/1.16.1}).
-        \item Comprobación del estado de la directiva de seguridad en el transporte \texttt{Strict-Transport-Security} (HSTS).
-        \item Inspección de cabeceras de defensa contra ataques visuales y de contexto (\texttt{X-Frame-Options}, \texttt{Content-Security-Policy}, \texttt{X-Content-Type-Options}).
+        \item Comprobación del estado de la directiva de transporte seguro HSTS (\texttt{Strict-}\allowbreak\texttt{Transport-}\allowbreak\texttt{Security}).
+        \item Inspección de cabeceras de defensa contra ataques visuales y de contexto (\path{X-Frame-Options}, \allowbreak\path{Content-Security-Policy}, \allowbreak\path{X-Content-Type-Options}).
     \end{itemize}
     
-    \item \textbf{Inspección de Atributos de Almacenamiento de Sesión:} Revisión de las banderas de seguridad asignadas a las cookies de autenticación generadas por el entorno de desarrollo (.NET Core: \texttt{.AspNetCore.Cookies}, \texttt{CookieTempDataProvider}) para evaluar la presencia de los atributos \texttt{HttpOnly}, \texttt{Secure} y \texttt{SameSite}.
+    \item \textbf{Inspección de Atributos de Almacenamiento de Sesión:} Revisión de las banderas de seguridad asignadas a las cookies de autenticación generadas por el entorno de desarrollo (.NET Core: \path{.AspNetCore.Cookies}, \path{CookieTempDataProvider}) para evaluar la presencia de los atributos \texttt{HttpOnly}, \texttt{Secure} y \texttt{SameSite}.
 \end{itemize}
 
-\subsection{Modelado de Amenazas y Simulación Teórica (Tabletop Simulation)}
+\prelimsubsec{C}{Modelado de Amenazas y Simulación Teórica (Tabletop Simulation)}
+
 La articulación de las amenazas no provino de incidentes forzados en producción, sino del cruce sistemático entre las vulnerabilidades de configuración verificadas pasivamente y las matrices estandarizadas de la industria (STRIDE de Microsoft, la taxonomía de técnicas de MITRE ATT\&CK Enterprise v14 y las 7 fases de intrusión de la Cyber Kill Chain de Lockheed Martin).
 
-\vspace{1em}
-\noindent\textbf{Nota de Rigor Académico:} Con este marco queda formalmente establecida la rigurosidad técnica, ética y legal del documento frente a cualquier comisión evaluadora o autoridad universitaria.
+\begin{tcolorbox}[
+    colback=outermarginbgcolor!40,
+    colframe=outermarginfgcolor,
+    arc=1.5mm,
+    boxrule=0.8pt,
+    left=3mm,right=3mm,top=2mm,bottom=2mm,
+    before skip=0.5em,after skip=0.5em
+]
+\textbf{Nota de Rigor Académico:} Con este marco queda formalmente establecida la rigurosidad técnica, ética y legal del documento frente a cualquier comisión evaluadora o autoridad universitaria.
+\end{tcolorbox}
 \clearpage
