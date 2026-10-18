@@ -1,96 +1,251 @@
-\chapter{Análisis con MITRE ATT\&CK}
-\label{ch:mitre_attack}
+\chapter{Análisis mediante MITRE ATT\&CK}\label{ch:mitre_attack}
 
-Para caracterizar el comportamiento táctico de los adversarios, se utiliza la matriz \textbf{MITRE ATT\&CK for Enterprise}, permitiendo identificar brechas de visibilidad e implementar reglas de detección precisas.
+\section{Fundamentación y Marco Teórico de MITRE ATT\&CK}
 
-\section{Estudio de TTPs Aplicables a la Superficie de la UNAP}
-A continuación, se describen las Tácticas, Técnicas y Procedimientos (TTPs) más relevantes para la infraestructura evaluada:
+El marco MITRE ATT\&CK (\textit{Adversarial Tactics, Techniques, and Common Knowledge}) es una base de conocimiento global y estandarizada que clasifica el comportamiento táctico y técnico de actores maliciosos basándose en observaciones directas del mundo real.
+
+A diferencia de modelos estrictamente lineales (como la \textit{Cyber Kill Chain}), MITRE ATT\&CK opera como una matriz multidimensional no secuencial. Su estructura permite comprender no solo qué fase atraviesa una intrusión, sino cómo actúa técnicamente el adversario en cada etapa mediante tres niveles jerárquicos:
 
 \begin{itemize}
-    \item \textbf{Reconocimiento (TA0043):}
-    \begin{itemize}
-        \item \textbf{T1596 (Search Open Technical Databases):} Identificación de subdominios y certificados mediante plataformas públicas como \texttt{crt.sh}.
-        \item \textbf{T1589 (Gather Victim Identity Info):} Recolección de correos institucionales de autoridades y docentes desde la web institucional.
-    \end{itemize}
-    \item \textbf{Acceso Inicial (TA0001):}
-    \begin{itemize}
-        \item \textbf{T1566.002 (Spearphishing Link):} Envío de enlaces maliciosos simulando comunicaciones del rectorado o la OTI.
-        \item \textbf{T1078 (Valid Accounts):} Acceso a plataformas universitarias utilizando credenciales legítimas comprometidas sin factor MFA.
-    \end{itemize}
-    \item \textbf{Ejecución (TA0002):}
-    \begin{itemize}
-        \item \textbf{T1059 (Command and Scripting Interpreter):} Ejecución no autorizada de comandos en el intérprete del servidor web a través de vulnerabilidades de aplicación.
-    \end{itemize}
-    \item \textbf{Persistencia (TA0003):}
-    \begin{itemize}
-        \item \textbf{T1505.003 (Web Shell):} Carga de archivos maliciosos en directorios de carga (\textit{uploads}) del Campus Virtual o portales web.
-    \end{itemize}
-    \item \textbf{Escalada de Privilegios (TA0004):}
-    \begin{itemize}
-        \item \textbf{T1068 (Exploitation for Privilege Escalation):} Aprovechamiento de fallos en versiones desactualizadas de software base (ej. servidores web Nginx o kernels Linux).
-    \end{itemize}
-    \item \textbf{Descubrimiento (TA0007):}
-    \begin{itemize}
-        \item \textbf{T1046 (Network Service Discovery):} Escaneo de puertos y servicios internos lanzado desde estaciones de cómputo o laboratorios de alumnos.
-    \end{itemize}
-    \item \textbf{Movimiento Lateral (TA0008):}
-    \begin{itemize}
-        \item \textbf{T1021.002 (SMB Shares):} Propagación entre estaciones de trabajo administrativas mediante carpetas compartidas sin segmentar.
-    \end{itemize}
-    \item \textbf{Exfiltración (TA0010):}
-    \begin{itemize}
-        \item \textbf{T1048 (Exfiltration Over Alternative Protocol):} Salida de bases de datos o información confidencial mediante canales web cifrados o protocolos no supervisados.
-    \end{itemize}
+    \item \textbf{Tácticas (El Objetivo):} Representan el ``por qué'' de una acción; la meta operativa intermedia que persigue el atacante (ej. Acceso Inicial, Persistencia, Movimiento Lateral).
+    \item \textbf{Técnicas (El Método):} Representan el ``cómo''; el método tecnológico o procedimental concreto empleado para alcanzar la táctica (ej. \textit{Spearphishing Link}, \textit{Valid Accounts}, \textit{Web Shell}).
+    \item \textbf{Subtécnicas y Procedimientos:} La implementación específica y detallada documentada en el comportamiento de grupos de ciberamenazas conocidos (APTs) o variantes de malware.
 \end{itemize}
 
-\section{Matriz MITRE ATT\&CK Institucional y Brechas de Visibilidad}
+En el contexto de la Universidad Nacional del Altiplano de Puno (UNAP), la matriz MITRE ATT\&CK Enterprise v14 se utiliza como el estándar técnico para:
+
+\begin{enumerate}
+    \item \textbf{Evaluación de cobertura:} Evaluar de forma sistemática la cobertura defensiva frente al perfil de intrusión universitario.
+    \item \textbf{Mapeo de debilidades:} Mapear las debilidades de configuración detectadas en el relevamiento perimetral (\texttt{Server: nginx/1.16.1}, falta de directiva HSTS, cookies de sesión ASP.NET Core y ausencia de registros DMARC).
+    \item \textbf{Telemetría y detección:} Definir reglas de telemetría y monitoreo (SIEM/EDR) basadas en registros reales de auditoría.
+\end{enumerate}
+
+\section{Procedimiento de Análisis y Evaluación de Brechas}
+
+Para operacionalizar MITRE ATT\&CK dentro del Plan de Ciberseguridad de la UNAP, se implementa un procedimiento estructurado de seis etapas:
 
 \begin{center}
-\small
-\begin{longtable}{>{\bfseries}p{3.2cm} p{4.0cm} p{4.2cm} p{3.2cm}}
+\begin{tikzpicture}[
+    node distance=0.85cm and 0.8cm,
+    stepcard/.style 2 args={
+        rectangle,
+        rounded corners=5pt,
+        draw=#1!85!black,
+        fill=#1!9,
+        line width=1.1pt,
+        text width=7.4cm,
+        minimum height=1.65cm,
+        inner sep=6.5pt,
+        align=left
+    },
+    flowarrow/.style={
+        -{Stealth[scale=1.05]},
+        line width=1.4pt,
+        color=fg!85!black
+    }
+]
+\definecolor{procColorA}{HTML}{1A365D} % Azul Marino Profundo
+\definecolor{procColorB}{HTML}{0D6EFD} % Azul Institucional
+\definecolor{procColorC}{HTML}{087F5B} % Verde Esmeralda
+\definecolor{procColorD}{HTML}{D97706} % Ambar Calido
+\definecolor{procColorE}{HTML}{DC2626} % Rojo Carmesi
+\definecolor{procColorF}{HTML}{4F46E5} % Indigo Tecnologico
+
+% Fila 1
+\node[stepcard={procColorA}{}] (step1) {
+    {\sffamily\bfseries\small\color{procColorA} 1. Selección de Amenazas Prioritarias}\\[2pt]
+    {\footnotesize Perfil del atacante universitario: cibercrimen masivo, ransomware y explotación de software desactualizado.}
+};
+
+\node[stepcard={procColorB}{}, right=0.8cm of step1] (step2) {
+    {\sffamily\bfseries\small\color{procColorB} 2. Identificación de Tácticas Relevantes}\\[2pt]
+    {\footnotesize 8 fases críticas: Reconocimiento $\rightarrow$ Acceso Inicial $\rightarrow$ Ejecución $\rightarrow$ ... $\rightarrow$ Exfiltración.}
+};
+
+% Fila 2
+\node[stepcard={procColorC}{}, below=0.85cm of step1] (step3) {
+    {\sffamily\bfseries\small\color{procColorC} 3. Mapeo de Técnicas y Subtécnicas}\\[2pt]
+    {\footnotesize Asociación directa con portales web, APIs de matrícula, servidores Nginx/Kestrel y puestos locales.}
+};
+
+\node[stepcard={procColorD}{}, right=0.8cm of step3] (step4) {
+    {\sffamily\bfseries\small\color{procColorD} 4. Evaluación de Brechas (Gap Analysis)}\\[2pt]
+    {\footnotesize Contraste con controles OTI: detección de puntos ciegos en telemetría, PowerShell y ausencia de MFA.}
+};
+
+% Fila 3
+\node[stepcard={procColorE}{}, below=0.85cm of step3] (step5) {
+    {\sffamily\bfseries\small\color{procColorE} 5. Creación de Reglas de Detección}\\[2pt]
+    {\footnotesize Reglas estandarizadas: eventos Windows Sysmon, directivas auditd Linux y reglas SIEM Wazuh.}
+};
+
+\node[stepcard={procColorF}{}, right=0.8cm of step5] (step6) {
+    {\sffamily\bfseries\small\color{procColorF} 6. Elaboración de Procedimientos de Respuesta}\\[2pt]
+    {\footnotesize Definición de playbooks inmediatos CSIRT-UNAP para contención, aislamiento y mitigación.}
+};
+
+% Conectores de flujo
+\draw[flowarrow] (step1.east) -- (step2.west);
+\draw[flowarrow] (step2.south) -- ++(0,-0.42) -| (step3.north);
+\draw[flowarrow] (step3.east) -- (step4.west);
+\draw[flowarrow] (step4.south) -- ++(0,-0.42) -| (step5.north);
+\draw[flowarrow] (step5.east) -- (step6.west);
+
+\end{tikzpicture}
+\end{center}
+
+A continuación, se detalla el contenido operativo de cada fase del procedimiento:
+
+\begin{enumerate}
+    \item \textbf{Selección de Amenazas Prioritarias:} Se define el perfil del adversario que ataca al sector educación superior peruano: actores motivados por robo masivo de identidades/credenciales, grupos de \textit{ransomware} que extorsionan con la paralización de sistemas de matrícula o planillas, y atacantes oportunistas que explotan software público desactualizado.
+    \item \textbf{Identificación de Tácticas Relevantes:} Se seleccionan las 8 fases críticas de intrusión: Reconocimiento $\rightarrow$ Acceso Inicial $\rightarrow$ Ejecución $\rightarrow$ Persistencia $\rightarrow$ Escalada de Privilegios $\rightarrow$ Descubrimiento $\rightarrow$ Movimiento Lateral $\rightarrow$ Exfiltración.
+    \item \textbf{Mapeo de Técnicas Específicas:} Se asocian técnicas de la matriz ATT\&CK a los componentes descubiertos en la UNAP (portales web, APIs de matrícula, servidores Nginx/Kestrel, controladores de dominio y puestos de trabajo).
+    \item \textbf{Evaluación de Brechas de Cobertura (\textit{Gap Analysis}):} Se contrasta la capacidad de detección actual de la OTI frente a cada técnica, identificando puntos ciegos (por ejemplo: falta de inspección en terminales PowerShell, logs web que no se correlacionan o ausencia de alertas por uso anómalo de credenciales válidas).
+    \item \textbf{Creación de Reglas de Detección:} Se diseñan reglas específicas en formato de eventos de Windows (Sysmon/Event ID), directivas de inspección para Linux auditd y firmas de correlación en el SIEM institucional (Wazuh).
+    \item \textbf{Definición de Respuestas:} Se establecen acciones inmediatas para mitigar o interrumpir cada técnica cuando sea alertada por el centro de operaciones de seguridad.
+\end{enumerate}
+
+\section{Matriz Institucional MITRE ATT\&CK (UNAP)}
+
+La siguiente tabla articula el mapeo completo de técnicas aplicadas a la infraestructura real evaluada, contrastando los controles existentes, las brechas identificadas y la regla técnica de detección:
+
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.28}
+\begin{longtable}{>{\bfseries\raggedright\arraybackslash}p{2.4cm} >{\ttfamily\raggedright\arraybackslash}p{1.9cm} >{\raggedright\arraybackslash}p{2.3cm} >{\raggedright\arraybackslash}p{2.9cm} >{\raggedright\arraybackslash}p{2.9cm} >{\raggedright\arraybackslash}p{3.1cm}}
 \toprule
 \rowcolor{outermarginbgcolor}
-Táctica MITRE & Técnica / ID & Escenario en la UNAP & Control / Brecha de Visibilidad \\
+Fase / Táctica & ID Técnica & Nombre de Técnica & Comportamiento del Adversario en la UNAP & Controles Existentes / Brecha Identificada & Mecanismo de Detección y Regla SIEM \\
 \midrule
 \endfirsthead
 \toprule
 \rowcolor{outermarginbgcolor}
-Táctica MITRE & Técnica / ID & Escenario en la UNAP & Control / Brecha de Visibilidad \\
+Fase / Táctica & ID Técnica & Nombre de Técnica & Comportamiento del Adversario en la UNAP & Controles Existentes / Brecha Identificada & Mecanismo de Detección y Regla SIEM \\
 \midrule
 \endhead
 \bottomrule
 \endfoot
-Reconocimiento & T1596 / T1589 & Rastreo pasivo en crt.sh y directorio docente & Brecha: Información expuesta públicamente \\
+
+Reconocimiento & T1596.001 & Search Open Technical Databases: DNS/\allowbreak Certificates & Consulta masiva de certificados SSL en \texttt{crt.sh} y registros DNS para mapear subdominios internos (\texttt{dev}, \texttt{prue1}, \texttt{cpanel.*}). & \textbf{Brecha:} Actividad 100\% pasiva; indetectable en el firewall perimetral por ejecutarse sobre servidores públicos de terceros. & Monitoreo externo mensual de Certificate Transparency Logs mediante scripts automatizados en la OTI. \\
 \midrule
-Acceso Inicial & T1566.002 / T1078 & Phishing con enlaces apócrifos y cuentas sin MFA & Control: Despliegue de MFA y filtrado de correo \\
+
+Reconocimiento & T1589.002 & Gather Victim Identity Info: Email Addresses & Búsqueda y recolección de correos de docentes y autoridades en directorios públicos y resoluciones de \texttt{unap.edu.pe}. & \textbf{Brecha:} Nombres y correos expuestos sin mecanismos de ofuscación ni CAPTCHA en portales de facultades. & Implementación de Cloudflare / WAF perimetral para detectar \textit{scraping} agresivo y recolección masiva de HTML. \\
 \midrule
-Ejecución & T1059 & Ejecución de scripts en servidores web vulnerables & Control: Restricción de permisos y WAF \\
+
+Acceso Inicial & T1566.002 & Phishing: Spearphishing Link & Envío de correos simulando ser la OTI con enlaces a sitios clonados para robar accesos al sistema de matrícula. & \textbf{Brecha Crítica:} Inexistencia de registro DMARC (\texttt{NXDOMAIN}) y política permisiva \texttt{SPF: \~all} en \texttt{unap.edu.pe}. & Detección de correos entrantes con remitente simulado; activación de alertas por fallos de alineación SPF/DKIM en pasarela de correo. \\
 \midrule
-Persistencia & T1505.003 & Carga de Web Shell en formularios sin sanitizar & Brecha: Carencia de monitoreo de integridad FIM \\
+
+Acceso Inicial & T1078.003 & Valid Accounts: Local Accounts & Autenticación ilegítima en la API de matrícula o VPN utilizando credenciales legítimas comprometidas de estudiantes/docentes. & \textbf{Brecha:} Falta de autenticación multifactor (MFA) obligatoria y nula correlación geográfica de inicios de sesión. & \textbf{Regla SIEM (Wazuh):} Alerta por inicios de sesión simultáneos imposibles (dos IPs con más de 300 km de distancia en un intervalo menor a 15 minutos). \\
 \midrule
-Escalada Priv. & T1068 & Exploits en Nginx 1.16.1 o Linux legados & Control: Gestión y parcheo de vulnerabilidades \\
+
+Ejecución & T1059.001 & Command and Scripting Interpreter: PowerShell & Ejecución de scripts \textit{encoded} descargados mediante macros o ejecutables fraudulentos en computadoras administrativas. & \textbf{Brecha:} Antivirus tradicional sin capacidad de inspección de línea de comandos en puestos de tesorería y decanatos. & \textbf{Sysmon Event ID 1 / PowerShell Event ID 4104:} Alerta por ejecución de \texttt{powershell.exe} con argumentos \texttt{-EncodedCommand}, \texttt{-WindowStyle Hidden} o \texttt{DownloadString}. \\
 \midrule
-Descubrimiento & T1046 & Escaneo de red interna desde laboratorios estudiantiles & Brecha: Falta de microsegmentación entre VLANs \\
+
+Persistencia & T1505.003 & Server Software Component: Web Shell & Subida de archivos ejecutables camuflados (\texttt{.php}, \texttt{.aspx}) en carpetas públicas de subida de fotos de admisión o campus virtual. & \textbf{Brecha:} Servidores web sin bloqueo de ejecución de código en directorios \texttt{/uploads/} o \texttt{/assets/}. & \textbf{Monitoreo de Integridad (FIM - Wazuh):} Alerta instantánea ante la creación o modificación de archivos con extensiones ejecutables en rutas web públicas. \\
 \midrule
-Mov. Lateral & T1021.002 & Movimiento vía SMB en redes de oficinas & Control: Deshabilitar SMBv1 y aislar puestos \\
+
+Escalada Priv. & T1068 & Exploitation for Privilege Escalation & Explotación de vulnerabilidades de kernel local o configuraciones defectuosas en el proxy Linux Nginx desactualizado. & \textbf{Brecha:} Presencia de \texttt{Server: nginx/1.16.1} (rama del 2019 con vulnerabilidades conocidas y parches desactualizados). & Inspección de llamadas al sistema con \texttt{auditd} en Linux; detección de ejecuciones sospechosas con privilegios root invocadas desde \texttt{nginx} o \texttt{www-data}. \\
 \midrule
-Exfiltración & T1048 & Extracción de tablas de notas vía HTTPS no filtrado & Control: Inspección TLS y DLP perimetral \\
+
+Descubrimiento & T1046 & Network Service Discovery & Barrido de puertos internos (TCP 5432 / 1433 / 445) desde una PC infectada en laboratorios de cómputo para ubicar la base de datos central. & \textbf{Brecha:} Red universitaria plana en ciertas facultades, sin aislamiento estricto de puertos cliente a cliente. & \textbf{Detección IDS (Suricata / Snort):} Alerta por ráfagas de paquetes TCP SYN dirigidas a más de 20 puertos distintos en menos de 5 segundos desde una misma IP local. \\
+\midrule
+
+Movimiento Lateral & T1021.002 & Remote Services: SMB/Windows Admin Shares & Propagación hacia servidores o PCs contables mediante el protocolo SMB (puerto 445) reutilizando credenciales administrativas. & \textbf{Brecha:} Uso de contraseñas de administrador local idénticas en equipos de trabajo administrativos. & \textbf{Windows Event ID 4624 (Logon Type 3):} Bloqueo de tráfico SMB entre estaciones mediante firewall de host; alerta de conexiones remotas entre IPs de usuarios. \\
+\midrule
+
+Exfiltración & T1048.003 & Exfiltration Over Unencrypted / Encrypted Non-C2 Protocol & Envío masivo de volcados de bases de datos de notas, padrones de estudiantes o datos biométricos hacia servidores externos. & \textbf{Brecha:} Tráfico saliente de subida sin inspección de volumen ni controles DLP (\textit{Data Loss Prevention}). & \textbf{NetFlow / Zeek:} Alerta de umbral por transferencias salientes continuas que superen los 100 MB desde el segmento de servidores hacia IPs públicas no institucionales. \\
 \bottomrule
 \end{longtable}
 \end{center}
 
-\section{Regla de Detección SIEM (Wazuh / Sysmon)}
-Para mitigar la técnica de ejecución y persistencia (T1505.003 - Web Shell), se define la siguiente regla de correlación:
+\section{Especificación de Reglas de Detección e Implementación}
 
-\begin{cmdbox}{Regla Wazuh para Detección de Creación de Web Shell (/etc/rules/local\_rules.xml)}
-<group name='web,attack,'>
-  <rule id='100250' level='12'>
-    <if_group>syscheck</if_group>
-    <match>/var/www/html/uploads/</match>
-    <description>Alerta Critica: Creacion de archivo ejecutable (.php) en carpeta uploads</description>
+Para asegurar que el plan proporcione herramientas técnicas directamente aplicables en la OTI, se definen tres reglas de detección estandarizadas listas para ser integradas en el entorno defensivo:
+
+\subsection*{Regla 1: Detección de Web Shells en Servidores Web UNAP (Wazuh FIM / Sysmon)}
+Apunta a neutralizar la técnica T1505.003 en directorios de aplicaciones web (\texttt{matricula}, \texttt{campus}, \texttt{admision}):
+
+\begin{cmdbox}{Regla Wazuh FIM: Deteccion Web Shell (T1505.003)}
+<!-- Regla Wazuh / Ossec para detectar persistencia en servidores web -->
+<group name="syscheck,web_attack,">
+  <rule id="100100" level="12">
+    <if_sid>550</if_sid>
+    <field name="file">/var/www/|/usr/share/nginx/html/|C:\inetpub\wwwroot\</field>
+    <match regex="(?i)\.(php|aspx|asp|jsp|sh|py)$">file</match>
+    <description>ALERTA CRITICA: Creacion o modificacion de archivo ejecutable en directorio web publico (Posible Web Shell - T1505.003)</description>
     <mitre>
       <id>T1505.003</id>
     </mitre>
   </rule>
 </group>
 \end{cmdbox}
+
+\newpage
+\enlargethispage{1.5\baselineskip}
+\subsection*{Regla 2: Detección de Ejecución de Comandos Ocultos (PowerShell T1059.001)}
+Diseñada para estaciones de trabajo administrativas donde los atacantes intentan ejecutar cargas maliciosas recibidas por correo:
+
+\begin{cmdbox}{Sysmon Event ID 1: Proceso Sospechoso (T1059.001)}
+<!-- Deteccion Sysmon Event ID 1: Proceso sospechoso en estaciones UNAP -->
+<RuleGroup name="detect_powershell_hidden" groupRelation="or">
+  <ProcessCreate onmatch="include">
+    <Rule groupRelation="and">
+      <Image condition="end with">powershell.exe</Image>
+      <CommandLine condition="contains any">-enc;-encodedcommand;-w hidden;-windowstyle hidden;downloadstring;bypass</CommandLine>
+    </Rule>
+  </ProcessCreate>
+</RuleGroup>
+\end{cmdbox}
+
+\subsection*{Regla 3: Detección de Anomalías de Concurrencia y Fuerza Bruta en Nginx (T1110 / T1078)}
+Configurada sobre los logs de acceso de \texttt{/var/log/nginx/access.log} para mitigar ataques dirigidos contra el endpoint \texttt{/matricula/alumno/horario} o la interfaz de login:
+
+\begin{cmdbox}{Regla Sigma: Deteccion Fuerza Bruta en Nginx}
+# Regla de deteccion en SIEM / Sigma Rule
+title: Intentos Masivos de Fuerza Bruta / Credential Stuffing en Portal UNAP
+status: experimental
+description: Detecta mas de 15 respuestas HTTP 401 o 403 en menos de 1 minuto desde una misma IP contra los endpoints de autenticacion.
+logsource:
+  service: nginx_access
+detection:
+  selection:
+    uri|contains:
+      - '/matricula/login'
+      - '/auth/login'
+      - '/campus/login'
+    status:
+      - 401
+      - 403
+  timeframe: 1m
+  condition: selection | count() > 15
+tags:
+  - attack.credential_access
+  - attack.t1110.001
+level: high
+\end{cmdbox}
+
+\newpage
+\section{Acciones de Respuesta y Remediación por Táctica}
+
+Para cerrar el ciclo operativo, el equipo de respuesta a incidentes (CSIRT-UNAP) ejecutará los siguientes procedimientos operativos estándar ante la activación de alertas mapeadas en ATT\&CK:
+
+\begin{itemize}
+    \item \textbf{Ante alertas de Reconocimiento / Acceso Inicial (T1566 / T1078):}
+    \begin{itemize}
+        \item Revocación inmediata de tokens de sesión activos (\texttt{.AspNetCore.Cookies}) y forzado de reseteo de credenciales en el directorio unificado.
+        \item Aislamiento preventivo de la IP de origen en las tablas dinámicas del Firewall perimetral (\textit{Drop rules} por 72 horas).
+    \end{itemize}
+
+    \item \textbf{Ante alertas de Ejecución / Persistencia (T1059 / T1505):}
+    \begin{itemize}
+        \item Aislamiento lógico de la estación o servidor web mediante corte de red en switch/VLAN (manteniendo la alimentación eléctrica para análisis forense de memoria volátil).
+        \item Extracción de artefactos, eliminación de archivos no autorizados y restauración del contenedor/servicio web a partir de la imagen dorada (\textit{Golden Image}) del repositorio Git institucional.
+    \end{itemize}
+
+    \item \textbf{Ante alertas de Descubrimiento / Movimiento Lateral (T1046 / T1021):}
+    \begin{itemize}
+        \item Deshabilitación temporal de cuentas de servicio o usuarios locales de administración compartidos.
+        \item Verificación y bloqueo de tráfico este-oeste entre subredes de facultades y el segmento del Data Center de la OTI.
+    \end{itemize}
+\end{itemize}
