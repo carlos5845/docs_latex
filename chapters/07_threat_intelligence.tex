@@ -1,54 +1,271 @@
 \chapter{Inteligencia de Amenazas (Threat Intelligence)}
 \label{ch:threat_intelligence}
 
-En este capítulo se estructura el modelo de vigilancia activa de amenazas para anticipar ataques dirigidos contra el entorno universitario.
+En este capítulo se formaliza el programa de vigilancia activa, detección temprana y análisis continuo de ciberamenazas (Cyber Threat Intelligence - CTI), orientado a anticipar y neutralizar vectores de ataque contra el ecosistema tecnológico de la Universidad Nacional del Altiplano de Puno.
 
-\section{Fuentes y Vectores de Vigilancia}
-El programa de Inteligencia de Amenazas de la UNAP se enfoca en el monitoreo continuo de los siguientes riesgos críticos:
-\begin{itemize}
-    \item \textbf{Phishing de Credenciales Institucionales:} Campañas dirigidas a capturar cuentas de correo \texttt{@unap.edu.pe} y accesos a matrícula.
-    \item \textbf{Dominios Tipográficos (Typosquatting):} Detección temprana de registros maliciosos que imitan los portales oficiales (ej. dominios apócrifos como \texttt{unap-matricula.*}, \texttt{unap-portal.*}).
-    \item \textbf{Vulnerabilidades y Exploits Conocidos:} Alertas sobre fallos que afectan al stack tecnológico observado, en especial exploits dirigidos a \texttt{Nginx 1.16.1} y componentes web legados.
-    \item \textbf{Fuentes de Información Especializadas:} Monitoreo de feeds del CSIRT Nacional (Perú), catálogo CISA KEV (Known Exploited Vulnerabilities) y comunidades globales de inteligencia (AlienVault OTX).
+% Definición de colores para diagramas de Threat Intelligence
+\definecolor{ctiPhase1}{HTML}{1A5276} % Azul Marino
+\definecolor{ctiPhase2}{HTML}{117A65} % Verde Azulado / Teal
+\definecolor{ctiPhase3}{HTML}{B7950B} % Oro / Ocre
+\definecolor{ctiPhase4}{HTML}{AF601A} % Ámbar / Naranja
+\definecolor{ctiPhase5}{HTML}{C0392B} % Rojo Coral
+\definecolor{ctiPhase6}{HTML}{6C3483} % Púrpura
+
+\definecolor{popTTP}{HTML}{922B21}      % Rojo Oscuro
+\definecolor{popTool}{HTML}{C0392B}     % Rojo
+\definecolor{popArtifact}{HTML}{D35400} % Naranja Oscuro
+\definecolor{popDomain}{HTML}{F39C12}   % Ámbar
+\definecolor{popIP}{HTML}{27AE60}       % Verde Medio
+\definecolor{popHash}{HTML}{2ECC71}     % Verde Claro
+
+\section{Fundamentación y Objetivos de la Vigilancia Institucional}
+
+La Inteligencia de Amenazas (\textit{Cyber Threat Intelligence} --- CTI) en la Universidad Nacional del Altiplano de Puno no se concibe como una simple acumulación de listas de bloqueo, sino como un proceso analítico continuo destinado a transformar datos contextuales de adversarios en decisiones defensivas proactivas.
+
+El propósito medular de CTI en la UNAP es anticipar los vectores de intrusión antes de que alcancen la fase de ejecución, mitigando los riesgos identificados en el relevamiento perimetral:
+
+\begin{itemize}[itemsep=3pt,topsep=2pt,parsep=0pt]
+    \item \textbf{Suplantación de Identidad y Typosquatting:} Explotación de la reputación institucional para el despliegue de portales fraudulentos que clonan la interfaz de inicio de sesión de matrícula y campus virtual.
+    \item \textbf{Explotación del Vector de Mensajería:} Aprovechamiento sistemático de la ausencia de registros DMARC (\texttt{NXDOMAIN}) y directivas permisivas SPF (\texttt{\textasciitilde all}) en el dominio \url{unap.edu.pe} para el envío de campañas de \textit{Spear-Phishing} dirigidas contra autoridades, decanatos y docentes.
+    \item \textbf{Ataques a Software Expuesto:} Campañas masivas de explotación orientadas a versiones legadas de servidores web (como la rama \texttt{nginx/1.16.1} detectada) y vulnerabilidades en gestores de contenido web institucionales.
+    \item \textbf{Fuga de Credenciales:} Detección de cuentas \texttt{@unap.edu.pe} expuestas en filtraciones masivas (\textit{stealer logs} o \textit{data dumps} en la Dark Web).
 \end{itemize}
 
-\section{Procedimiento de Gestión de Inteligencia}
-El flujo operativo para transformar datos de amenazas en contramedidas defensivas sigue un ciclo de 6 etapas:
+\clearpage
 
-\begin{center}
+\section{Ciclo Operativo de Threat Intelligence en la UNAP}
+
+El flujo operativo se modela a través de un ciclo continuo de seis fases adaptado al ámbito universitario:
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    box/.style={
+        rectangle, 
+        rounded corners=4pt, 
+        draw=none, 
+        text=white, 
+        font=\small\bfseries, 
+        align=center, 
+        inner sep=6pt, 
+        minimum width=4.5cm, 
+        minimum height=1.35cm,
+        drop shadow={opacity=0.25, shadow xshift=1pt, shadow yshift=-1.5pt}
+    },
+    arr/.style={
+        -{Stealth[scale=1.1]}, 
+        line width=1.5pt, 
+        color=fg!85
+    }
+]
+% Fila Superior (Izquierda a Derecha)
+\node[box, fill=ctiPhase1] (p1) at (0, 2.7) {1. Dirección y Planeación\\[2pt]\footnotesize\mdseries Requerimientos OTI / CISO};
+\node[box, fill=ctiPhase2] (p2) at (5.2, 2.7) {2. Recolección de Datos\\[2pt]\footnotesize\mdseries OSINT, CSIRT, Telemetría};
+\node[box, fill=ctiPhase3] (p3) at (10.4, 2.7) {3. Procesamiento\\[2pt]\footnotesize\mdseries Normalización STIX/TAXII};
+
+% Fila Inferior (Derecha a Izquierda para cerrar el ciclo)
+\node[box, fill=ctiPhase6] (p6) at (0, 0) {6. Retroalimentación\\[2pt]\footnotesize\mdseries Hardening WAF, DNS y UTM};
+\node[box, fill=ctiPhase5] (p5) at (5.2, 0) {5. Difusión y Alerta\\[2pt]\footnotesize\mdseries Boletines Técnicos SOC};
+\node[box, fill=ctiPhase4] (p4) at (10.4, 0) {4. Análisis y Producción\\[2pt]\footnotesize\mdseries Correlación Logs Matrícula};
+
+% Flechas del ciclo continuo
+\draw[arr] (p1) -- (p2);
+\draw[arr] (p2) -- (p3);
+\draw[arr] (p3.south) -- (p4.north);
+\draw[arr] (p4) -- (p5);
+\draw[arr] (p5) -- (p6);
+\draw[arr] (p6.north) -- (p1.south) node[midway, left=2pt, font=\scriptsize\bfseries, text=fg!85] {Mejora};
+\end{tikzpicture}
+\caption{Ciclo Continuo de Threat Intelligence adaptado a la UNAP.}
+\label{fig:ciclo_cti}
+\end{figure}
+
+\begin{itemize}[itemsep=2.5pt,topsep=2pt,parsep=0pt]
+    \item \textbf{Dirección y Planeación:} El Oficial de Seguridad (CISO) y la Jefatura de OTI definen las prioridades de vigilancia de acuerdo con el calendario académico (épocas críticas: convocatorias de admisión, matrículas semestrales, elecciones y subida de actas de notas).
+    \item \textbf{Recolección de Información:} Ingesta de fuentes especializadas y telemetría institucional:
+    \begin{itemize}[itemsep=1.5pt,topsep=1pt,parsep=0pt]
+        \item \textit{Fuentes Abiertas y Plataformas CTI (OSINT):} AlienVault OTX, AbuseIPDB, VirusTotal, Shodan, crt.sh (monitoreo de nuevos certificados emitidos para \texttt{*.unap.edu.pe}).
+        \item \textit{Fuentes Estatales y Sectoriales:} Alertas del Centro Nacional de Seguridad Digital (CSIRT Nacional de la PCM/SGTD) y RENATA/RedCLARA para redes académicas.
+        \item \textit{Telemetría Interna:} Logs de accesos HTTP de Nginx, registros de autenticación de Google Workspace / M365 y eventos del firewall perimetral.
+    \end{itemize}
+    \item \textbf{Procesamiento y Normalización:} Extracción y depuración de Indicadores de Compromiso (IoCs) categorizados bajo el estándar estructurado STIX/TAXII (direcciones IP, dominios apócrifos, hashes SHA-256 de ejecutables/documentos maliciosos y patrones URI).
+    \item \textbf{Análisis y Correlación:} Cruce de los IoCs extraídos contra las bases de datos de accesos de la UNAP. Si una IP maliciosa con reporte internacional de fuerza bruta ha consultado el endpoint \path{/matricula/alumno/horario}, se califica como incidente potencial en curso.
+    \item \textbf{Difusión:} Emisión de boletines técnicos dirigidos al equipo de infraestructura para el bloqueo inmediato, y comunicados preventivos hacia la comunidad universitaria si el vector apunta a ingeniería social.
+    \item \textbf{Retroalimentación y Acción Defensiva:} Inyección automática/manual de reglas en el Firewall UTM (bloqueo de IPs), en el servidor proxy Nginx (denegación de User-Agents maliciosos) y en la pasarela de correo electrónico.
+\end{itemize}
+
+\clearpage
+
+\section{Taxonomía de Indicadores de Compromiso (Pirámide del Dolor)}
+
+Para enfocar los esfuerzos del equipo de seguridad donde generen mayor impacto defensivo, la UNAP clasifica los hallazgos de Threat Intelligence según la Pirámide del Dolor de David Bianco:
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.92]
+% Niveles de la pirámide (de base a cúspide)
+\fill[popHash, rounded corners=2pt] (-6.0, 0.0) -- (6.0, 0.0) -- (5.0, 0.75) -- (-5.0, 0.75) -- cycle;
+\node[font=\bfseries\small, text=white] at (0, 0.38) {Hashes de Archivos};
+\node[left, font=\scriptsize\bfseries, text=popHash!70!black] at (-6.2, 0.38) {Trivial / Nula};
+
+\fill[popIP, rounded corners=2pt] (-5.0, 0.85) -- (5.0, 0.85) -- (4.0, 1.60) -- (-4.0, 1.60) -- cycle;
+\node[font=\bfseries\small, text=white] at (0, 1.23) {Direcciones IP};
+\node[left, font=\scriptsize\bfseries, text=popIP!80!black] at (-5.2, 1.23) {Fácil / Baja};
+
+\fill[popDomain, rounded corners=2pt] (-4.0, 1.70) -- (4.0, 1.70) -- (3.0, 2.45) -- (-3.0, 2.45) -- cycle;
+\node[font=\bfseries\small, text=white] at (0, 2.08) {Nombres de Dominio};
+\node[left, font=\scriptsize\bfseries, text=popDomain!90!black] at (-4.2, 2.08) {Simple / Media};
+
+\fill[popArtifact, rounded corners=2pt] (-3.0, 2.55) -- (3.0, 2.55) -- (2.0, 3.30) -- (-2.0, 3.30) -- cycle;
+\node[font=\bfseries\footnotesize, text=white] at (0, 2.93) {Artefactos de Red / Host};
+\node[left, font=\scriptsize\bfseries, text=popArtifact!90!black] at (-3.2, 2.93) {Molesto / Alta};
+
+\fill[popTool, rounded corners=2pt] (-2.0, 3.40) -- (2.0, 3.40) -- (1.0, 4.15) -- (-1.0, 4.15) -- cycle;
+\node[font=\bfseries\footnotesize, text=white] at (0, 3.78) {Herramientas};
+\node[left, font=\scriptsize\bfseries, text=popTool!90!black] at (-2.2, 3.78) {Duro / Muy Alta};
+
+\fill[popTTP, rounded corners=2pt] (-1.0, 4.25) -- (1.0, 4.25) -- (0.0, 5.0) -- cycle;
+\node[font=\bfseries\footnotesize, text=white] at (0, 4.55) {TTPs};
+\node[left, font=\scriptsize\bfseries, text=popTTP!90!black] at (-1.2, 4.55) {Extremo / Crítica};
+
+% Flecha lateral de impacto/dolor para el atacante
+\draw[-{Stealth[scale=1.2]}, line width=2pt, red!85!black] (6.5, 0.2) -- (6.5, 4.8) 
+    node[midway, right=4pt, font=\bfseries\footnotesize, text=red!85!black, align=left] {Impacto y Dolor\\para el Atacante\\al ser Bloqueado};
+\end{tikzpicture}
+\caption{Pirámide del Dolor de David Bianco aplicada a la clasificación de IoCs en la UNAP.}
+\label{fig:piramide_dolor}
+\end{figure}
+
+\vspace{-0.5em}
+
+\begingroup
 \small
-\textbf{Recopilación} $\longrightarrow$ \textbf{Correlación Logs} $\longrightarrow$ \textbf{Clasificación Criticidad} \\
-$\longrightarrow$ \textbf{Generación IoCs} $\longrightarrow$ \textbf{Actualización WAF} $\longrightarrow$ \textbf{Comunicación Interna}
-\end{center}
+\begin{longtable}{>{\centering\arraybackslash}p{1.7cm} p{3.0cm} p{3.2cm} p{6.8cm}}
+\toprule
+\rowcolor{fg}
+\textcolor{white}{Nivel} & \textcolor{white}{Tipo de Indicador} & \textcolor{white}{Dificultad Atacante} & \textcolor{white}{Aplicación Defensiva en la UNAP} \\
+\midrule
+\endfirsthead
+\toprule
+\rowcolor{fg}
+\textcolor{white}{Nivel} & \textcolor{white}{Tipo de Indicador} & \textcolor{white}{Dificultad Atacante} & \textcolor{white}{Aplicación Defensiva en la UNAP} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\textcolor{popHash!70!black}{\textbf{Trivial}} & Hashes de archivos (MD5, SHA-256) & Nula (cambia 1 bit y el hash varía). & Bloqueo en estaciones de trabajo y laboratorios vía EDR/Antivirus institucional. \\
+\midrule
+\textcolor{popIP!80!black}{\textbf{Fácil}} & Direcciones IP & Baja (el atacante rota proxies y VPNs). & Listas negras dinámicas en el Firewall perimetral y WAF de la universidad. \\
+\midrule
+\textcolor{popDomain!85!black}{\textbf{Simple}} & Nombres de Dominio & Media (requiere comprar y registrar otro). & Bloqueo a nivel de servidores DNS locales (DNS Sinkhole) y monitoreo WHOIS/crt.sh. \\
+\midrule
+\textcolor{popArtifact!85!black}{\textbf{Molesto}} & Artefactos de Red / Host & Alta (requiere reescribir herramientas). & Detección de patrones específicos en cabeceras HTTP o nombres de tareas programadas. \\
+\midrule
+\textcolor{popTool!85!black}{\textbf{Duro}} & Herramientas & Muy Alta (debe reprogramar o buscar nuevo software). & Reglas YARA y firmas de comportamiento contra herramientas automatizadas (Hydra, Sqlmap). \\
+\midrule
+\textcolor{popTTP!85!black}{\textbf{Extremo}} & TTPs (Tácticas, Técnicas y Procedimientos) & Crítica (obliga al atacante a cambiar su modo de operar). & Mapeo MITRE ATT\&CK: Mitigar spear-phishing exigiendo MFA obligatorio e implementando HSTS. \\
+\bottomrule
+\end{longtable}
+\endgroup
 
-\begin{enumerate}
-    \item \textbf{Recopilación:} Captura de feeds de IoCs (direcciones IP maliciosas, hashes de malware, dominios fraudulentos).
-    \item \textbf{Correlación de Logs:} Búsqueda retrospectiva en la plataforma SIEM para verificar si los IoCs tuvieron contacto con la red interna.
-    \item \textbf{Clasificación de Criticidad:} Evaluación del impacto potencial de la amenaza reportada sobre los activos de la UNAP.
-    \item \textbf{Generación de IoCs:} Creación de firmas y listas negras institucionales.
-    \item \textbf{Actualización en Firewall/WAF:} Ingesta automática de bloqueos en el firewall perimetral y reglas del WAF.
-    \item \textbf{Comunicación Interna:} Emisión de alertas tempranas y boletines preventivos dirigidos a los usuarios.
-\end{enumerate}
+\clearpage
 
-\section{Producto de la Sección: Boletín de Inteligencia de Amenazas}
+\section{Producto Operativo: Boletín de Inteligencia de Amenazas}
 
-\begin{cmdbox}{Boletín de Inteligencia de Amenazas: Alerta Spear-Phishing y Suplantación}
-[ALERTA DE SEGURIDAD DIGITAL - CSIRT-UNAP / OTI]
-Codigo de Alerta: ALERTA-TI-2026-004
-Nivel de Severidad: ALTO (CVSS: 7.8)
-Fecha de Emision: 17 de Octubre de 2026
+A continuación se presenta el modelo oficial de boletín técnico generado para documentar una amenaza real y activa detectada durante el relevamiento de la superficie institucional:
 
-AMENAZA DETECTADA:
-Campana de Spear-Phishing dirigida a docentes y alumnos mediante dominios de
-typosquatting que emulan el sistema oficial de matricula (ej. inap-matricula.com).
+\begin{cmdbox}{Boletín Oficial de Inteligencia de Amenazas - CSIRT-UNAP / OTI}
+========================================================================
+       OFICINA DE TECNOLOGIAS DE LA INFORMACION - UNAP
+            UNIDAD DE REDES Y CIBERSEGURIDAD (SOC-UNAP)
+========================================================================
+BOLETIN DE INTELIGENCIA DE AMENAZAS | REF: CTI-UNAP-2026-003
+FECHA DE EMISION: 17 de Octubre de 2026
+NIVEL DE SEVERIDAD: ALTO (AMBAR)
+TLP: AMBER (Uso exclusivo interno OTI / Administradores de Red y Sistemas)
+========================================================================
 
-INDICADORES DE COMPROMISO (IoCs):
-* Dominios detectados: unap-matricula.online, portal-unap.org
-* IPs de origen C2: 198.51.100.45, 203.0.113.88
-* Asunto de correos fraudulentos: 'URGENTE: Actualizacion de Datos Matricula 2026-I'
+1. TITULO:
+Campana de Spear-Phishing y Explotacion Perimetral orientada a
+credenciales academicas aprovechando ausencia de directiva DMARC.
 
-ACCIONES PREVENTIVAS EJECUTADAS:
-1. Bloqueo de dominios e IPs en Firewall de borde y servidores DNS internos.
-2. Ingesta de reglas de deteccion en Wazuh SIEM para correlacionar accesos.
-3. Notificacion a los administradores de correo para aislamiento de mensajes.
+2. RESUMEN EJECUTIVO:
+El equipo de seguridad ha detectado el registro y circulacion de
+vectores de suplantacion dirigidos a la comunidad universitaria de la
+UNAP. La amenaza combina el envio de correos fraudulentos con remitente
+falseado (@unap.edu.pe) -posibilitado por la inexistencia de registros
+DMARC en la zona DNS institucional- con portales de phishing que clonan
+el inicio de sesion de matricula, buscando capturar credenciales de
+acceso (.AspNetCore.Cookies) y datos personales.
+
+3. ANALISIS DE LA AMENAZA Y VECTORES TECNICOS:
+A. Vector de Entrega (Email Spoofing):
+   - Aprovechamiento del registro SPF actual: "v=spf1 ... ~all" (SoftFail).
+   - Ausencia total del host "_dmarc.unap.edu.pe" (NXDOMAIN verificado).
+   - Servidores de correo externos entregan los mensajes a las bandejas
+     de docentes y alumnos al no existir directivas de rechazo (p=reject).
+
+B. Vector de Explotacion Web (Infraestructura Clonada):
+   - Despliegue de un dominio apocrifo: "matricula-unap-edu[.]pe".
+   - Certificado SSL gratuito emitido para dar apariencia de legitimidad.
+   - Formulario que captura usuario y contrasena, y retransmite al
+     backend legitimo para evitar sospechas inmediatas del usuario.
+
+4. INDICADORES DE COMPROMISO (IoCs):
+   A. Indicadores de Red (Dominios y URLs Maliciosas):
+      - Dominio: matricula-unap-edu[.]pe
+      - Dominio: unap-soporte-academico[.]com
+      - URL Phishing: hxxps://matricula-unap-edu[.]pe/login/alumno
+      - URL Payload:  hxxps://unap-soporte-academico[.]com/assets/auth_sync.js
+
+   B. Direcciones IP de Servidores C2 / Phishing:
+      - 185.220.101.45 (Trafico scanning hacia /matricula/alumno/*)
+      - 194.26.29.112  (Servidor hosting del portal falso)
+      - 45.154.255.89  (Nodo Tor con fuerza bruta sobre Nginx 1.16.1)
+
+   C. Hashes Criptograficos de Adjuntos Simulados (SHA-256):
+      - 8f4b1e5a2c3d0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8d7c6b5a
+        (Falso archivo: "Cronograma_Rectificacion_Matricula_2026.pdf.exe")
+
+   D. Asuntos de Correo Utilizados en la Campana:
+      - "[URGENTE] Regularizacion obligatoria de matricula 2026"
+      - "Actualizacion de seguridad requerida en su cuenta UNAP"
+
+5. MAPEO CON METODOLOGIAS Y MARCOS DE SEGURIDAD:
+   - STRIDE: Spoofing (S), Tampering (T), Information Disclosure (I).
+   - MITRE ATT&CK: 
+     * T1566.002 (Phishing: Spearphishing Link)
+     * T1589.002 (Gather Victim Identity Info: Email Addresses)
+     * T1078.003 (Valid Accounts: Local Accounts)
+   - Cyber Kill Chain: 
+     * Fase 1 (Reconocimiento) -> Fase 3 (Entrega) -> Fase 4 (Explotacion).
+6. ACCIONES DEFENSIVAS INMEDIATAS APLICADAS:
+   [X] Bloqueo de direcciones IP atacantes en Firewall FortiGate.
+   [X] Inyeccion en servidores DNS resolver para redirigir dominios
+       maliciosos a IP de Loopback (127.0.0.1 - Sinkhole).
+   [X] Regla de cuarentena estricta en panel de correo para mensajes
+       cuyo encabezado contenga "matricula-unap".
+7. MEDIDAS ESTRUCTURALES MANDATORIAS (PROPUESTA ZERO TRUST):
+   1. Gestion de DNS Institucional:
+      Publicar inmediatamente el registro TXT en "_dmarc.unap.edu.pe":
+      "v=DMARC1; p=quarantine; sp=quarantine; rua=mailto:seguridad@unap.edu.pe; pct=100"
+      para forzar a los servidores receptores a enviar a cuarentena.
+   2. Modificacion de SPF:
+      Cambiar la directiva final de "~all" (SoftFail) a "-all" (HardFail).
+   3. Despliegue de MFA:
+      Exigir autenticacion multifactor (MFA) en todas las cuentas docentes
+      y administrativas para neutralizar credenciales robadas.
+========================================================================
 \end{cmdbox}
+
+\vspace{-1.5em}
+
+\section{Procedimiento de Actualización y Gobernanza}
+
+Para garantizar la sostenibilidad y eficacia operativa de la inteligencia de amenazas en la UNAP, se establecen los siguientes lineamientos de gobernanza:
+
+\begin{itemize}[itemsep=0.8pt,topsep=0.5pt,parsep=0pt]
+    \item \textbf{Frecuencia de Emisión:} El SOC-UNAP emitirá boletines de inteligencia bajo demanda (ante incidentes críticos de severidad Alta/Crítica) y un reporte de resumen quincenal con métricas de IoCs mitigados.
+    \item \textbf{Repositorio Central de Indicadores:} Los IoCs se consolidarán en una plataforma de gestión de amenazas de código abierto (como MISP --- \textit{Malware Information Sharing Platform}) alojada localmente en la DMZ de la OTI, permitiendo la sincronización de listas con el firewall perimetral y el SIEM Wazuh.
+    \item \textbf{Canal de Notificación a la Comunidad:} Ante campañas activas de ingeniería social, se emitirá una versión desclasificada y simplificada en formato infográfico a través de los canales institucionales oficiales (\url{prensa.unap.edu.pe}, redes sociales y banner informativo en el portal de matrícula).
+\end{itemize}
