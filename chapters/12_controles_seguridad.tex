@@ -1,35 +1,287 @@
-\chapter{Controles Técnicos de Seguridad}
+\chapter{Controles de Seguridad}
 \label{ch:controles_seguridad}
 
-En este capítulo se detallan las especificaciones técnicas y el catálogo de implementación de los controles de seguridad seleccionados para blindar el entorno tecnológico de la UNAP.
+\section{Marco de Especificación Técnica de Controles}
 
-\section{Catálogo de Especificación Técnica de Controles}
-\begin{enumerate}
-    \item \textbf{Control de Identidad y Acceso:} Implementación generalizada de Autenticación Multifactor (MFA) sobre un esquema de Inicio de Sesión Único (Single Sign-On - SSO) corporativo basado en OpenID Connect / SAML 2.0.
-    \item \textbf{Seguridad Perimetral y de Aplicación:} Despliegue de un Firewall de Siguiente Generación (Next-Generation Firewall - NGFW) en el borde y un Web Application Firewall (WAF) perimetral para inspección de peticiones HTTP/HTTPS (bloqueo de inyecciones SQL, XSS y ataques L7).
-    \item \textbf{Seguridad en Endpoints:} Instalación de agentes de Endpoint Detection and Response (EDR) centralizados en todas las estaciones administrativas y servidores del Data Center para detección de comportamientos anómalos.
-    \item \textbf{Cifrado Criptográfico Estricto:} Forzado del protocolo TLS 1.3 en todos los portales web institucionales, desactivación definitiva de suites criptográficas débiles (SSLv3, TLS 1.0, TLS 1.1) y cifrado de volúmenes de almacenamiento mediante LUKS / BitLocker.
-    \item \textbf{Monitoreo y Auditoría Centralizada:} Plataforma SIEM (Security Information and Event Management) basada en Wazuh para agregación, correlación y análisis de registros de eventos en tiempo real.
-    \item \textbf{Microsegmentación de Redes:} Reglas estrictas de filtrado de tráfico inter-VLAN en el Switch Core central, impidiendo que el tráfico de alumnos acceda a servidores de bases de datos o redes administrativas.
-    \item \textbf{Gestión Continua de Vulnerabilidades:} Ejecución de escaneos periódicos programados mediante OpenVAS / Nessus para identificación y remediación temprana de fallas en servidores y servicios expuestos.
-    \item \textbf{Continuidad Operativa y Respaldos Inmutables:} Automatización de copias de seguridad de bases de datos con retención histórica y almacenamiento inmutable fuera de línea.
-\end{enumerate}
+Los controles de seguridad constituyen la materialización técnica y operativa de los principios defensivos definidos bajo NIST CSF 2.0 y Zero Trust. En la Universidad Nacional del Altiplano de Puno, la implementación de estos controles responde de forma directa a las brechas y vulnerabilidades constatadas en el relevamiento perimetral:
 
-\section{Configuración de Endurecimiento Web en Servidores Nginx}
-A continuación, se presenta la directiva de configuración recomendada para mitigar los hallazgos de información expuesta y falta de HSTS:
+\begin{itemize}
+    \item \textbf{Exposición de software desactualizado:} Detección perimetral de versión obsoleta (\texttt{Server: nginx/1.16.1}).
+    \item \textbf{Ausencia de cabeceras de transporte seguro:} Falta de directivas HSTS (\texttt{Strict-Transport-\allowbreak Security:\allowbreak{} Desactivado}).
+    \item \textbf{Debilidad crítica en autenticación de correo institucional:} Inexistencia de registro DMARC (\texttt{NXDOMAIN}) y política permisiva (\texttt{SPF: \~all}).
+    \item \textbf{Persistencia insegura de sesiones web:} Aplicaciones ASP.NET Core sin flag \texttt{Secure} explícito en estados temporales (\texttt{CookieTempDataProvider}).
+    \item \textbf{Sobreexposición perimetral:} Más de un centenar de subdominios, paneles administrativos y entornos de desarrollo expuestos directamente a Internet.
+\end{itemize}
 
-\begin{cmdbox}{Configuración Nginx para Hardening (security.conf)}
-# Desactivar version de servidor
-server_tokens off;
+A continuación, se detallan las especificaciones técnicas, configuraciones aplicadas y criterios de despliegue para los once (11) controles prioritarios de la UNAP.
 
-# Cabeceras de proteccion obligatorias
-add_header Strict-Transport-Security 'max-age=31536000; includeSubDomains' always;
-add_header X-Frame-Options 'SAMEORIGIN' always;
-add_header X-Content-Type-Options 'nosniff' always;
-add_header X-XSS-Protection '1; mode=block' always;
-add_header Content-Security-Policy 'default-src \'self\';' always;
+\section{Especificación Detallada de los 11 Controles de Seguridad}
 
-# Forzar TLS 1.2 y 1.3 unicamente
-ssl_protocols TLSv1.2 TLSv1.3;
-ssl_prefer_server_ciphers on;
+% Colores temáticos por dominio de control
+\definecolor{colIdent}{RGB}{20, 110, 160}
+\definecolor{colPerim}{RGB}{30, 130, 70}
+\definecolor{colEndp}{RGB}{200, 100, 20}
+\definecolor{colDatos}{RGB}{115, 45, 130}
+
+\begin{center}
+\begin{tikzpicture}[
+    font=\small,
+    catTitle/.style={
+        rectangle, rounded corners=3pt,
+        draw=fg!90!black, fill=fg!90!black, text=white,
+        font=\bfseries\small, align=center,
+        inner sep=4pt, text width=14.6cm
+    },
+    colCard/.style={
+        rectangle, rounded corners=4pt,
+        inner sep=5pt,
+        minimum height=3.6cm, align=left,
+        anchor=north
+    }
+]
+
+\node[catTitle] (mainTitle) at (0, 0) {CATÁLOGO DE CONTROLES DE SEGURIDAD UNAP};
+
+% Columna 1: Identidad
+\node[colCard, draw=colIdent!80, fill=colIdent!10, text width=3.1cm] (cIdent) at (-5.5, -0.6) {
+    {\centering\bfseries\color{colIdent} IDENTIDAD\par\smallskip\hrule\smallskip}
+    {\scriptsize
+    \textbf{1.} MFA Universal\par\smallskip
+    \textbf{11.} Políticas TI (PSSI)\par
+    }
+};
+
+% Columna 2: Perímetro y Red
+\node[colCard, draw=colPerim!80, fill=colPerim!10, text width=3.5cm] (cPerim) at (-1.9, -0.6) {
+    {\centering\bfseries\color{colPerim} PERÍMETRO Y RED\par\smallskip\hrule\smallskip}
+    {\scriptsize
+    \textbf{2.} Firewall NGFW\par\smallskip
+    \textbf{3.} WAF Perimetral\par\smallskip
+    \textbf{7.} Microsegmentación\par
+    }
+};
+
+% Columna 3: Endpoints
+\node[colCard, draw=colEndp!80, fill=colEndp!10, text width=3.1cm] (cEndp) at (1.7, -0.6) {
+    {\centering\bfseries\color{colEndp} ENDPOINTS\par\smallskip\hrule\smallskip}
+    {\scriptsize
+    \textbf{4.} Antivirus / EDR\par\smallskip
+    \textbf{8.} Gestión de Vuln.\par
+    }
+};
+
+% Columna 4: Datos y Monitoreo
+\node[colCard, draw=colDatos!80, fill=colDatos!10, text width=3.9cm] (cDatos) at (5.5, -0.6) {
+    {\centering\bfseries\color{colDatos} DATOS Y MONITOREO\par\smallskip\hrule\smallskip}
+    {\scriptsize
+    \textbf{5.} Cifrado TLS 1.3 / Reposo\par\smallskip
+    \textbf{6.} Plataforma SIEM\par\smallskip
+    \textbf{9.} Respaldo Inmutable\par\smallskip
+    \textbf{10.} Monitoreo NOC/SOC\par
+    }
+};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.2cm}
+
+\subsection{Control 1: Autenticación Multifactor (MFA / 2FA)}
+
+\begin{itemize}
+    \item \textbf{Objetivo:} Neutralizar el vector de intrusión por compromiso o robo de credenciales legítimas (T1078 en MITRE ATT\&CK), quebrando la fase de instalación de la \textit{Cyber Kill Chain}.
+    \item \textbf{Alcance Técnico:}
+    \begin{itemize}
+        \item \textit{Obligatoriedad Total (100\%):} Personal docente, directores de escuela, operadores administrativos (Tesorería, Matrícula, Recursos Humanos) y personal de TI de la OTI.
+        \item \textit{Modo Condicional:} Estudiantes de pregrado y posgrado en operaciones críticas (inscripción formal de asignaturas, cambio de contraseñas y visualización de actas).
+    \end{itemize}
+    \item \textbf{Mecanismos y Métodos Soportados:}
+    \begin{itemize}
+        \item Protocolo TOTP (\textit{Time-based One-Time Password} - RFC 6238) mediante Google Authenticator o Microsoft Authenticator con confirmación de número (\textit{Number Matching}) para mitigar fatiga de notificaciones.
+        \item Llaves criptográficas de hardware FIDO2 / WebAuthn (YubiKey) obligatorias para los administradores del Data Center y base de datos con acceso a consolas de comando.
+        \item \textit{Prohibición Expresa:} Se prohíbe el uso de SMS o llamadas de voz como segundo factor para el personal administrativo, debido a su vulnerabilidad frente a ataques de SIM Swapping.
+    \end{itemize}
+    \item \textbf{Parámetros de Configuración:} Ventana de expiración de código TOTP fijada en 30 segundos con tolerancia de desfasaje temporal máximo de 1 paso ($t \pm 30\,\text{s}$).
+\end{itemize}
+
+\subsection{Control 2: Firewall de Próxima Generación (NGFW / UTM)}
+
+\begin{itemize}
+    \item \textbf{Objetivo:} Controlar, segmentar e inspeccionar el tráfico de entrada y salida en el borde perimetral del campus universitario (Av. Floral).
+    \item \textbf{Implementación Tecnológica:} Clúster de Firewalls Fortinet FortiGate / pfSense en alta disponibilidad (HA Activo-Pasivo).
+    \item \textbf{Especificaciones y Reglas Técnicas:}
+    \begin{itemize}
+        \item \textit{Filtrado Estricto de Egreso (Egress Filtering):} Denegación por defecto (\textit{Default Deny}) para todo tráfico saliente desde la VLAN de servidores (Data Center). Solo se autorizan salidas explícitas por puertos TCP 80/443 hacia repositorios de actualización de software homologados y consultas NTP institucionales.
+        \item \textit{Inspección Profunda de Paquetes (DPI):} Descifrado e inspección de tráfico SSL/TLS para navegación de estaciones administrativas, detectando descargas de ejecutables maliciosos o scripts sospechosos.
+        \item \textit{Integración con Threat Intelligence:} Suscripción del firewall a listas dinámicas de bloqueo de IPs maliciosas y nodos de salida Tor (actualización cada 60 minutos).
+        \item \textit{VPN Institucional con Control de Acceso:} Conexiones remotas aseguradas mediante WireGuard o SSL-VPN con verificación obligatoria de certificado digital de host y MFA.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Control 3: Web Application Firewall (WAF)}
+
+\begin{itemize}
+    \item \textbf{Objetivo:} Proteger las aplicaciones web institucionales frente a ataques dirigidos al código y lógica de negocio (OWASP Top 10), mitigando las amenazas STRIDE de \textit{Tampering} e \textit{Injection} en el sistema de matrícula.
+    \item \textbf{Plataforma:} ModSecurity con conjunto de reglas OWASP Core Rule Set (CRS v3.3+) integrado sobre Nginx / Cloudflare Enterprise.
+    \item \textbf{Políticas y Reglas Específicas para \texttt{matricula.unap.edu.pe}:}
+    \begin{itemize}
+        \item \textit{Mitigación DoS y Rate Limiting:} Límite estricto de peticiones por dirección IP en endpoints sensibles:
+        
+\begin{cmdbox}{Nginx: Configuración de Rate Limiting para Matrícula}
+# Rate limiting para peticiones JSON y autenticacion en matricula
+limit_req_zone $binary_remote_addr zone=waf_matricula:10m rate=10r/s;
+limit_req_status 429;
 \end{cmdbox}
+
+        \item \textit{Inspección de Inyecciones (SQLi / XSS):} Bloqueo automático de peticiones que contengan caracteres y operadores de inyección (\texttt{UNION SELECT}, \texttt{OR 1=1}, \texttt{<script>}, payloads en parámetros \texttt{?start=} o \texttt{?end=}).
+        \item \textit{Geo-Bloqueo Adaptativo:} Durante ventanas de matrícula regular, bloqueo o desafío de Captcha interactivo para solicitudes provenientes de fuera del territorio nacional o nodos VPN comerciales no autorizados.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Control 4: Antivirus Centralizado / Detección y Respuesta en Endpoint (EDR)}
+
+\begin{itemize}
+    \item \textbf{Objetivo:} Proporcionar visibilidad continua, contención automática y capacidades de caza de amenazas (\textit{Threat Hunting}) en servidores y puestos de trabajo.
+    \item \textbf{Solución Técnica:} Wazuh Endpoint Agent / Microsoft Defender for Endpoint / CrowdStrike Falcon.
+    \item \textbf{Políticas de Protección Activa:}
+    \begin{itemize}
+        \item \textit{Bloqueo de Intérpretes Sospechosos:} Detección y bloqueo de invocaciones a \texttt{powershell.\allowbreak exe}, \texttt{cmd.exe} o \texttt{wscript.exe} con argumentos en base64 (\texttt{-EncodedCommand}), en ventanas ocultas o con llamadas directas a APIs de descarga en la web.
+        \item \textit{Monitoreo de Integridad de Archivos (FIM):} Vigilancia en tiempo real sobre rutas críticas del sistema operativo (\path{/etc/}, \path{/var/www/}, \path{C:\Windows\System32\}, \path{C:\inetpub\wwwroot\}). Cualquier adición de extensiones \texttt{.php}, \texttt{.aspx} o \texttt{.sh} en directorios de carga pública dispara el aislamiento automático del host.
+        \item \textit{Protección contra Ransomware:} Detección de comportamiento heurístico basada en el cifrado masivo y rápido de extensiones de archivos, terminando el proceso malicioso y revirtiendo escrituras desde copias de sombra (VSS).
+    \end{itemize}
+\end{itemize}
+
+\subsection{Control 5: Cifrado en Tránsito y en Reposo}
+
+\begin{itemize}
+    \item \textbf{Objetivo:} Asegurar la confidencialidad e integridad del patrimonio digital institucional, dando estricto cumplimiento a la Ley N° 29733 (Ley de Protección de Datos Personales).
+    \item \textbf{Especificaciones de Cifrado en Tránsito (\textit{In-Transit}):}
+    \begin{itemize}
+        \item \textit{Protocolo mandatorio:} TLS 1.3 forzado en los servidores web \texttt{matricula.unap.edu.pe}, \texttt{campus.unap.edu.pe} y pasarelas de pago. Desactivación absoluta de SSLv2, SSLv3, TLS 1.0 y TLS 1.1.
+        \item \textit{Suprime suites de cifrado débiles:} Prohibición de CBC, 3DES y RC4. Suites autorizadas: \texttt{TLS\_AES\_256\_GCM\_SHA384} y \texttt{TLS\_CHACHA20\_POLY1305\_SHA256}.
+        \item \textit{Inyección Obligatoria de HSTS:}
+        
+\begin{cmdbox}{Nginx: Directiva de Transporte Seguro HSTS}
+add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+\end{cmdbox}
+    \end{itemize}
+    \item \textbf{Especificaciones de Cifrado en Reposo (\textit{At-Rest}):}
+    \begin{itemize}
+        \item \textit{Cifrado de Almacenamiento:} Volúmenes de disco de servidores virtuales y estaciones de trabajo administrativas cifrados a nivel de bloque mediante BitLocker (AES-XTS 256 bits) en Windows y dm-crypt / LUKS (AES-256) en servidores Linux del Data Center.
+        \item \textit{Cifrado de Base de Datos:} Implementación de cifrado transparente (\textit{Transparent Data Encryption} - TDE) o \texttt{pgcrypto} a nivel de columnas en PostgreSQL/Oracle para tablas sensibles (\texttt{alumnos.dni}, \texttt{actas.notas}, \texttt{personal.remuneraciones}).
+    \end{itemize}
+\end{itemize}
+
+\subsection{Control 6: Gestión de Eventos e Información de Seguridad (SIEM)}
+
+\begin{itemize}
+    \item \textbf{Objetivo:} Centralizar, correlacionar y analizar los registros de auditoría de toda la infraestructura universitaria para detectar anomalías en tiempo real.
+    \item \textbf{Arquitectura de Monitoreo:} Despliegue de plataforma Wazuh SIEM / Elastic Security con clúster de indexación alojado en la VLAN 10 (Data Center OTI).
+    \item \textbf{Especificaciones de Ingesta y Retención:}
+    \begin{itemize}
+        \item \textit{Ingesta centralizada de:} logs de acceso y error de Nginx (\path{access.log}), eventos de autenticación de Linux (\path{auth.log}), eventos de seguridad de Windows (Sysmon / Security Event 4624, 4625), registros de tráfico del Firewall FortiGate y logs de auditoría de PostgreSQL.
+        \item \textit{Periodo de Retención Inmutable:} Almacenamiento de bitácoras durante un plazo mínimo de doce (12) meses en esquema de solo adición (\textit{Append-Only}) con sincronización horaria mediante NTP institucional (\texttt{ntp.unap.edu.pe}), garantizando validez pericial ante investigaciones de la Fiscalía o Divindat.
+        \item \textit{Reglas de Correlación Activas:} Alerta instantánea (Telegram/Correo institucional del SOC) ante 5 fallos consecutivos de login seguidos de 1 éxito, o ante la ejecución de comandos de descubrimiento de red (\texttt{nmap}, \texttt{net view}) desde estaciones de trabajo de facultades.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Control 7: Segmentación y Microsegmentación de Redes}
+
+\begin{itemize}
+    \item \textbf{Objetivo:} Eliminar la confianza implícita de la red plana tradicional, reduciendo el radio de impacto de cualquier compromiso lateral (T1021 en MITRE ATT\&CK).
+    \item \textbf{Estructura de Microsegmentación por VLANs:}
+\end{itemize}
+
+\vspace{0.15cm}
+
+\begingroup
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{>{\raggedright\bfseries}p{1.8cm} >{\raggedright}p{3.2cm} >{\centering}p{2.7cm} >{\raggedright\arraybackslash}p{6.6cm}}
+\toprule
+\rowcolor{outermarginbgcolor}
+Identificador VLAN & Nombre de Segmento & Rango IP Sugerido & Descripción y Reglas de Tráfico \\
+\midrule
+\endfirsthead
+\toprule
+\rowcolor{outermarginbgcolor}
+Identificador VLAN & Nombre de Segmento & Rango IP Sugerido & Descripción y Reglas de Tráfico \\
+\midrule
+\endhead
+\textbf{VLAN 10} & Data Center / Servidores Críticos & \texttt{10.10.10.0/24} & Motores de BD (ACT-01), almacenamiento NAS, switches Core. Tráfico denegado desde Internet; acceso administrativo solo vía Bastión con mTLS. \\
+\midrule
+\textbf{VLAN 20} & Red Docente y Decanatos & \texttt{10.10.20.0/23} & Equipos de profesores y autoridades. Solo acceso hacia portales web (HTTPS); denegado acceso a bases de datos o consolas SSH. \\
+\midrule
+\textbf{VLAN 30} & Red Administrativa & \texttt{10.10.30.0/23} & Tesorería, SITRAD, RRHH. Tráfico inter-estación (este-oeste) bloqueado por firewall en switch capa 3. Bloqueo de SMB (puerto 445). \\
+\midrule
+\textbf{VLAN 40} & Laboratorios de Estudiantes & \texttt{10.10.40.0/22} & Salas de cómputo de las 20 facultades. Aislamiento estricto de clientes (\textit{Client Isolation}); no se ven entre sí ni ven a servidores internos. \\
+\midrule
+\textbf{VLAN 50} & Wi-Fi Invitados y Campus & \texttt{172.16.0.0/16} & Redes inalámbricas abiertas. Únicamente salida a Internet; enrutamiento bloqueado hacia cualquier subred \texttt{10.x.x.x}. \\
+\midrule
+\textbf{VLAN 60} & DMZ (Servidores Públicos) & \texttt{192.168.60.0/24} & Proxies web Nginx, portales públicos (matrícula, campus). Aislados de la LAN interna; solo hablan con la base de datos por puertos específicos. \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\begin{itemize}
+    \item \textbf{Protocolos de Aislamiento:} Implementación de \textit{Private VLANs} (PVLAN) en switches de acceso de laboratorios y desactivación de puertos de red físicos en desuso en todas las dependencias.
+\end{itemize}
+
+\subsection{Control 8: Gestión Continua de Vulnerabilidades}
+
+\begin{itemize}
+    \item \textbf{Objetivo:} Detectar, priorizar y remediar proactivamente fallas de configuración y obsolescencia de software antes de que sean explotadas por ciberatacantes.
+    \item \textbf{Herramientas Operativas:} OpenVAS / Greenbone Vulnerability Management / Nessus Essentials integrado con escaneos de dependencias (Trivy para contenedores y Dependabot para código fuente ASP.NET Core).
+    \item \textbf{Procedimiento y Tiempos de Remediación (SLA):}
+    \begin{itemize}
+        \item \textit{Escaneo Perimetral Automatizado:} Ejecución semanal de barridos no invasivos sobre los subdominios catalogados bajo \texttt{unap.edu.pe}.
+        \item \textit{Escaneo Interno con Credenciales:} Análisis mensual de configuración y parches en servidores del Data Center.
+        \item \textit{Ventanas de Parchado Obligatorio según Severidad CVSS v3:}
+        \begin{itemize}
+            \item \textbf{Severidad Crítica} ($\text{CVSS} \ge 9.0$): Aplicación de parche o contramedida en un plazo máximo de 48 horas.
+            \item \textbf{Severidad Alta} ($\text{CVSS } 7.0 - 8.9$): Aplicación de parche en un plazo máximo de 7 días calendario.
+            \item \textbf{Severidad Media / Baja} ($\text{CVSS} < 7.0$): Aplicación durante la ventana de mantenimiento mensual programada.
+        \end{itemize}
+        \item \textit{Actualización Específica:} Reemplazo inmediato del binario de \texttt{nginx/1.16.1} en el servidor de matrícula por la rama estable soportada (1.26+ o superior).
+    \end{itemize}
+\end{itemize}
+
+\subsection{Control 9: Copias de Seguridad Inmutables y Continuidad (Backups)}
+
+\begin{itemize}
+    \item \textbf{Objetivo:} Garantizar la restauración íntegra y oportuna de los servicios académicos y financieros ante catástrofes físicas o ataques de ransomware, evitando la pérdida de registros de notas o extorsiones.
+    \item \textbf{Estrategia y Regla 3-2-1-1-0 Institucional:}
+    \begin{itemize}
+        \item \textbf{3 Copias de los Datos:} Una copia en producción (Base de datos PostgreSQL en vivo), una copia secundaria local en NAS y una copia externa fuera de sitio.
+        \item \textbf{2 Medios Diferentes:} Almacenamiento en arreglos de discos SAS/SSD en Data Center y almacenamiento de objetos en nube institucional o cinta magnética.
+        \item \textbf{1 Copia Fuera de Sitio (\textit{Offsite}):} Réplica sincronizada en la nube pública o en un centro experimental distante geográficamente (Centro Experimental Camacani / Illpa).
+        \item \textbf{1 Copia Inmutable / Fuera de Línea (\textit{Air-Gapped}):} Repositorio configurado con tecnología WORM (\textit{Write-Once-Read-Many}); los respaldos de actas de notas no pueden ser modificados, sobreescritos ni eliminados por ninguna cuenta (incluyendo el Administrador OTI) durante 180 días.
+        \item \textbf{0 Errores en Pruebas:} Ejecución obligatoria de simulacros semestrales de restauración total en caliente sobre un entorno de pruebas aislado (\textit{Staging}), verificando la consistencia referencial de las bases de datos de matrícula.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Control 10: Monitoreo Continuo y Operaciones de Seguridad (SOC / NOC)}
+
+\begin{itemize}
+    \item \textbf{Objetivo:} Mantener una vigilancia activa 24/7 sobre la salud operativa, disponibilidad de la red y amenazas a la seguridad de la información.
+    \item \textbf{Infraestructura de Gestión:} Sala de Control de la OTI operando bajo modelo híbrido con monitoreo de disponibilidad (Zabbix / Prometheus + Grafana) y monitoreo de eventos de seguridad (Wazuh Dashboard).
+    \item \textbf{Parámetros de Telemetría:}
+    \begin{itemize}
+        \item Monitoreo en tiempo real del ancho de banda y consumo de recursos de CPU/RAM en los servidores de matrícula durante los periodos de alta concurrencia.
+        \item Sistema automatizado de alertas vía webhooks seguros (notificaciones push al equipo de guardia ante caídas de enlace de fibra óptica, saturación de conexiones Nginx o detección de ataques de fuerza bruta).
+        \item Panel de estado público (\textit{Status Page} en \path{estado.unap.edu.pe}) para informar de forma transparente a la comunidad universitaria sobre mantenimientos programados o incidentes de servicio.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Control 11: Políticas Institucionales de Seguridad de la Información (PSSI)}
+
+\begin{itemize}
+    \item \textbf{Objetivo:} Proveer el marco regulatorio, administrativo y sancionador que rige el uso de los recursos computacionales de la universidad, alineado con el marco legal peruano.
+    \item \textbf{Conjunto de Políticas Aprobadas por Consejo Universitario:}
+    \begin{itemize}
+        \item \textbf{Política de Uso Aceptable de Tecnologías:} Prohibición expresa de instalación de software pirata, uso de programas de minería de criptomonedas, descarga de torrents en redes universitarias o uso del correo institucional para fines de comercio personal.
+        \item \textbf{Política de Contraseñas Seguras:} Longitud mínima de 12 caracteres alfanuméricos combinando mayúsculas, minúsculas, números y símbolos especiales; prohibición de reutilización de las últimas 5 contraseñas; caducidad obligatoria cada 180 días para cuentas administrativas; y bloqueo automático de cuenta tras 5 intentos fallidos consecutivos durante 15 minutos.
+        \item \textbf{Política de Puestos de Trabajo Limpios y Bloqueo de Pantalla:} Obligación de bloquear la sesión del sistema operativo (\texttt{Windows + L}) ante cualquier ausencia del puesto de trabajo en dependencias administrativas, y resguardo físico bajo llave de expedientes que contengan datos personales de estudiantes y trabajadores (Ley N° 29733).
+        \item \textbf{Política de Despliegue y Desarrollo Seguro:} Obligación para los programadores de la OTI de someter todo nuevo software a un análisis estático de código seguro (SAST) antes de su puesta en producción, prohibiendo el despliegue directo de entornos de prueba (\texttt{dev}, \texttt{prue1}) con acceso público a Internet.
+    \end{itemize}
+\end{itemize}
