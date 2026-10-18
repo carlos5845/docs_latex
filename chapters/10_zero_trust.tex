@@ -1,55 +1,298 @@
-\chapter{Implementación de Arquitectura Zero Trust}
+\chapter{Implementación de Zero Trust (Confianza Cero)}
 \label{ch:zero_trust}
 
-En este capítulo se establece la estrategia de transición hacia un modelo Zero Trust, fundamentado en la premisa rectora:
+\section{Principios Rectores y Filosofía Arquitectónica en la UNAP}
 
+El paradigma de Confianza Cero (\textit{Zero Trust Architecture} - ZTA), estandarizado bajo la publicación especial \textbf{NIST SP 800-207}, reemplaza de forma definitiva el modelo perimetral tradicional basado en castillos y fosos (\textit{Castle-and-Moat}). En la infraestructura universitaria tradicional se asumía erróneamente que cualquier conexión originada dentro del campus físico (red cableada de facultades o Wi-Fi institucional) era confiable por defecto.
+
+Bajo la doctrina Zero Trust, la Universidad Nacional del Altiplano asume como axioma operativo:
 \begin{quote}
-\textit{\large ``Nunca confiar automáticamente; verificar siempre de forma explícita y asumir la brecha''.}
+\centering
+\textit{\large ``Nunca confiar automáticamente; verificar siempre de manera explícita y asumir la brecha (\textbf{Assume Breach})''.}
 \end{quote}
 
-\section{Pilares de la Arquitectura Zero Trust en la UNAP}
-La implementación abarca los cinco pilares esenciales de seguridad:
+La arquitectura institucional se gobierna mediante tres principios fundamentales:
 
-\begin{enumerate}
-    \item \textbf{Pilar Identidad:} Despliegue mandatorio de Autenticación Multifactor (MFA mediante TOTP o llaves FIDO2) para el 100\% de docentes y personal administrativo. Política rigurosa de depuración y eliminación de cuentas inactivas o egresadas.
-    \item \textbf{Pilar Dispositivos:} Verificación previa del estado de salud y cumplimiento del endpoint (\textit{Device Compliance}) antes de permitir la conexión a servicios centrales o bases de datos de la universidad.
-    \item \textbf{Pilar Red (Microsegmentación):} Aislamiento estricto del tráfico de red a nivel de capa 3 mediante VLANs dedicadas con reglas de filtrado en Switch Core y Firewall:
-    \begin{itemize}
-        \item VLAN 10: Servidores de Producción y Data Center (restringida).
-        \item VLAN 20: Personal Administrativo y Tesorería.
-        \item VLAN 30: Salas de Profesores y Docentes.
-        \item VLAN 40: Laboratorios de Cómputo para Estudiantes.
-        \item VLAN 50: Zona Desmilitarizada (DMZ) para servicios públicos.
-        \item VLAN 60: Wi-Fi para Invitados (aislamiento total de la red interna).
-    \end{itemize}
-    \item \textbf{Pilar Aplicaciones:} Inspección continua de tráfico web a través de un Web Application Firewall (WAF) perimetral, transición obligatoria hacia TLS 1.3 con desactivación de suites criptográficas heredadas y endurecimiento (\textit{hardening}) del servidor Nginx.
-    \item \textbf{Pilar Datos:} Cifrado integral de bases de datos tanto en reposo (AES-256) como en tránsito (TLS 1.3), complementado con la aplicación estricta del principio de mínimo privilegio en el acceso a tablas.
-\end{enumerate}
+\begin{itemize}
+    \item \textbf{Verificación Explícita:} Toda solicitud de acceso a sistemas académicos o administrativos (tales como \texttt{matricula.\allowbreak unap.\allowbreak edu.pe}, \texttt{campus.\allowbreak unap.\allowbreak edu.pe}, bases de datos o consolas SSH) debe ser autenticada, autorizada y cifrada de forma continua utilizando todos los puntos de datos contextuales disponibles (identidad del usuario, robustez del método de autenticación, salud del dispositivo, ubicación de red y anomalías de comportamiento).
+    \item \textbf{Uso del Privilegio Mínimo (\textit{Least Privilege}):} Se limita el acceso de usuarios, cuentas de servicio y administradores mediante esquemas de acceso justo a tiempo (\textit{Just-In-Time} - JIT) y justo el necesario (\textit{Just-Enough-Access} - JEA), restringiendo los privilegios a las tareas estrictamente requeridas por el rol institucional.
+    \item \textbf{Asumir la Brecha (\textit{Assume Breach}):} Se diseña la red y los sistemas considerando que un adversario ya ha comprometido una cuenta o se encuentra ejecutando código en una estación de trabajo de una facultad. En consecuencia, se minimiza el ``radio de explosión'' (\textit{blast radius}) mediante microsegmentación de redes, cifrado universal de datos y monitoreo analítico en tiempo real.
+\end{itemize}
 
-\section{Matriz de Roles, Usuarios y Permisos (RBAC / Zero Trust)}
+\vspace{0.3cm}
 
 \begin{center}
-\small
-\begin{longtable}{>{\bfseries}p{3.0cm} p{3.8cm} p{4.2cm} p{4.0cm}}
+\begin{tikzpicture}[
+    font=\small,
+    boxTitle/.style={
+        rectangle,
+        rounded corners=4pt,
+        draw=fg!90!black,
+        fill=fg!90!black,
+        text=white,
+        font=\bfseries\small,
+        align=center,
+        inner sep=5pt,
+        text width=14.6cm
+    },
+    boxEngine/.style={
+        rectangle,
+        rounded corners=4pt,
+        draw=fg!80!black,
+        fill=bg!80,
+        text=fg!95!black,
+        font=\bfseries\footnotesize,
+        align=center,
+        inner sep=4pt,
+        text width=14.6cm
+    },
+    pillarHeader/.style={
+        rectangle,
+        rounded corners=3pt,
+        font=\bfseries\scriptsize,
+        text=white,
+        align=center,
+        inner sep=3pt,
+        text width=2.7cm,
+        minimum height=0.6cm
+    },
+    pillarBody/.style={
+        rectangle,
+        rounded corners=3pt,
+        font=\scriptsize,
+        align=left,
+        inner sep=4pt,
+        text width=2.7cm,
+        minimum height=2.6cm
+    },
+    arrowDown/.style={
+        -{Stealth[scale=0.85]},
+        line width=1pt,
+        color=fg!85!black
+    }
+]
+
+% Título General
+\node[boxTitle] (topBanner) at (0, 0) {ARQUITECTURA ZERO TRUST UNAP (NIST SP 800-207)};
+
+% Motor de Políticas
+\node[boxEngine] (engine) at (0, -0.85) {MOTOR DE POLÍTICAS (PDP) + PUNTO DE DECISIÓN (PEP)};
+
+% Pilares Headers
+\definecolor{colP1}{RGB}{30, 80, 160}
+\definecolor{colP2}{RGB}{15, 125, 135}
+\definecolor{colP3}{RGB}{45, 130, 75}
+\definecolor{colP4}{RGB}{190, 95, 20}
+\definecolor{colP5}{RGB}{125, 45, 130}
+
+\node[pillarHeader, fill=colP1] (h1) at (-5.92, -1.8) {IDENTIDADES};
+\node[pillarHeader, fill=colP2] (h2) at (-2.96, -1.8) {DISPOSITIVOS};
+\node[pillarHeader, fill=colP3] (h3) at (0, -1.8) {REDES};
+\node[pillarHeader, fill=colP4] (h4) at (2.96, -1.8) {APLICACIONES};
+\node[pillarHeader, fill=colP5] (h5) at (5.92, -1.8) {DATOS};
+
+% Pilares Bodies
+\node[pillarBody, draw=colP1!70, fill=colP1!8] (b1) at (-5.92, -3.25) {
+    \textbullet~MFA Obligatorio\\
+    \textbullet~IdP Centralizado\\
+    \textbullet~Baja de Cuentas Inactivas\\
+    \textbullet~Sesión a 20 min
+};
+
+\node[pillarBody, draw=colP2!70, fill=colP2!8] (b2) at (-2.96, -3.25) {
+    \textbullet~Postura de Salud\\
+    \textbullet~Dispositivos OTI\\
+    \textbullet~Bloqueo de BYOD en Data Center\\
+    \textbullet~Bloqueo USB
+};
+
+\node[pillarBody, draw=colP3!70, fill=colP3!8] (b3) at (0, -3.25) {
+    \textbullet~Microsegmentado (VLANs 10 a 60)\\
+    \textbullet~Tráfico Este-Oeste Denegado\\
+    \textbullet~Host Bastión
+};
+
+\node[pillarBody, draw=colP4!70, fill=colP4!8] (b4) at (2.96, -3.25) {
+    \textbullet~WAF e Inspección\\
+    \textbullet~Hardening Nginx\\
+    \textbullet~Cookies Seguras\\
+    \textbullet~CSP y HSTS
+};
+
+\node[pillarBody, draw=colP5!70, fill=colP5!8] (b5) at (5.92, -3.25) {
+    \textbullet~Cifrado en Reposo (TDE / LUKS)\\
+    \textbullet~TLS 1.3 Forzado\\
+    \textbullet~DLP y Enmascarado (Ley N° 29733)
+};
+
+% Conectores desde el Motor a cada pilar
+\draw[arrowDown] (-5.92, -1.15) -- (h1.north);
+\draw[arrowDown] (-2.96, -1.15) -- (h2.north);
+\draw[arrowDown] (0, -1.15) -- (h3.north);
+\draw[arrowDown] (2.96, -1.15) -- (h4.north);
+\draw[arrowDown] (5.92, -1.15) -- (h5.north);
+
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.3cm}
+
+\section{Acciones Estratégicas por los Cinco Pilares de Zero Trust}
+
+\subsection*{Pilar 1: Seguridad de las Identidades (\textit{Users / Identities})}
+La identidad constituye el nuevo perímetro defensivo de la universidad:
+\begin{itemize}
+    \item \textbf{Autenticación Multifactor (MFA) Obligatoria:} Implementación universal de MFA mediante aplicaciones de contraseñas de un solo uso basadas en tiempo (TOTP como Google Authenticator o llaves de hardware FIDO2) para el 100\% de autoridades, personal administrativo, docentes y personal técnico de la OTI.
+    \item \textbf{Directorio Unificado y Federación de Identidades (IdP / IAM):} Centralización de todas las credenciales institucionales en un único proveedor de identidad (OpenID Connect / SAML federado), eliminando bases de datos de usuarios dispersas en aplicaciones individuales.
+    \item \textbf{Gestión de Ciclo de Vida de Cuentas:} Depuración y desactivación automatizada de cuentas de alumnos egresados, retirados y contratos concluidos de docentes y personal CAS en un plazo máximo de 48 horas tras el cese.
+    \item \textbf{Control de Sesiones Adaptativo:} Reducción del tiempo de vida de los tokens y cookies de autenticación (\texttt{.AspNetCore.Cookies} a 20 minutos de inactividad) con reautenticación forzada ante cambios de dirección IP o huella del navegador.
+\end{itemize}
+
+\subsection*{Pilar 2: Seguridad de los Dispositivos (\textit{Devices / Endpoints})}
+No se permite el acceso a servicios internos basándose únicamente en una credencial válida; el equipo debe ser verificado:
+\begin{itemize}
+    \item \textbf{Validación de Postura del Dispositivo (\textit{Device Compliance}):} Exigir que cualquier computadora que intente conectarse a la red administrativa o a la VPN cuente con sistema operativo soportado, parches de seguridad al día, firewall local activo y el agente EDR institucional operando.
+    \item \textbf{Aislamiento de Dispositivos Personales (BYOD):} Prohibición estricta del uso de computadoras portátiles, tabletas o teléfonos personales para la administración de servidores, bases de datos o sistemas financieros (Tesorería / SITRAD). Estos dispositivos quedan confinados exclusivamente a la VLAN de navegación general.
+    \item \textbf{Control de Periféricos:} Bloqueo de puertos USB y almacenamiento extraíble mediante directivas de grupo (GPO) y agentes EDR en estaciones de trabajo de áreas críticas (Caja, Matrícula, Data Center).
+\end{itemize}
+
+\subsection*{Pilar 3: Seguridad de Redes y Comunicaciones (\textit{Networks})}
+Supresión de la red plana tradicional mediante segmentación estricta y control de flujo:
+\begin{itemize}
+    \item \textbf{Microsegmentación por VLANs y Zonas de Seguridad:}
+    \begin{itemize}
+        \item \textbf{VLAN 10 - Data Center / Gestión Crítica:} Aloja el motor de Base de Datos Académica (ACT-01), servidores de almacenamiento y switches Core. Aislamiento absoluto; acceso únicamente a través de un Host Bastión (\textit{Jump Host}) con mTLS y MFA.
+        \item \textbf{VLAN 20 - Red Docente y Decanatos:} Segmento para equipos de catedráticos y autoridades; acceso habilitado hacia los portales web vía HTTPS, con tráfico directo denegado hacia la base de datos o consolas SSH.
+        \item \textbf{VLAN 30 - Red Administrativa:} Computadoras de Tesorería, SITRAD, Recursos Humanos y Matrícula. Tráfico inter-estación (este-oeste / SMB) bloqueado por firewall de capa 2/3.
+        \item \textbf{VLAN 40 - Laboratorios de Cómputo Estudiantiles:} Redes de alta rotación con aislamiento de clientes (\textit{Client Isolation}); las estaciones no pueden comunicarse entre sí ni con subredes administrativas.
+        \item \textbf{VLAN 50 - Wi-Fi Institucional e Invitados:} Únicamente acceso de salida a Internet; aislamiento total respecto a cualquier servidor o dirección IP interna de la universidad.
+        \item \textbf{VLAN 60 - DMZ (Zona Desmilitarizada):} Servidores web públicos (\path{matricula.unap.edu.pe}, \path{campus.unap.edu.pe}, \path{www.unap.edu.pe}) protegidos por firewall perimetral y WAF.
+    \end{itemize}
+    \item \textbf{Denegación por Defecto (\textit{Default-Deny}):} Reglas en el Core Switch y Firewall NGFW que bloquean todo el tráfico entre subredes salvo que exista una regla explícita autorizada por puerto, protocolo e IP de origen/destino.
+    \item \textbf{Filtrado Estricto de Egreso (\textit{Egress Filtering}):} Bloqueo de todo tráfico saliente no estándar desde los servidores del Data Center para evitar comunicaciones de comando y control (C2).
+\end{itemize}
+
+\subsection*{Pilar 4: Seguridad de las Aplicaciones y Cargas de Trabajo (\textit{Applications \& Workloads})}
+Blindaje del software de cara a los usuarios y entre microservicios:
+\begin{itemize}
+    \item \textbf{Hardening Perimetral en Reverse Proxy:} Ocultamiento mandatorio de firmas de software (\texttt{server\_tokens off;} en Nginx) y actualización continua de los paquetes base para mitigar la explotación de versiones obsoletas (\texttt{nginx/1.16.1}).
+    \item \textbf{Inyección Obligatoria de Cabeceras de Seguridad:} Activación forzada de la directiva \texttt{Strict-\allowbreak Transport-\allowbreak Security} (HSTS con \texttt{max-age=\allowbreak 31536000}), cabeceras \texttt{X-Frame-\allowbreak Options: SAMEORIGIN} y directiva \texttt{X-Content-\allowbreak Type-\allowbreak Options: nosniff} en todos los portales institucionales.
+    \item \textbf{Aseguramiento de Cookies de Sesión:} Configuración forzada en el backend ASP.NET Core y PHP de los atributos \texttt{HttpOnly}, \texttt{Secure} y \texttt{SameSite=Strict} para todas las cookies de autenticación y datos temporales (\texttt{CookieTempDataProvider}).
+    \item \textbf{Protección mediante WAF:} Inspección activa de peticiones HTTP en tiempo real para bloquear inyecciones SQL, Cross-Site Scripting (XSS) y manipulación de parámetros de matrícula.
+\end{itemize}
+
+\subsection*{Pilar 5: Seguridad de los Datos (\textit{Data})}
+Protección integral del activo más valioso de la UNAP:
+\begin{itemize}
+    \item \textbf{Cifrado Mandatorio en Tránsito:} Tráfico web forzado a HTTPS bajo TLS 1.3, retirando soporte para suites de cifrado débiles o deprecadas (TLS 1.0, 1.1 y RC4).
+    \item \textbf{Cifrado en Reposo (\textit{Encryption at Rest}):} Cifrado de discos virtuales en el Data Center mediante BitLocker / LUKS y cifrado transparente a nivel de base de datos (\textit{Transparent Data Encryption} - TDE) en PostgreSQL y Oracle para tablas que contengan calificaciones, historiales académicos y datos biométricos.
+    \item \textbf{Clasificación y Enmascaramiento de Datos:} Clasificación documental conforme a la Ley N° 29733 (Datos Públicos, Uso Interno, Confidenciales y Sensibles). Enmascaramiento dinámico de datos de estudiantes y docentes en entornos de desarrollo y pruebas (\path{dev.unap.edu.pe}, \path{prue1.unap.edu.pe}).
+\end{itemize}
+
+\newpage
+\section{Matriz Institucional de Roles, Usuarios y Permisos (Modelo RBAC / Zero Trust)}
+
+La asignación de privilegios se rige por el modelo Control de Acceso Basado en Roles (RBAC) con validación contextual de políticas (\textit{Attribute-Based Access Control} - ABAC), formalizando los accesos permitidos, niveles operativos y métodos de verificación para cada actor del ecosistema UNAP:
+
+\vspace{0.2cm}
+
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{>{\raggedright\bfseries}p{2.35cm} >{\raggedright}p{2.05cm} >{\raggedright}p{2.45cm} >{\raggedright}p{2.35cm} >{\raggedright}p{2.35cm} >{\raggedright\arraybackslash}p{3.65cm}}
 \toprule
 \rowcolor{outermarginbgcolor}
-Rol Institucional & Identidades & Ámbito de Acceso Autorizado & Controles Obligatorios \\
+Rol Institucional & Colectivo de Usuarios & Activos y Endpoints Autorizados & Nivel de Acceso a Base de Datos & Método de Verificación Exigido & Políticas y Restricciones Zero Trust \\
 \midrule
 \endfirsthead
 \toprule
 \rowcolor{outermarginbgcolor}
-Rol Institucional & Identidades & Ámbito de Acceso Autorizado & Controles Obligatorios \\
+Rol Institucional & Colectivo de Usuarios & Activos y Endpoints Autorizados & Nivel de Acceso a Base de Datos & Método de Verificación Exigido & Políticas y Restricciones Zero Trust \\
 \midrule
 \endhead
 \bottomrule
 \endfoot
-Super Administrador & Personal OTI designado & Consolas de administración, Switch Core y servidores & MFA físico (FIDO2), acceso solo por IP estática y bastion host \\
+Estudiante de Pregrado / Posgrado & 
+Más de 19,000 alumnos regulares e ingresantes & 
+Portal de Matrícula (\path{/matricula/alumno/*}), Campus Virtual Moodle (\path{campus.unap.edu.pe}), Consulta de Notas & 
+Lectura Restringida únicamente a su identificador de alumno (\texttt{id\_alumno}). Inserción temporal en tabla de matrícula & 
+Credenciales institucionales + MFA condicional (OTP SMS/App) + Cookie \texttt{.AspNet\allowbreak Core.\allowbreak Cookies} con flag \texttt{Secure} &  
+\textbullet~Acceso a matrícula condicionado estrictamente al cronograma académico oficial.\par
+\textbullet~Denegación absoluta de acceso a rutas administrativas o APIs internas de docentes.\par
+\textbullet~Sesión revocada tras 15 minutos de inactividad. \\
 \midrule
-Docente & Docentes ordinarios y contratados & Módulo docente del SIA y Campus Virtual institucional & MFA por TOTP, expiración de sesión a 15 min de inactividad \\
+Docente Ordinario / Contratado & 
+Plana docente de las 20 facultades de la UNAP & 
+Campus Virtual Moodle, Módulo de Registro de Notas y Asistencia Docente (\path{/docente/*}) & 
+Lectura de nómina de alumnos inscritos en su carga horaria. Escritura en actas de evaluación académica & 
+Cuenta institucional unificada (\texttt{@unap.\allowbreak edu.pe}) + MFA Obligatorio (TOTP) & 
+\textbullet~Inserción de notas permitida únicamente dentro de las fechas de apertura de actas fijadas por el Vicerrectorado Académico.\par
+\textbullet~Prohibido el acceso directo al sistema operativo o a consolas de administración del servidor.\par
+\textbullet~Registro auditado e inmutable de cada cambio de nota con IP y timestamp. \\
 \midrule
-Estudiante & Alumnos matriculados & Consulta de notas, matrícula web y Campus Virtual & Credencial única, captcha y límite de intentos fallidos \\
+Director de Escuela Profesional & 
+Directores de las 36 Escuelas Profesionales & 
+Módulo de Gestión Curricular, Apertura de Grupos y Convalidaciones & 
+Lectura de padrones de la escuela. Modificación de cupos y horarios correspondientes a su carrera & 
+Credenciales nominativas + MFA obligatorio + Acceso condicionado a IP o red institucional & 
+\textbullet~Aprobación de ampliación de vacantes o convalidaciones sujeta a firma digital institucional.\par
+\textbullet~Restricción geográfica: denegación de accesos directivos desde fuera del territorio nacional sin preaviso a la OTI. \\
 \midrule
-Administrativo & Personal de tesorería y mesa de partes & SITRAD y sistemas de recaudación específicos & Acceso restringido a VLAN 20 y horario laboral institucional \\
+Operador de Tesorería y Caja & 
+Personal administrativo de la DGA & 
+Sistema de Recaudación, Facturación Electrónica y Conciliaciones (\texttt{tesoreria.\allowbreak unap.\allowbreak edu.pe}) & 
+Lectura y Escritura en tablas de transacciones financieras y estados de pago de tasas & 
+Credencial nominativa única (no compartida) + MFA + Certificado de equipo instalado & 
+\textbullet~Acceso permitido exclusivamente desde estaciones de trabajo corporativas dentro de la VLAN 30 (Red Administrativa).\par
+\textbullet~Denegación total de acceso vía Wi-Fi, VPN doméstica o Internet público.\par
+\textbullet~Bloqueo de puertos USB y almacenamiento extraíble en la PC. \\
+\midrule
+Operador de Mesa de Partes / Trámite & 
+Personal de Trámite Documentario y Archivo Central & 
+Sistema de Trámite Documentario (SITRAD / \texttt{tramiteapp.\allowbreak unap.\allowbreak edu.pe}) & 
+Lectura y Creación de expedientes, decretos y resoluciones universitarias & 
+Credencial institucional + MFA + Firma Digital (Reniec / Refirma) & 
+\textbullet~Segmentación estricta de expedientes por áreas de derivación autorizadas.\par
+\textbullet~Trazabilidad total de descargas de documentos clasificados como confidenciales. \\
+\midrule
+Desarrollador de Sistemas OTI & 
+Ingenieros de software y programadores de la OTI & 
+Repositorios Git institucionales, Servidores de Pruebas y Homologación (\path{dev.*}, \path{prue1.*}) & 
+Lectura y Escritura en bases de datos de desarrollo (con datos ficticios o enmascarados) & 
+Autenticación basada en llaves SSH (RSA 4096 / Ed25519) + MFA & 
+\textbullet~Prohibición absoluta de desplegar entornos \texttt{dev} o \texttt{prue1} con acceso directo a Internet. Deben operar en subred privada detrás de VPN.\par
+\textbullet~Prohibido el uso de credenciales de producción en código fuente o repositorios. \\
+\midrule
+Administrador de Redes y Comunicaciones & 
+Ingenieros de la Unidad de Redes OTI & 
+Consolas de gestión de Switches Core, Routers, Controladores Wi-Fi y Firewall UTM & 
+Nulo acceso a datos de negocio; acceso total a tablas de enrutamiento y configuraciones & 
+Cuenta nominal de administración + Llave física FIDO2 / Token de hardware & 
+\textbullet~Acceso permitido únicamente desde el Host Bastión (\textit{Jump Host}) en la VLAN 10.\par
+\textbullet~Todas las sesiones SSH/HTTPS quedan grabadas en video y bitácora centralizada.\par
+\textbullet~Prohibido el uso de la cuenta genérica \texttt{admin} de los equipos. \\
+\midrule
+Administrador de Base de Datos (DBA) & 
+Custodio de Bases de Datos de la OTI & 
+Motores de bases de datos centrales (PostgreSQL, Oracle, SQL Server en Data Center) & 
+Control Total (DBA) sobre esquemas, procedimientos almacenados, usuarios de BD y respaldos & 
+Autenticación mutua (mTLS) + Cuenta nominal DBA + MFA en servidor bastión & 
+\textbullet~Conexión TCP directa hacia el puerto de base de datos bloqueada para cualquier equipo que no sea el servidor de aplicaciones o el Bastión.\par
+\textbullet~Consultas masivas (\texttt{SELECT *}, \texttt{DROP}, \texttt{ALTER}) alertadas inmediatamente en el SIEM.\par
+\textbullet~Respaldo y cifrado obligatorio de llaves de recuperación. \\
 \bottomrule
 \end{longtable}
 \end{center}
+
+\vspace{0.3cm}
+
+\section{Procedimiento Operativo de Verificación y Revocación de Accesos}
+
+Para asegurar la sostenibilidad del modelo Zero Trust en el tiempo, la OTI ejecutará tres rutinas operativas periódicas:
+
+\begin{itemize}
+    \item \textbf{Revisión Trimestral de Cuentas y Privilegios (\textit{Access Review}):} Auditoría automatizada que cruza el padrón activo de personal provisto por Recursos Humanos con los directorios de usuarios. Toda cuenta sin justificación de rol vigente o con más de 60 días sin actividad transaccional es suspendida inmediatamente.
+    \item \textbf{Revocación Inmediata de Permisos (\textit{Kill-Switch} de Identidad):} Ante la detección de una anomalía de seguridad por el SIEM (ej. intento de acceso desde una ubicación geográfica imposible o reporte de robo de equipo), el centro de operaciones invocará un script de respuesta rápida que invalida los tokens de sesión activos en Redis/ASP.NET Core, bloquea la cuenta en el directorio unificado y corta las conexiones VPN activas del usuario en menos de 60 segundos.
+    \item \textbf{Monitoreo Continuo de Comportamiento (\textit{User and Entity Behavior Analytics} - UEBA):} Monitoreo algorítmico de desviaciones en los patrones de uso habituales de los trabajadores universitarios (ej. un docente intentando modificar actas de notas a las 03:00 AM o un operador de tesorería descargando volúmenes atípicos de registros de pago). Toda desviación genera una alerta de severidad Alta que exige verificación telefónica o reautenticación mediante MFA con confirmación de número (\textit{Number Matching}).
+\end{itemize}
