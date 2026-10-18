@@ -1,39 +1,298 @@
-\chapter{Gestión y Respuesta a Incidentes}
+\chapter{Gestión de Incidentes de Ciberseguridad}
 \label{ch:gestion_incidentes}
 
-En este capítulo se describe el procedimiento operativo estándar para la gestión, contención y recuperación ante eventos o incidentes de seguridad que afecten a la UNAP.
+\section{Marco de Gobernanza y Creación del CSIRT-UNAP}
 
-\section{Procedimiento Operativo Estándar}
-El ciclo de vida de atención a incidentes de seguridad digital sigue la secuencia estándar de seis fases:
+La gestión de incidentes en la Universidad Nacional del Altiplano se estructura formalmente conforme a los estándares internacionales NIST SP 800-61 Rev. 2 (\textit{Computer Security Incident Handling Guide}) e ISO/IEC 27035, alineándose con los mandatos de la Secretaría de Gobierno y Transformación Digital (SGTD/PCM) y el Centro Nacional de Seguridad Digital (CSIRT Nacional) bajo el Decreto de Urgencia N° 006-2020.
+
+Se constituye formalmente el \textbf{Equipo de Respuesta a Incidentes de Seguridad Digital de la Universidad Nacional del Altiplano (CSIRT-UNAP)}, dependiente jerárquicamente de la Oficina de Tecnologías de la Información (OTI).
+
+\subsection*{Estructura Operativa del CSIRT-UNAP}
+
+\begin{itemize}
+    \item \textbf{Líder del CSIRT:} Jefe de la OTI / Oficial de Seguridad de la Información (CISO).
+    \item \textbf{Coordinador Técnico:} Administrador de Redes y Seguridad Informática (Líder Técnico de Contención).
+    \item \textbf{Especialista de Sistemas y BD:} Administrador de Base de Datos (DBA) y Desarrollador Líder del Sistema de Matrícula.
+    \item \textbf{Analista de Monitoreo / Forense:} Operador del SOC / Analista de Ciberseguridad encargado de telemetría y recolección de evidencias.
+    \item \textbf{Enlace Legal y Comunicacional:} Representante de la Oficina de Asesoría Jurídica y la Oficina de Comunicación e Imagen Institucional.
+\end{itemize}
+
+\section{Flujo Operativo en Seis (6) Etapas}
+
+El procedimiento estandarizado para la atención de eventos adversos que atenten contra los activos de la UNAP sigue un ciclo cerrado y metodológico:
+
+\vspace{0.2cm}
+
+% Definición de colores para las etapas
+\definecolor{colDet}{RGB}{20, 110, 160}
+\definecolor{colAna}{RGB}{30, 130, 70}
+\definecolor{colCon}{RGB}{195, 110, 20}
+\definecolor{colErr}{RGB}{185, 45, 45}
+\definecolor{colRec}{RGB}{115, 45, 130}
+\definecolor{colPost}{RGB}{35, 55, 95}
 
 \begin{center}
-\small
-\textbf{Detección} $\longrightarrow$ \textbf{Análisis y Triaje} $\longrightarrow$ \textbf{Contención} \\
-$\longrightarrow$ \textbf{Erradicación} $\longrightarrow$ \textbf{Recuperación} $\longrightarrow$ \textbf{Evaluación Post-Mortem}
+\begin{tikzpicture}[
+    font=\small,
+    flowTitle/.style={
+        rectangle, rounded corners=3pt,
+        draw=fg!90!black, fill=fg!90!black, text=white,
+        font=\bfseries\scriptsize, align=center,
+        inner sep=3.5pt, text width=14.8cm
+    },
+    stageBox/.style={
+        rectangle, rounded corners=4pt,
+        inner sep=4pt, text width=4.3cm,
+        minimum height=1.2cm, align=left
+    },
+    arrowFlow/.style={
+        -{Stealth[scale=0.85]},
+        line width=1.1pt,
+        color=fg!85!black
+    }
+]
+
+\node[flowTitle] (mTitle) at (0, 0.75) {PROCEDIMIENTO ESTANDARIZADO DE GESTIÓN DE INCIDENTES (NIST SP 800-61 / ISO 27035)};
+
+% Fila Superior: Etapas 1, 2, 3
+\node[stageBox, draw=colDet!80, fill=colDet!10] (b1) at (-4.8, -0.3) {
+    {\bfseries\scriptsize\color{colDet} 1. DETECCIÓN Y REPORTE}\\[1pt]
+    {\scriptsize Alertas SIEM, monitoreo FIM, reportes docentes y CSIRT-PE.}
+};
+
+\node[stageBox, draw=colAna!80, fill=colAna!10] (b2) at (0, -0.3) {
+    {\bfseries\scriptsize\color{colAna} 2. ANÁLISIS Y TRIAJE}\\[1pt]
+    {\scriptsize Triaje de severidad (Crítica a Baja) y descarte de falsos positivos.}
+};
+
+\node[stageBox, draw=colCon!80, fill=colCon!10] (b3) at (4.8, -0.3) {
+    {\bfseries\scriptsize\color{colCon} 3. CONTENCIÓN}\\[1pt]
+    {\scriptsize Aislamiento VLAN, revocación de tokens y corte perimetral en WAF.}
+};
+
+% Fila Inferior: Etapas 6, 5, 4
+\node[stageBox, draw=colPost!80, fill=colPost!10] (b6) at (-4.8, -2.5) {
+    {\bfseries\scriptsize\color{colPost} 6. LECCIONES APRENDIDAS}\\[1pt]
+    {\scriptsize Informe técnico-legal, reporte PCM y mejoras continuas STRIDE/ZT.}
+};
+
+\node[stageBox, draw=colRec!80, fill=colRec!10] (b5) at (0, -2.5) {
+    {\bfseries\scriptsize\color{colRec} 5. RECUPERACIÓN}\\[1pt]
+    {\scriptsize Restauración BD inmutable 3-2-1, Golden Images y vigilancia 72\,h.}
+};
+
+\node[stageBox, draw=colErr!80, fill=colErr!10] (b4) at (4.8, -2.5) {
+    {\bfseries\scriptsize\color{colErr} 4. ERRADICACIÓN}\\[1pt]
+    {\scriptsize Eliminación de Web Shells, parchado Nginx y forzado DMARC/MFA.}
+};
+
+% Conectores de flujo del ciclo
+\draw[arrowFlow] (b1.east) -- (b2.west);
+\draw[arrowFlow] (b2.east) -- (b3.west);
+\draw[arrowFlow] (b3.south) -- (b4.north);
+\draw[arrowFlow] (b4.west) -- (b5.east);
+\draw[arrowFlow] (b5.west) -- (b6.east);
+\draw[arrowFlow] (b6.west) -- ++(-0.35,0) |- (b1.west);
+
+\end{tikzpicture}
 \end{center}
 
-\begin{enumerate}
-    \item \textbf{Detección:} Identificación de alertas a través del SIEM, reportes de usuarios o anomalías en el tráfico de red.
-    \item \textbf{Análisis y Triaje:} Determinación del alcance, impacto potencial y severidad del incidente por parte del equipo CSIRT-UNAP.
-    \item \textbf{Contención:} Aplicación de medidas de aislamiento inmediato (aislamiento de VLAN, revocación de tokens, bloqueo perimetral de IPs) para evitar la propagación.
-    \item \textbf{Erradicación:} Eliminación de artefactos maliciosos, cierre de brechas de configuración y revocación de credenciales comprometidas.
-    \item \textbf{Recuperación:} Restauración de servicios a partir de respaldos limpios validados y reactivación paulatina con monitoreo reforzado.
-    \item \textbf{Evaluación Posterior (Post-Mortem):} Elaboración del informe técnico final, identificación de lecciones aprendidas y ajuste de controles preventivos.
-\end{enumerate}
+\vspace{0.2cm}
 
-\section{Canales Institucionales de Notificación Rápida}
-Para garantizar la oportuna recepción de reportes sobre comportamientos anómalos, se formalizan los siguientes canales oficiales:
+\subsection{Etapa 1: Detección y Notificación}
 \begin{itemize}
-    \item \textbf{Correo Electrónico de Seguridad:} \texttt{seguridad.informatica@unap.edu.pe}
-    \item \textbf{Anexo Telefónico de Emergencia OTI:} Anexo interno 1111 (Línea directa del CSIRT-UNAP).
-    \item \textbf{Botón de Reporte en Webmail:} Complemento integrado en el correo institucional para notificar mensajes sospechosos de phishing en un clic.
+    \item \textbf{Objetivo:} Identificar la ocurrencia de una anomalía o evento adverso a través de fuentes automatizadas o reportes de usuarios.
+    \item \textbf{Fuentes de Detección:}
+    \begin{itemize}
+        \item \textit{Automatizadas:} Reglas de correlación del SIEM Wazuh ante ataques de fuerza bruta en \texttt{matri\allowbreak cula.\allowbreak unap.\allowbreak edu.pe}, ejecuciones anómalas de PowerShell T1059.001 o modificaciones FIM en \path{/var/www/}.
+        \item \textit{Reportes de Usuarios:} Notificaciones de la comunidad universitaria sobre recepción de correos fraudulentos, comportamientos atípicos en sus equipos o páginas bloqueadas.
+        \item \textit{Fuentes Externas:} Notificaciones del CSIRT Nacional (PCM) sobre direcciones IP institucionales comprometidas o credenciales \texttt{@unap.edu.pe} filtradas en la Dark Web.
+    \end{itemize}
+    \item \textbf{Canales Oficiales de Reporte Institucional:}
+    \begin{itemize}
+        \item \textit{Correo 24/7:} \texttt{seguridad.informatica@unap.edu.pe} / \texttt{csirt@unap.edu.pe}.
+        \item \textit{Botón de Reporte en Webmail:} Botón integrado en Google Workspace / Outlook para reportar phishing con un solo clic.
+        \item \textit{Anexo de Emergencia OTI:} Canal telefónico de alerta inmediata para áreas críticas (Data Center, Tesorería, Admisión).
+    \end{itemize}
 \end{itemize}
 
-\section{Clasificación de Incidentes por Tipo de Amenaza}
+\subsection{Etapa 2: Análisis, Clasificación y Triaje}
+
 \begin{itemize}
-    \item \textbf{Phishing Masivo o Dirigido:} Correos fraudulentos que buscan robar identidades o distribuir malware.
-    \item \textbf{Accesos No Autorizados:} Intentos de inicio de sesión anómalos o explotación de credenciales institucionales.
-    \item \textbf{Infecciones por Malware / Ransomware:} Ejecución de código malicioso en servidores o computadoras de oficinas.
-    \item \textbf{Exfiltración de Información:} Fuga o extracción no autorizada de bases de datos o expedientes sensibles.
-    \item \textbf{Pérdida o Sustracción de Equipos Físicos:} Extravío de portátiles o almacenamiento institucional con datos sensibles.
+    \item \textbf{Objetivo:} Determinar la autenticidad del incidente (descarte de falsos positivos), su alcance técnico, los activos comprometidos y su nivel de impacto institucional.
+    \item \textbf{Criterio de Severidad Institucional:}
 \end{itemize}
+
+\vspace{0.15cm}
+
+\begingroup
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{>{\raggedright\bfseries}p{2.3cm} >{\raggedright}p{4.7cm} >{\centering}p{1.8cm} >{\raggedright\arraybackslash}p{5.5cm}}
+\toprule
+\rowcolor{outermarginbgcolor}
+Nivel de Severidad & Criterio de Impacto en la UNAP & Tiempo Máximo (SLA) & Ejemplos de Incidentes \\
+\midrule
+\endfirsthead
+\toprule
+\rowcolor{outermarginbgcolor}
+Nivel de Severidad & Criterio de Impacto en la UNAP & Tiempo Máximo (SLA) & Ejemplos de Incidentes \\
+\midrule
+\endhead
+\textbf{Crítica}\par(Nivel 4) & Afectación directa a la Base de Datos Académica Central (ACT-01), parálisis total del portal de Matrícula (ACT-02) en semana de inscripciones, o ataque de Ransomware en servidores del Data Center. & $\le 15$ minutos & \textbullet~Inyección SQL masiva con alteración de notas.\par\textbullet~Servidor ESXi cifrado por ransomware.\par\textbullet~Defacement en portal principal de la UNAP. \\
+\midrule
+\textbf{Alta}\par(Nivel 3) & Compromiso de cuentas directivas o docentes sin alteración masiva confirmada, suplantación de dominio activo (NXDOMAIN DMARC) con phishing masivo en curso, o infección por malware en red administrativa (Tesorería). & $\le 1$ hora & \textbullet~Web Shell detectada en servidor de pruebas expuesto (\texttt{dev.unap.edu.pe}).\par\textbullet~Campaña activa de phishing usando \texttt{@unap.edu.pe}. \\
+\midrule
+\textbf{Media}\par(Nivel 2) & Escaneos de puertos anómalos contra la DMZ, infección aislada en una máquina de laboratorio de facultad (VLAN 40), o bloqueo de cuentas por múltiples intentos fallidos. & $\le 4$ horas & \textbullet~Estación de trabajo con troyano detectado por el EDR.\par\textbullet~Intentos de fuerza bruta mitigados por el WAF. \\
+\midrule
+\textbf{Baja}\par(Nivel 1) & Spams esporádicos sin payload malicioso, incidentes de navegación no autorizada de bajo riesgo o eventos aislados sin afectación de servicios. & $\le 24$ horas & \textbullet~Correo no deseado recibido por un usuario.\par\textbullet~Escaneo pasivo registrado en firewall sin impacto. \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\subsection{Etapa 3: Contención}
+
+\begin{itemize}
+    \item \textbf{Objetivo:} Frenar la propagación de la amenaza, aislar el radio de explosión (\textit{Blast Radius}) e impedir la exfiltración o destrucción de datos sin destruir la evidencia forense.
+    \item \textbf{Estrategia de Contención Escalonada:}
+    \begin{itemize}
+        \item \textit{Contención Lógica y de Red:}
+        \begin{itemize}
+            \item Aislamiento del puerto en el switch de borde o cambio de VLAN del host infectado a una ``VLAN de Cuarentena'' sin salida a Internet ni comunicación este-oeste.
+            \item En servidores virtuales (VMware/Proxmox), desconexión de la tarjeta de interfaz de red (vNIC) manteniendo la máquina encendida para preservar la memoria RAM volátil.
+        \end{itemize}
+        \item \textit{Contención Perimetral Inmediata:} Inyección dinámica de reglas de bloqueo en el Firewall NGFW FortiGate y en el proxy Nginx para las direcciones IP y dominios atacantes (IoCs identificados en la Etapa 2).
+        \item \textit{Contención de Identidades (Kill-Switch de Sesión):}
+        \begin{itemize}
+            \item Revocación forzada de tokens y cookies de autenticación (\texttt{.AspNetCore.Cookies}) en Redis / Kestrel.
+            \item Deshabilitación temporal de la cuenta de usuario comprometida en el directorio unificado (IdP / Active Directory / Google Workspace) y corte de túneles VPN activos.
+        \end{itemize}
+        \item \textit{Preservación Forense:} Adquisición de la memoria volátil (RAM dump) mediante herramientas forenses (FTK Imager / LiME) antes de cualquier reinicio o apagado de equipos.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Etapa 4: Erradicación}
+
+\begin{itemize}
+    \item \textbf{Objetivo:} Eliminar de raíz todos los componentes maliciosos, puertas traseras, cuentas no autorizadas y vulnerabilidades explotadas dentro del entorno.
+    \item \textbf{Procedimiento Operativo:}
+    \begin{itemize}
+        \item \textit{Eliminación de Artefactos:} Supresión de Web Shells, scripts maliciosos, tareas programadas fraudulentas (\textit{Cron jobs} o \textit{Windows Scheduled Tasks}) y claves de registro creadas para persistencia.
+        \item \textit{Remediación de la Causa Raíz:}
+        \begin{itemize}
+            \item Si la brecha se produjo por explotación de la cabecera \texttt{Server: nginx/1.16.1}, actualizar de inmediato el binario de Nginx a la versión estable soportada y configurar \texttt{server\_tokens off;}.
+            \item Si el vector fue Spear-Phishing aprovechando la ausencia de DMARC, publicar la política \texttt{v=DMARC1; p=reject} en la zona DNS.
+            \item Si se debió a contraseñas débiles, forzar el enrolamiento obligatorio en MFA.
+        \end{itemize}
+        \item \textit{Escaneo de Validación:} Ejecución de escaneos exhaustivos de vulnerabilidades y detección de amenazas con el agente EDR/antivirus en toda la subred afectada para asegurar la ausencia de malware latente.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Etapa 5: Recuperación y Restauración}
+
+\begin{itemize}
+    \item \textbf{Objetivo:} Retornar los sistemas comprometidos a su operación productiva regular de forma segura, garantizando la integridad de la información académica y financiera.
+    \item \textbf{Protocolo de Restauración:}
+    \begin{itemize}
+        \item \textit{Reconstrucción desde Estado Seguro:} En servidores comprometidos, se prioriza el redespliegue de la máquina virtual a partir de imágenes doradas (\textit{Golden Images}) o contenedores limpios del repositorio Git institucional, en lugar de desinfectar manualmente el sistema operativo dañado.
+        \item \textit{Restauración de Bases de Datos:} En caso de alteración o cifrado de actas de notas, restaurar desde la última copia de seguridad inmutable (Estrategia 3-2-1 del Control 9), verificando la coherencia referencial y la firma de auditoría previa al incidente.
+        \item \textit{Reingreso Gradual a Producción:} Habilitar el servicio inicialmente solo para consultas de lectura; tras validar estabilidad y monitoreo, restablecer la funcionalidad transaccional completa.
+        \item \textit{Monitoreo Reforzado (Vigilancia Post-Incidente):} Telemetría intensiva durante un periodo de observación de 72 horas continuas mediante el SIEM Wazuh sobre el activo restaurado para detectar posibles intentos de reinfección.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Etapa 6: Evaluación Posterior y Lecciones Aprendidas (Post-Mortem)}
+
+\begin{itemize}
+    \item \textbf{Objetivo:} Analizar las causas profundas del incidente para mejorar las defensas institucionales, actualizar las políticas y retroalimentar el marco de gobernanza NIST CSF 2.0.
+    \item \textbf{Reunión Post-Incidente (Plazo: 5 días hábiles post-cierre):} Convocada por el CISO con la participación de todos los miembros del CSIRT-UNAP involucrados.
+    \item \textbf{Interrogantes Operativas Obligatorias:}
+    \begin{enumerate}
+        \item ¿Exactamente qué ocurrió y en qué minuto se detectó?
+        \item ¿Por qué fallaron los controles preventivos existentes (STRIDE / Zero Trust)?
+        \item ¿Qué información contextual de \textit{Threat Intelligence} faltó para anticiparlo?
+        \item ¿Los tiempos de respuesta del equipo (MTTD y MTTR) cumplieron con el SLA?
+        \item ¿Qué reglas del SIEM o configuraciones de red deben añadirse o modificarse?
+    \end{enumerate}
+    \item \textbf{Productos Formales de la Etapa:}
+    \begin{itemize}
+        \item \textit{Informe Técnico-Legal de Incidente de Seguridad Digital:} Documento oficial remitido al Rectorado y custodiado bajo confidencialidad.
+        \item \textit{Notificación al CSIRT Nacional:} En cumplimiento del marco normativo peruano, reporte formal del incidente y sus IoCs a la Secretaría de Gobierno y Transformación Digital (PCM).
+        \item \textit{Actualización del Plan de Capacitación:} Inclusión del caso anonimizado como ejemplo práctico en las siguientes jornadas de concientización docente.
+    \end{itemize}
+\end{itemize}
+
+\section{Procedimientos Específicos por Tipo de Incidente}
+
+\begingroup
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{>{\raggedright\bfseries}p{3.5cm} >{\raggedright}p{3.8cm} >{\raggedright\arraybackslash}p{7.1cm}}
+\toprule
+\rowcolor{outermarginbgcolor}
+Tipo de Incidente & Canal de Reporte & Acciones Inmediatas Clave \\
+\midrule
+\endfirsthead
+\toprule
+\rowcolor{outermarginbgcolor}
+Tipo de Incidente & Canal de Reporte & Acciones Inmediatas Clave \\
+\midrule
+\endhead
+\textbf{Correos Sospechosos /}\par\textbf{Spear-Phishing} & Botón webmail /\par\path{seguridad.informatica@unap.edu.pe} & \textbullet~Análisis de cabeceras SPF/DKIM/DMARC.\par\textbullet~Purga masiva de buzones en Google/M365.\par\textbullet~Bloqueo de URLs en DNS Sinkhole y Firewall. \\
+\midrule
+\textbf{Accesos No Autorizados}\par\textbf{a Sistemas Académicos} & Alerta SIEM /\par Reporte Directo OTI & \textbullet~Revocación instantánea de cookies de sesión.\par\textbullet~Bloqueo de IP en Nginx / WAF (403 Forbidden).\par\textbullet~Reseteo forzado de credenciales y forzado MFA. \\
+\midrule
+\textbf{Infección por Malware /}\par\textbf{Ransomware en Servidor} & Alerta EDR /\par Teléfono de Emergencia & \textbullet~Aislamiento inmediato de red del host.\par\textbullet~Prohibición de apagar equipo (volcado de RAM).\par\textbullet~Validación de respaldos inmutables (WORM). \\
+\midrule
+\textbf{Fuga de Información /}\par\textbf{Base de Datos Expuesta} & Detección SIEM DLP /\par Notificación Externa & \textbullet~Corte de transferencias salientes en NGFW.\par\textbullet~Notificación a la Autoridad Nacional de Protección de Datos Personales (Minjus / Ley N° 29733). \\
+\midrule
+\textbf{Pérdida o Robo de}\par\textbf{Equipos Institucionales} & Denuncia Policial +\par Mesa de Partes OTI & \textbullet~Bloqueo remoto del equipo vía MDM/BitLocker.\par\textbullet~Revocación de certificados y credenciales de red. \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\section{Formato Institucional: Ficha de Registro y Control de Incidentes}
+
+Todo evento gestionado por el CSIRT-UNAP debe quedar registrado bajo la siguiente ficha formal estandarizada (integrada en el Anexo 7 del plan):
+
+\begin{cmdbox}{CSIRT-UNAP: Ficha Oficial de Registro y Control de Incidente}
+========================================================================
+         CSIRT-UNAP | REGISTRO DE INCIDENTE DE SEGURIDAD DIGITAL
+========================================================================
+CODIGO DE INCIDENTE: INC-UNAP-2026-______   FECHA/HORA: ___/___/2026 __:__
+RESPONSABLE ATENCION: ___________________   SEVERIDAD: [ ]B [ ]M [ ]A [ ]C
+
+1. CLASIFICACION DE LA AMENAZA:
+   [ ] Phishing / Ingenieria Social      [ ] Malware / Ransomware
+   [ ] Acceso No Autorizado (Cta Valida) [ ] Denegacion de Servicio (DoS)
+   [ ] Intrusion Web / Web Shell         [ ] Fuga de Datos (Ley 29733)
+   [ ] Perdida / Robo de Equipo          [ ] Otro: _____________________
+
+2. ACTIVOS DE INFORMACION AFECTADOS:
+   Nombre del Activo: __________________   IP/Host: ____________________
+   Clasificacion Activo: [ ] Critico   [ ] Alto   [ ] Medio   [ ] Bajo
+
+3. DESCRIPCION TECNICA DEL EVENTO:
+   _____________________________________________________________________
+   _____________________________________________________________________
+
+4. EVIDENCIAS RECOLECTADAS Y VECTOR DE ENTRADA:
+   Vector: [ ] Email   [ ] Puerto Expuesto   [ ] USB   [ ] Vulnerab. Web
+   Hashes / IPs / URLs: ________________________________________________
+
+5. ACCIONES DE CONTENCION Y ERRADICACION APLICADAS:
+   [ ] Aislamiento Red / VLAN            [ ] Revocacion Tokens / Cookies
+   [ ] Bloqueo IP en Firewall/WAF        [ ] Restauracion Copia Inmutable
+   Hora Contencion Efectiva: ___:___     Tiempo Total (MTTR): _____ min
+
+6. IMPACTO RESIDUAL Y OBSERVACIONES LEGALES:
+   Compromiso datos personales (Ley 29733): [ ] SI   [ ] NO
+   Notificacion al CSIRT Nacional (PCM):    [ ] SI   [ ] NO   Fecha: ___/___
+
+FIRMA OFICIAL DE SEGURIDAD (CISO)         FIRMA LIDER TECNICO CSIRT
+========================================================================
+\end{cmdbox}
+
+Esta redacción formaliza los protocolos de respuesta del CSIRT-UNAP y enlaza directamente los hallazgos técnicos (cookies de sesión, Nginx, DMARC) con playbooks de defensa activa y contención inmediata.
