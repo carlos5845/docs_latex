@@ -1,44 +1,299 @@
-\chapter{Marco General de Ciberseguridad NIST CSF 2.0}
+\chapter{Matriz de Gestión y Gobernanza -- NIST CSF 2.0}
 \label{ch:nist_csf}
 
-En este capítulo se articula el gobierno de la ciberseguridad universitaria bajo el estándar internacional \textbf{NIST Cybersecurity Framework 2.0}, integrando sus seis funciones fundamentales.
+\section{Fundamentación del Marco NIST CSF 2.0 en la UNAP}
 
-\section{Las Seis Funciones Fundamentales del NIST CSF 2.0 en la UNAP}
-\begin{enumerate}
-    \item \textbf{GOVERN (Gobernar):} Establecimiento y difusión de directivas institucionales de seguridad digital, designación formal del Oficial de Seguridad de la Información (CISO), asignación presupuestal específica y alineamiento con la normativa del Estado Peruano (D.U. N° 006-2020).
-    \item \textbf{IDENTIFY (Identificar):} Catalogación y actualización continua del inventario de activos, evaluación sistemática de riesgos informáticos y análisis de impacto en la operación académica universitaria.
-    \item \textbf{PROTECT (Proteger):} Hardening de servidores Nginx, publicación forzada de cabeceras HSTS, configuración de registros SPF estricto (\texttt{-all}) y DMARC (\texttt{p=reject}), y adopción de autenticación multifactor (MFA).
-    \item \textbf{DETECT (Detectar):} Monitoreo operacional 24/7 mediante la plataforma SIEM centralizada (Wazuh), correlación de anomalías, alertas automáticas por fuerza bruta y recolección inmutable de registros de eventos.
-    \item \textbf{RESPOND (Responder):} Protocolos y playbooks operativos para contención inmediata, aislamiento automático de subredes comprometidas y comunicación institucional con el CSIRT Nacional de la PCM.
-    \item \textbf{RECOVER (Recuperar):} Políticas de respaldo bajo el esquema 3-2-1 con copias de seguridad inmutables fuera de línea (\textit{Air-Gapped}) y ensayos periódicos semestrales de restauración de bases de datos.
-\end{enumerate}
+El Marco de Ciberseguridad del NIST (\textit{NIST Cybersecurity Framework} - Versión 2.0) actúa como el modelo sombrilla de gobernanza estratégica y operativa del presente plan. A diferencia de su versión previa (1.1), el NIST CSF 2.0 incorpora formalmente la función transversal \textbf{Gobernar (\textit{Govern} - GV)}, reconociendo que la ciberseguridad no es un problema puramente técnico del área de TI, sino una disciplina directiva vinculada al riesgo institucional, la asignación presupuestal y el marco legal del Estado peruano (D.U. N° 006-2020 y directivas de la SGTD/PCM).
 
-\section{Matriz NIST CSF 2.0 de la UNAP}
+En la Universidad Nacional del Altiplano de Puno, el NIST CSF 2.0 orquesta las metodologías tácticas aplicadas previamente:
 
-\small
-\begin{longtable}{>{\bfseries}p{2.5cm} p{4.2cm} p{3.8cm} p{4.5cm}}
+\begin{itemize}
+    \item Proporciona el marco directivo para priorizar las amenazas descubiertas con STRIDE en el sistema de matrícula.
+    \item Institucionaliza la ingestión de \textit{Threat Intelligence} y el monitoreo de TTPs catalogadas en MITRE ATT\&CK.
+    \item Provee la estructura de resiliencia para quebrar la \textit{Cyber Kill Chain} y materializar los controles de Zero Trust.
+\end{itemize}
+
+El marco organiza la gestión institucional en seis funciones continuas:
+
+\vspace{0.25cm}
+
+% Colores temáticos por función NIST
+\definecolor{colGov}{RGB}{35, 55, 95}
+\definecolor{colId}{RGB}{20, 110, 160}
+\definecolor{colPr}{RGB}{30, 130, 70}
+\definecolor{colDe}{RGB}{195, 110, 20}
+\definecolor{colRs}{RGB}{185, 45, 45}
+\definecolor{colRc}{RGB}{115, 45, 130}
+
+\begin{center}
+\begin{tikzpicture}[
+    font=\small,
+    boxNistTitle/.style={
+        rectangle,
+        rounded corners=4pt,
+        draw=fg!90!black,
+        fill=fg!90!black,
+        text=white,
+        font=\bfseries\small,
+        align=center,
+        inner sep=5pt,
+        text width=14.6cm
+    },
+    boxGovern/.style={
+        rectangle,
+        rounded corners=4pt,
+        draw=colGov!90!black,
+        fill=colGov!12,
+        text=colGov!95!black,
+        align=center,
+        inner sep=5pt,
+        text width=14.6cm,
+        minimum height=1.0cm
+    },
+    funcBox3/.style={
+        rectangle,
+        rounded corners=4pt,
+        align=left,
+        inner sep=5pt,
+        text width=4.4cm,
+        minimum height=1.9cm
+    },
+    funcBox2/.style={
+        rectangle,
+        rounded corners=4pt,
+        align=left,
+        inner sep=5pt,
+        text width=6.9cm,
+        minimum height=1.9cm
+    },
+    arrowConn/.style={
+        -{Stealth[scale=0.85]},
+        line width=1.1pt,
+        color=fg!85!black
+    }
+]
+
+% Título General
+\node[boxNistTitle] (titleNist) at (0, 0.2) {NIST CYBERSECURITY FRAMEWORK (CSF) 2.0};
+
+% 1. GOVERN (Fila Transversal Superior)
+\node[boxGovern] (govBox) at (0, -0.85) {
+    {\bfseries\large 1. GOVERN (GV) --- Gobernar}\\[3pt]
+    {\scriptsize Gobernanza, Políticas Institucionales, Roles, Presupuesto y Cumplimiento Legal (D.U. 006-2020 / SGTD-PCM)}
+};
+
+% Fila Intermedia: IDENTIFY, PROTECT, DETECT
+\node[funcBox3, draw=colId!80, fill=colId!10] (idBox) at (-5.0, -2.95) {
+    {\bfseries\color{colId} 2. IDENTIFY (ID)}\\[2pt]
+    {\scriptsize\textbullet~Gestión de Activos\\
+    \textbullet~Riesgos Técnicos y DFD\\
+    \textbullet~Superficie DNS y \path{crt.sh}\\
+    \textbullet~Priorización STRIDE}
+};
+
+\node[funcBox3, draw=colPr!80, fill=colPr!10] (prBox) at (0, -2.95) {
+    {\bfseries\color{colPr} 3. PROTECT (PR)}\\[2pt]
+    {\scriptsize\textbullet~Zero Trust y MFA\\
+    \textbullet~DMARC / SPF Estricto\\
+    \textbullet~Hardening Nginx y WAF\\
+    \textbullet~HSTS y Cookies Seguras}
+};
+
+\node[funcBox3, draw=colDe!80, fill=colDe!10] (deBox) at (5.0, -2.95) {
+    {\bfseries\color{colDe} 4. DETECT (DE)}\\[2pt]
+    {\scriptsize\textbullet~SIEM Wazuh 24/7\\
+    \textbullet~Telemetría Sysmon\\
+    \textbullet~Reglas MITRE ATT\&CK\\
+    \textbullet~Threat Intelligence (IoCs)}
+};
+
+% Fila Inferior: RESPOND, RECOVER
+\node[funcBox2, draw=colRs!80, fill=colRs!10] (rsBox) at (-3.75, -5.65) {
+    {\bfseries\color{colRs} 5. RESPOND (RS) --- Responder}\\[2pt]
+    {\scriptsize\textbullet~Equipo de Respuesta CSIRT-UNAP\\
+    \textbullet~Playbooks de Mitigación (Phishing, Web Shell, DoS)\\
+    \textbullet~Aislamiento de Red (Kill-Switch) y Revocación de Sesión}
+};
+
+\node[funcBox2, draw=colRc!80, fill=colRc!10] (rcBox) at (3.75, -5.65) {
+    {\bfseries\color{colRc} 6. RECOVER (RC) --- Recuperar}\\[2pt]
+    {\scriptsize\textbullet~Estrategia de Respaldo 3-2-1 Inmutable (\textit{Air-Gapped})\\
+    \textbullet~Pruebas de Restauración en Caliente de BD Académica\\
+    \textbullet~Plan de Continuidad (DRP/BCP) y Análisis \textit{Post-Mortem}}
+};
+
+% Conectores transversales desde Govern hacia las funciones operativas
+\draw[arrowConn] (idBox.north |- govBox.south) -- (idBox.north);
+\draw[arrowConn] (govBox.south) -- (prBox.north);
+\draw[arrowConn] (deBox.north |- govBox.south) -- (deBox.north);
+
+% Flujo secuencial entre funciones
+\draw[arrowConn] (idBox.east) -- (prBox.west);
+\draw[arrowConn] (prBox.east) -- (deBox.west);
+\draw[arrowConn] (deBox.south) -- ++(0,-0.25) -| (rsBox.north);
+\draw[arrowConn] (rsBox.east) -- (rcBox.west);
+\draw[arrowConn] (rcBox.east) -- ++(0.5,0) |- (govBox.east);
+
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.3cm}
+
+\newpage
+\section{Matriz Integral NIST CSF 2.0 Aplicada a la UNAP}
+
+La siguiente matriz desglosa formalmente las acciones, controles específicos, responsables institucionales y herramientas tecnológicas para cada una de las seis funciones de ciberseguridad:
+
+\vspace{0.2cm}
+
+\begin{center}
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{>{\raggedright\bfseries}p{1.9cm} >{\raggedright}p{2.1cm} >{\raggedright}p{3.5cm} >{\raggedright}p{3.2cm} >{\raggedright}p{1.9cm} >{\raggedright\arraybackslash}p{2.5cm}}
 \toprule
 \rowcolor{outermarginbgcolor}
-Función NIST & Acción Estratégica & Responsable & Herramientas / Controles \\
+Función NIST 2.0 & Categoría / Subcategoría & Acciones a Desarrollar en la UNAP & Controles Implementados & Responsables & Herramientas y Tecnologías Sugeridas \\
 \midrule
 \endfirsthead
 \toprule
 \rowcolor{outermarginbgcolor}
-Función NIST & Acción Estratégica & Responsable & Herramientas / Controles \\
+Función NIST 2.0 & Categoría / Subcategoría & Acciones a Desarrollar en la UNAP & Controles Implementados & Responsables & Herramientas y Tecnologías Sugeridas \\
 \midrule
 \endhead
 \bottomrule
 \endfoot
-GOVERN & Políticas y directivas de seguridad & Rectorado / CISO & Comité de Gobierno Digital y normativas \\
+\textbf{1. GOVERN (GV)}\par\textit{Gobernar} & 
+Estrategia y Contexto (GV.SC)\par\smallskip
+Supervisión de Riesgo (GV.RM)\par\smallskip
+Cumplimiento Legal (GV.PO) & 
+\textbullet~Formalizar el Comité de Gobierno de Seguridad Digital de la UNAP.\par
+\textbullet~Aprobar mediante Resolución Rectoral la Política Institucional de Seguridad de la Información.\par
+\textbullet~Alinear la gestión universitaria con el D.U. 006-2020, Ley 30096 (Delitos Informáticos) y Ley 29733 (Datos Personales).\par
+\textbullet~Asignar presupuesto anual específico para licencias de seguridad, renovación de infraestructura y capacitación. & 
+\textbullet~Creación del rol formal de Oficial de Seguridad de la Información (CISO / Delegado de Seguridad Digital).\par
+\textbullet~Política obligatoria de uso aceptable de recursos tecnológicos y redes.\par
+\textbullet~Acuerdos de confidencialidad (NDA) para desarrolladores y contratistas de la OTI. & 
+\textbullet~Rectorado\par
+\textbullet~Consejo Universitario\par
+\textbullet~Asesoría Legal\par
+\textbullet~Jefe de la OTI / CISO & 
+\textbullet~Sistema de Gestión Documental (ISO 27001 doc)\par
+\textbullet~Plataforma de Trámite SITRAD \\
 \midrule
-IDENTIFY & Inventario continuo y matriz de riesgos & Unidad de Seguridad & crt.sh, Nessus y matriz de activos \\
+\textbf{2. IDENTIFY (ID)}\par\textit{Identificar} & 
+Gestión de Activos (ID.AM)\par\smallskip
+Evaluación de Riesgos (ID.RA)\par\smallskip
+Mejora Continua (ID.IM) & 
+\textbullet~Mantener actualizado el inventario de hardware, servidores, bases de datos y los más de 100 subdominios públicos.\par
+\textbullet~Identificar dependencias críticas entre el sistema de matrícula (\texttt{matricula.\allowbreak unap.\allowbreak edu.pe}), Nginx y la base de datos PostgreSQL/Oracle.\par
+\textbullet~Ejecutar modelado periódico de amenazas con STRIDE y clasificar activos por criticidad (1 al 4). & 
+\textbullet~Matriz de inventario de activos TI con clasificación de datos sensibles.\par
+\textbullet~Relevamiento pasivo bimestral de certificados SSL/TLS y dominios en \path{crt.sh}.\par
+\textbullet~Evaluación de riesgo técnico basada en el método DREAD adaptado. & 
+\textbullet~Administradores de Red y Sistemas OTI\par
+\textbullet~Custodio de Base de Datos\par
+\textbullet~Gestor de Inventario TI & 
+\textbullet~Snipe-IT (Gestor de inventario TI Open Source)\par
+\textbullet~\path{crt.sh} / Amass (Mapeo de subdominios)\par
+\textbullet~Microsoft Threat Modeling Tool / Draw.io \\
 \midrule
-PROTECT & Hardening web, MFA y DMARC & OTI / Redes & Nginx, Let's Encrypt, TOTP, DNS BIND \\
+\textbf{3. PROTECT (PR)}\par\textit{Proteger} & 
+Gestión de Identidad (PR.AA)\par\smallskip
+Seguridad de Datos (PR.DS)\par\smallskip
+Mantenimiento (PR.MA) & 
+\textbullet~Desplegar arquitectura Zero Trust en toda la infraestructura universitaria.\par
+\textbullet~Endurecer la seguridad en el transporte web mediante HSTS y actualización de \texttt{nginx/1.16.1}.\par
+\textbullet~Blindar el vector de correo electrónico corrigiendo las directivas DNS institucionales.\par
+\textbullet~Asegurar la persistencia de cookies en ASP.NET Core (\texttt{HttpOnly}, \texttt{Secure}, \texttt{SameSite=Strict}). & 
+\textbullet~DMARC mandatorio: Publicación en DNS de \texttt{\_dmarc.\allowbreak unap.\allowbreak edu.pe} con \texttt{p=reject}.\par
+\textbullet~SPF estricto: Modificar directiva final de \texttt{\~all} a \texttt{-all}.\par
+\textbullet~MFA Obligatorio: TOTP / FIDO2 para docentes y personal administrativo.\par
+\textbullet~Microsegmentación: Aislamiento de VLANs (10 Data Center, 20 Docentes, 30 Admin, 40 Labs, 60 DMZ).\par
+\textbullet~Directivas HSTS con \texttt{max-age=\allowbreak 31536000; includeSubDomains}. & 
+\textbullet~Administrador de Redes y Comunicaciones\par
+\textbullet~Administrador Web / Proxy\par
+\textbullet~Desarrolladores Backend OTI & 
+\textbullet~Fortinet FortiGate / pfSense (NGFW)\par
+\textbullet~Nginx Hardening (\texttt{server\_tokens off;})\par
+\textbullet~Google Workspace Admin / FreeIPA (IdP)\par
+\textbullet~Let's Encrypt / Certbot (TLS 1.3) \\
 \midrule
-DETECT & Monitoreo continuo de eventos y logs & CSIRT-UNAP & Wazuh SIEM, Suricata IDS y Syslog \\
+\textbf{4. DETECT (DE)}\par\textit{Detectar} & 
+Monitoreo Continuo (DE.CM)\par\smallskip
+Análisis de Adversarios (DE.AE) & 
+\textbullet~Centralizar la recolección de eventos de seguridad (logs web, autenticaciones, firewalls, DNS).\par
+\textbullet~Monitorear activamente las TTPs mapeadas en MITRE ATT\&CK (ej. T1059 PowerShell, T1505 Web Shells, T1078 Cuentas Válidas).\par
+\textbullet~Correlacionar accesos sospechosos contra bases de datos de Threat Intelligence (IoCs). & 
+\textbullet~Despliegue de agentes EDR/SIEM en el 100\% de servidores y estaciones administrativas.\par
+\textbullet~Alertas por inicios de sesión simultáneos imposibles o fuerza bruta en portales web.\par
+\textbullet~Monitoreo de integridad de archivos web (FIM) en directorios de carga (\path{/uploads/}). & 
+\textbullet~Operadores del SOC-UNAP\par
+\textbullet~Analista de Ciberseguridad OTI & 
+\textbullet~Wazuh SIEM (XDR \& Log Analysis)\par
+\textbullet~Sysmon (Monitoreo de eventos Windows)\par
+\textbullet~Suricata / Snort (IDS de Red)\par
+\textbullet~AlienVault OTX / AbuseIPDB (Feeds IoCs) \\
 \midrule
-RESPOND & Playbooks de contención de incidentes & CSIRT-UNAP & Procedimientos formales y scripts de aislamiento \\
+\textbf{5. RESPOND (RS)}\par\textit{Responder} & 
+Plan de Respuesta (RS.MA)\par\smallskip
+Mitigación de Incidentes (RS.MI)\par\smallskip
+Comunicación (RS.CO) & 
+\textbullet~Conformar y activar el Equipo de Respuesta a Incidentes de Seguridad Digital (CSIRT-UNAP).\par
+\textbullet~Ejecutar playbooks estandarizados ante incidentes de phishing masivo, ransomware, compromiso de cuentas o DoS.\par
+\textbullet~Aislar de inmediato estaciones comprometidas y revocar tokens de sesión activos (\texttt{.AspNet\allowbreak Core.\allowbreak Cookies}).\par
+\textbullet~Notificar incidentes de impacto nacional al Centro Nacional de Seguridad Digital (CSIRT-PE / PCM). & 
+\textbullet~Procedimiento formal de gestión de incidentes en 6 etapas.\par
+\textbullet~Protocolo de aislamiento lógico de red (Kill-Switch en switches Core y Firewall).\par
+\textbullet~Revocación masiva de sesiones y reseteo forzado de credenciales en Active Directory/Google Workspace.\par
+\textbullet~Canal oficial de reporte: \texttt{seguridad.\allowbreak informatica\allowbreak @unap.edu.pe}. & 
+\textbullet~Comité CSIRT-UNAP\par
+\textbullet~Jefe de OTI / CISO\par
+\textbullet~Administrador de Redes\par
+\textbullet~Unidad de Comunicaciones & 
+\textbullet~TheHive / Cortex (Gestión de Incidentes)\par
+\textbullet~Scripts de aislamiento automatizado (PowerShell / Bash / API Firewall)\par
+\textbullet~Plantillas de notificación oficial \\
 \midrule
-RECOVER & Restauración de respaldos 3-2-1 & OTI / Soporte & Almacenamiento Air-Gapped y Veeam Backup \\
+\textbf{6. RECOVER (RC)}\par\textit{Recuperar} & 
+Plan de Restauración (RC.RP)\par\smallskip
+Lecciones Aprendidas (RC.CO) & 
+\textbullet~Garantizar la recuperación total de los sistemas académicos y financieros ante desastres o ataques de secuestro de datos.\par
+\textbullet~Validar la integridad y consistencia de las bases de datos de matrícula antes de la reactivación del servicio.\par
+\textbullet~Elaborar el informe de lecciones aprendidas (\textit{Post-Mortem}) tras cada incidente relevante para alimentar el ciclo de gobernanza. & 
+\textbullet~Estrategia de Respaldo 3-2-1: 3 copias de datos, en 2 medios diferentes, 1 copia aislada fuera de línea (\textit{Air-Gapped} / Inmutable).\par
+\textbullet~Pruebas semestrales de restauración en caliente de la Base de Datos Académica Central.\par
+\textbullet~Plan de Continuidad Operativa y Recuperación ante Desastres (BCP / DRP). & 
+\textbullet~Administrador de Bases de Datos (DBA)\par
+\textbullet~Administrador de Infraestructura y Servidores\par
+\textbullet~Jefe de la OTI & 
+\textbullet~Veeam Backup \& Replication / BorgBackup\par
+\textbullet~Almacenamiento NAS/SAN dedicado con snapshots WORM (\textit{Write-Once-Read-Many})\par
+\textbullet~Entorno de \textit{Staging} para validación limpia \\
 \bottomrule
 \end{longtable}
+\end{center}
+
+\newpage
+\section{Articulación Operativa con las Metodologías del Plan}
+
+Para evidenciar la coherencia técnica exigida por la estructura del proyecto, la siguiente relación causal demuestra cómo interactúan las herramientas dentro del marco NIST CSF 2.0:
+
+\vspace{0.2cm}
+
+\begin{small}
+\[
+\begin{aligned} 
+\mathbf{GOVERN} &\longrightarrow \text{Define las políticas institucionales, presupuesto y roles (CISO / OTI).} \\ 
+\mathbf{IDENTIFY} &\longrightarrow \text{STRIDE descubre fallas en el DFD de matrícula y clasifica los activos.} \\ 
+\mathbf{PROTECT} &\longrightarrow \text{Zero Trust aplica controles: MFA, HSTS, DMARC } (p=\text{reject}) \text{ y VLANs.} \\ 
+\mathbf{DETECT} &\longrightarrow \text{Threat Intelligence aporta IoCs y MITRE ATT\&CK define reglas SIEM.} \\ 
+\mathbf{RESPOND} &\longrightarrow \text{Cyber Kill Chain guía el corte del vector vía playbooks CSIRT-UNAP.} \\ 
+\mathbf{RECOVER} &\longrightarrow \text{Estrategia 3-2-1 y análisis \textit{Post-Mortem} garantizan continuidad y mejora.} 
+\end{aligned}
+\]
+\end{small}
+
+\vspace{0.2cm}
+
+Esta integración asegura que la Universidad Nacional del Altiplano disponga de un plan estructurado, verificable y alineado con los más altos estándares internacionales de ciberseguridad.
