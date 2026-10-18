@@ -1,41 +1,166 @@
 \chapter{Indicadores de Cumplimiento (Métricas y KPIs)}
 \label{ch:indicadores_kpis}
 
-En este capítulo se establecen las métricas e Indicadores Clave de Desempeño (KPIs) para evaluar cuantitativamente la eficacia, madurez y avance del plan de ciberseguridad.
+\section{Marco Metodológico de Medición}
 
-\section{Cuadro de Mando de Métricas de Ciberseguridad}
-Los siguientes indicadores serán reportados trimestralmente al Comité de Gobierno Digital de la UNAP:
+Para evaluar la efectividad del Plan Integral de Ciberseguridad, justificar la inversión tecnológica ante el Consejo Universitario y retroalimentar de manera continua la función Gobernar (GV) del marco NIST CSF 2.0, se establece un cuadro de mando integral estructurado sobre diez (10) Indicadores Clave de Desempeño (\textit{Key Performance Indicators} -- KPIs).
+
+Cada indicador cuenta con una formulación matemática explícita, meta cuantitativa verificable, periodicidad estandarizada de cálculo y un custodio responsable de su trazabilidad.
+
+\section{Catálogo Formal de Indicadores y Fórmulas Matemáticas}
+
+\subsection{KPI 01: Cobertura de Inventario de Activos \texorpdfstring{($C_{IA}$)}{(C\_IA)}}
+Mide la exhaustividad en la catalogación formal de los recursos tecnológicos, servidores, bases de datos y subdominios institucionales identificados.
+\[
+C_{IA} = \left( \frac{A_{INV}}{A_{TOT}} \right) \times 100
+\]
+\begin{itemize}[leftmargin=1.5em, itemsep=1pt]
+    \item \textbf{Variables:} $A_{INV}$ = Número de activos tecnológicos formalmente registrados en la matriz institucional; $A_{TOT}$ = Total de activos físicos, virtuales y subdominios detectados en Certificate Transparency (crt.sh) y auditorías internas.
+    \item \textbf{Meta Institucional:} $\ge 98\%$ \quad$\vert$\quad \textbf{Frecuencia:} Trimestral.
+    \item \textbf{Responsable Directo:} Administrador de Infraestructura y Servidores OTI.
+\end{itemize}
+
+\subsection{KPI 02: Cobertura STRIDE en Sistemas Críticos \texorpdfstring{($C_{STRIDE}$)}{(C\_STRIDE)}}
+Evalúa el progreso institucional en el modelado formal de amenazas sobre aplicaciones transaccionales y académicas de la UNAP.
+\[
+C_{STRIDE} = \left( \frac{S_{EVAL}}{S_{CRIT}} \right) \times 100
+\]
+\begin{itemize}[leftmargin=1.5em, itemsep=1pt]
+    \item \textbf{Variables:} $S_{EVAL}$ = Sistemas críticos con análisis STRIDE y diagramas DFD Nivel 1 formalizados; $S_{CRIT}$ = Total de sistemas catalogados con nivel de criticidad 4 (Crítico).
+    \item \textbf{Meta Institucional:} $100\%$ \quad$\vert$\quad \textbf{Frecuencia:} Semestral.
+    \item \textbf{Responsable Directo:} Líder de Desarrollo de Software / Analista de Ciberseguridad OTI.
+\end{itemize}
+
+\subsection{KPI 03: Tasa de Remediación de Vulnerabilidades Críticas \texorpdfstring{($T_{RVC}$)}{(T\_RVC)}}
+Determina la capacidad operativa institucional de subsanar fallas de seguridad graves y desactualizaciones de software (como el servidor Nginx obsoleto) dentro de los plazos comprometidos en el SLA defensivo.
+\[
+T_{RVC} = \left( \frac{V_{CORR}}{V_{DET}} \right) \times 100
+\]
+\begin{itemize}[leftmargin=1.5em, itemsep=1pt]
+    \item \textbf{Variables:} $V_{CORR}$ = Vulnerabilidades con CVSS $\ge 7.0$ corregidas en plazo ($<48$\,h para críticas, $<7$ días para altas); $V_{DET}$ = Total de vulnerabilidades críticas y altas reportadas por los escáneres en el periodo.
+    \item \textbf{Meta Institucional:} $\ge 90\%$ \quad$\vert$\quad \textbf{Frecuencia:} Mensual.
+    \item \textbf{Responsable Directo:} Administrador de Redes y Sistemas OTI.
+\end{itemize}
+
+\subsection{KPI 04: Nivel de Adopción de Autenticación Multifactor \texorpdfstring{($A_{MFA}$)}{(A\_MFA)}}
+Cuantifica el avance en el despliegue del Control 1 (Zero Trust) sobre el universo total de identidades institucionales.
+\[
+A_{MFA} = \left( \frac{U_{MFA}}{U_{REQ}} \right) \times 100
+\]
+\begin{itemize}[leftmargin=1.5em, itemsep=1pt]
+    \item \textbf{Variables:} $U_{MFA}$ = Usuarios con segundo factor de autenticación (TOTP/FIDO2) activo y verificado; $U_{REQ}$ = Total de cuentas de personal docente, administrativo y directivo con acceso a portales institucionales.
+    \item \textbf{Meta Institucional:} $100\%$ en Personal Administrativo y TI \quad$\vert$\quad $\ge 90\%$ en Plana Docente.
+    \item \textbf{Frecuencia:} Mensual \quad$\vert$\quad \textbf{Responsable Directo:} Administrador del Directorio de Identidades (IdP) OTI.
+\end{itemize}
+
+\subsection{KPI 05: Tasa de Vulnerabilidad en Phishing Simulado \texorpdfstring{($T_{PHISH}$)}{(T\_PHISH)}}
+Evalúa la susceptibilidad empírica de los colaboradores a ser víctimas de engaños por ingeniería social.
+\[
+T_{PHISH} = \left( \frac{U_{CLICK}}{U_{DEST}} \right) \times 100
+\]
+\begin{itemize}[leftmargin=1.5em, itemsep=1pt]
+    \item \textbf{Variables:} $U_{CLICK}$ = Usuarios que hicieron clic en el enlace fraudulento simulado o introdujeron credenciales; $U_{DEST}$ = Total de colaboradores receptores de la campaña controlada.
+    \item \textbf{Meta Institucional:} $\le 8\%$ \quad$\vert$\quad \textbf{Frecuencia:} Trimestral.
+    \item \textbf{Responsable Directo:} Oficial de Seguridad de la Información (CISO).
+\end{itemize}
+
+\subsection{KPI 06: Cobertura de Capacitación en Seguridad Digital \texorpdfstring{($C_{CAP}$)}{(C\_CAP)}}
+Mide el alcance formativo del personal universitario en los módulos del programa institucional anual.
+\[
+C_{CAP} = \left( \frac{P_{CERT}}{P_{TOT}} \right) \times 100
+\]
+\begin{itemize}[leftmargin=1.5em, itemsep=1pt]
+    \item \textbf{Variables:} $P_{CERT}$ = Trabajadores que completaron satisfactoriamente la evaluación del programa anual; $P_{TOT}$ = Planilla total de trabajadores activos de la universidad.
+    \item \textbf{Meta Institucional:} $\ge 85\%$ \quad$\vert$\quad \textbf{Frecuencia:} Anual.
+    \item \textbf{Responsable Directo:} Oficina de Recursos Humanos / OTI.
+\end{itemize}
+
+\subsection{KPI 07: Tiempo Medio de Detección de Incidentes (MTTD)}
+Determina la eficiencia de las reglas de correlación del SIEM y la vigilancia del CSIRT-UNAP para identificar una intrusión o brecha de seguridad.
+\[
+\text{MTTD} = \frac{\sum_{i=1}^{N} \left( T_{\text{detección}, i} - T_{\text{ocurrencia}, i} \right)}{N}
+\]
+\begin{itemize}[leftmargin=1.5em, itemsep=1pt]
+    \item \textbf{Variables:} $T_{\text{detección}, i}$ = Marca temporal de detección formal en SIEM o alerta CSIRT; $T_{\text{ocurrencia}, i}$ = Marca temporal estimada del compromiso inicial del vector; $N$ = Total de incidentes en el periodo.
+    \item \textbf{Meta Institucional:} $\le 120\text{ minutos}$ (Incidentes de severidad Alta y Crítica).
+    \item \textbf{Frecuencia:} Por incidente / Consolidado mensual \quad$\vert$\quad \textbf{Responsable Directo:} Coordinador Técnico del CSIRT-UNAP.
+\end{itemize}
+
+\subsection{KPI 08: Tiempo Medio de Respuesta y Contención (MTTR)}
+Mide la rapidez operativa del equipo defensivo para aislar el activo comprometido y neutralizar la propagación de una amenaza activa.
+\[
+\text{MTTR} = \frac{\sum_{i=1}^{N} \left( T_{\text{contención}, i} - T_{\text{detección}, i} \right)}{N}
+\]
+\begin{itemize}[leftmargin=1.5em, itemsep=1pt]
+    \item \textbf{Variables:} $T_{\text{contención}, i}$ = Marca temporal en que el activo fue aislado o el vector malicioso bloqueado (corte de red, revocación de tokens, regla WAF); $T_{\text{detección}, i}$ = Inicio de atención formal; $N$ = Total de incidentes atendidos.
+    \item \textbf{Meta Institucional:} $\le 60\text{ minutos}$ \quad$\vert$\quad \textbf{Frecuencia:} Por incidente / Consolidado mensual.
+    \item \textbf{Responsable Directo:} Líder Técnico de Contención CSIRT-UNAP.
+\end{itemize}
+
+\subsection{KPI 09: Fiabilidad de Copias de Seguridad y Restauración \texorpdfstring{($F_{BK}$)}{(F\_BK)}}
+Garantiza que la estrategia de respaldo inmutable 3-2-1 sea operativa y no meramente declarativa, asegurando la recuperabilidad de las bases de datos académicas y notas.
+\[
+F_{BK} = \left( \frac{R_{EXITO}}{R_{EJEC}} \right) \times 100
+\]
+\begin{itemize}[leftmargin=1.5em, itemsep=1pt]
+    \item \textbf{Variables:} $R_{EXITO}$ = Pruebas de restauración total en entorno de staging con verificación de integridad de tablas de notas; $R_{EJEC}$ = Total de simulacros de restauración programados.
+    \item \textbf{Meta Institucional:} $100\%$ \quad$\vert$\quad \textbf{Frecuencia:} Semestral.
+    \item \textbf{Responsable Directo:} Administrador de Base de Datos (DBA) / Custodio de Almacenamiento.
+\end{itemize}
+
+\subsection{KPI 10: Tasa de Detección y Rechazo de Suplantación de Dominio \texorpdfstring{($T_{DMARC}$)}{(T\_DMARC)}}
+Monitorea la eficacia de los controles DNS institucionales para mitigar y descartar el uso ilegítimo y no autorizado del dominio \texttt{@unap.edu.pe}.
+\[
+T_{DMARC} = \left( \frac{C_{RECHAZADOS}}{C_{FALSIFICADOS}} \right) \times 100
+\]
+\begin{itemize}[leftmargin=1.5em, itemsep=1pt]
+    \item \textbf{Variables:} $C_{RECHAZADOS}$ = Correos maliciosos suplantando el dominio institucional descartados por servidores receptores (\texttt{p=reject}); $C_{FALSIFICADOS}$ = Total de correos fraudulentos registrados en reportes agregados DMARC (RUA).
+    \item \textbf{Meta Institucional:} $\ge 99\%$ \quad$\vert$\quad \textbf{Frecuencia:} Mensual.
+    \item \textbf{Responsable Directo:} Administrador de Correo Institucional y DNS OTI.
+\end{itemize}
+
+\newpage
+
+\section{Cuadro de Mando Integral de Ciberseguridad (Dashboard UNAP)}
+
+A continuación, se consolida la matriz directiva de los diez (10) indicadores clave para la supervisión y reporte periódico ante el Comité de Gobierno Digital:
 
 \begin{center}
-\small
-\begin{longtable}{>{\bfseries}p{5.2cm} p{5.8cm} c c}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{>{\bfseries}p{1.2cm} p{3.5cm} p{3.0cm} p{1.8cm} p{1.5cm} p{3.2cm}}
 \toprule
 \rowcolor{outermarginbgcolor}
-Indicador / Métrica & Fórmula de Cálculo & Meta Esperada & Frecuencia \\
+Código & Nombre del Indicador & Fórmula Sintética & Meta Operativa & Frecuencia & Responsable Directo \\
 \midrule
 \endfirsthead
 \toprule
 \rowcolor{outermarginbgcolor}
-Indicador / Métrica & Fórmula de Cálculo & Meta Esperada & Frecuencia \\
+Código & Nombre del Indicador & Fórmula Sintética & Meta Operativa & Frecuencia & Responsable Directo \\
 \midrule
 \endhead
 \bottomrule
 \endfoot
-Porcentaje de activos inventariados & $\frac{\text{Act. Catalogados}}{\text{Act. Totales}} \times 100$ & $\ge 98\%$ & Mensual \\
+KPI-01 & Cobertura de Inventario de Activos & $(A_{\text{INV}} / A_{\text{TOT}}) \times 100$ & $\ge 98\%$ & Trimestral & Admin.\ de Infraestructura \\
 \midrule
-Cobertura de evaluación STRIDE & $\frac{\text{Sist. Modelados}}{\text{Sist. Críticos}} \times 100$ & $100\%$ & Semestral \\
+KPI-02 & Cobertura STRIDE en Sistemas Críticos & $(S_{\text{EVAL}} / S_{\text{CRIT}}) \times 100$ & $100\%$ & Semestral & Líder de Desarrollo / CISO \\
 \midrule
-Remediación de fallas críticas & Tiempo promedio de resolución de hallazgos & $< 72\text{ horas}$ & Continuo \\
+KPI-03 & Tasa de Remediación de Vulnerabilidades & $(V_{\text{CORR}} / V_{\text{DET}}) \times 100$ & $\ge 90\%$ & Mensual & Admin.\ de Redes y Sistemas \\
 \midrule
-Cuentas con MFA activo & $\frac{\text{Cuentas con MFA}}{\text{Total Cuentas}} \times 100$ & $100\%$ & Mensual \\
+KPI-04 & Adopción de MFA en Personal & $(U_{\text{MFA}} / U_{\text{REQ}}) \times 100$ & $100\%$ (Admin) \newline $\ge 90\%$ (Doc) & Mensual & Admin.\ de Identidades (IdP) \\
 \midrule
-Tasa de clics en phishing & $\frac{\text{Clics Phishing}}{\text{Total Evaluados}} \times 100$ & $\le 8\%$ & Semestral \\
+KPI-05 & Vulnerabilidad en Phishing Simulado & $(U_{\text{CLICK}} / U_{\text{DEST}}) \times 100$ & $\le 8\%$ & Trimestral & Oficial de Seguridad (CISO) \\
 \midrule
-Tiempo medio de detección (MTTD) & Promedio de horas transcurridas desde el evento & $< 2\text{ horas}$ & Mensual \\
+KPI-06 & Cobertura de Capacitación Docente/Admin & $(P_{\text{CERT}} / P_{\text{TOT}}) \times 100$ & $\ge 85\%$ & Anual & Recursos Humanos / OTI \\
 \midrule
-Tiempo medio de respuesta (MTTR) & Promedio de horas para contención efectiva & $< 4\text{ horas}$ & Mensual \\
+KPI-07 & Tiempo Medio de Detección (MTTD) & $\text{Prom}(T_{\text{det}} - T_{\text{ocurr}})$ & $\le 120\text{ min}$ & Mensual & Analista Forense / SOC \\
 \midrule
-Éxito en restauración de backups & $\frac{\text{Ensayos Exitosos}}{\text{Total Ensayos}} \times 100$ & $100\%$ & Semestral \\
+KPI-08 & Tiempo Medio de Respuesta (MTTR) & $\text{Prom}(T_{\text{cont}} - T_{\text{det}})$ & $\le 60\text{ min}$ & Mensual & Coord.\ Técnico CSIRT \\
+\midrule
+KPI-09 & Fiabilidad de Restauración de Backups & $(R_{\text{EXITO}} / R_{\text{EJEC}}) \times 100$ & $100\%$ & Semestral & Admin.\ de BD (DBA) \\
+\midrule
+KPI-10 & Eficacia de Rechazo DMARC & $(C_{\text{RECH}} / C_{\text{FALS}}) \times 100$ & $\ge 99\%$ & Mensual & Admin.\ de DNS y Correo \\
 \bottomrule
 \end{longtable}
 \end{center}
