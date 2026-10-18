@@ -1,61 +1,359 @@
-\chapter{Análisis mediante Cyber Kill Chain}
-\label{ch:cyber_kill_chain}
+\chapter{Análisis mediante Cyber Kill Chain}\label{ch:cyber_kill_chain}
 
-En este capítulo se modela el ciclo de intrusión lineal que un adversario ejecutaría contra el sistema académico y personal de la UNAP, determinando los puntos de interrupción defensiva.
+\section{Fundamentación del Modelo Cyber Kill Chain}
 
-\section{Modelado del Ciclo Lineal de Intrusión}
-El escenario reconstruye un vector de intrusión dirigido hacia el personal docente y la plataforma académica:
+El modelo \textit{Cyber Kill Chain}, desarrollado por Lockheed Martin en el marco del concepto de Intrusión Basada en Inteligencia, desglosa una amenaza avanzada y dirigida en una secuencia lineal y multifásica de siete etapas interdependientes.
 
-\begin{enumerate}
-    \item \textbf{Reconocimiento (Reconnaissance):} Mapeo pasivo de subdominios universitarios (\path{matricula.unap.edu.pe}) y extracción de nombres y correos de directores de escuela y docentes mediante fuentes abiertas (OSINT).
-    \item \textbf{Armamento (Weaponization):} Clonación visual fidedigna del formulario de inicio de sesión de \path{matricula.unap.edu.pe} montado en un servidor externo bajo dominio tipográfico.
-    \item \textbf{Entrega (Delivery):} Envío masivo de correos electrónicos fraudulentos suplantando al Vicerrectorado Académico, aprovechando la \textbf{ausencia de registro DMARC (NXDOMAIN)} y un registro \textbf{SPF excesivamente permisivo} (\path{~all} SoftFail) en el dominio institucional \path{unap.edu.pe}.
-    \item \textbf{Explotación (Exploitation):} El docente o alumno hace clic en el enlace malicioso e introduce sus credenciales oficiales en la página clonada apócrifa.
-    \item \textbf{Instalación (Installation):} El atacante captura las credenciales válidas y accede directamente a las plataformas institucionales internas sin requerimiento de segundo factor (MFA).
-    \item \textbf{Comando y Control (C2):} Establecimiento de túneles y sesiones interactivas cifradas HTTPS hacia el exterior que pasan desapercibidas por carecer de inspección TLS profunda.
-    \item \textbf{Acción sobre el Objetivo (Actions on Objectives):} Alteración de calificaciones en actas, reserva irregular de vacantes o exfiltración de tablas con información personal sensible.
-\end{enumerate}
+El principio operacional medular de este modelo radica en la \textbf{asimetría defensiva}: mientras que un ciberadversario requiere superar con éxito el 100\% de las fases consecutivas para lograr su meta final, el equipo defensivo de la universidad solo necesita quebrar de manera efectiva uno de los eslabones para neutralizar el ataque por completo, minimizando los costos de remediación e impidiendo el impacto sobre los activos críticos institucionales.
 
-\section{Puntos de Quiebre Defensivo y Controles de Interrupción}
-El principio fundamental de la Cyber Kill Chain establece que neutralizar cualquier fase interrumpe la consumación del ataque:
+\begin{center}
+\begin{tikzpicture}[
+    node distance=0.55cm and 0.4cm,
+    phasebox/.style 2 args={
+        rectangle,
+        rounded corners=4pt,
+        draw=#1!85!black,
+        fill=#1!10,
+        line width=1pt,
+        text width=3.35cm,
+        minimum height=1.75cm,
+        inner sep=4.5pt,
+        align=center
+    },
+    subtag/.style={
+        rectangle,
+        rounded corners=2.5pt,
+        fill=white,
+        draw=#1!75!black,
+        line width=0.6pt,
+        font=\sffamily\bfseries\scriptsize,
+        inner sep=2.5pt,
+        text=#1!90!black
+    },
+    flowarrow/.style={
+        -{Stealth[scale=0.95]},
+        line width=1.3pt,
+        color=fg!80!black
+    }
+]
+\definecolor{kcColorA}{HTML}{1A365D} % Navy
+\definecolor{kcColorB}{HTML}{0D6EFD} % Blue
+\definecolor{kcColorC}{HTML}{087F5B} % Teal
+\definecolor{kcColorD}{HTML}{D97706} % Amber
+\definecolor{kcColorE}{HTML}{D9480F} % Orange-Red
+\definecolor{kcColorF}{HTML}{DC2626} % Red
+\definecolor{kcColorG}{HTML}{7C1A22} % Wine / Dark Red
 
-\small
-\begin{longtable}{>{\bfseries}p{3.2cm} p{4.2cm} p{7.5cm}}
+% Fila 1: Fases 1 a 4
+\node[phasebox={kcColorA}{}] (p1) {
+    {\sffamily\bfseries\footnotesize\color{kcColorA} 1. RECON}\\[1pt]
+    {\scriptsize Reconocimiento}\\[3pt]
+    \tikz\node[subtag=kcColorA] {DNS / OSINT};
+};
+
+\node[phasebox={kcColorB}{}, right=0.45cm of p1] (p2) {
+    {\sffamily\bfseries\footnotesize\color{kcColorB} 2. WEAPON}\\[1pt]
+    {\scriptsize Armamento}\\[3pt]
+    \tikz\node[subtag=kcColorB] {Typosquatting};
+};
+
+\node[phasebox={kcColorC}{}, right=0.45cm of p2] (p3) {
+    {\sffamily\bfseries\footnotesize\color{kcColorC} 3. DELIVER}\\[1pt]
+    {\scriptsize Entrega}\\[3pt]
+    \tikz\node[subtag=kcColorC] {Sin DMARC};
+};
+
+\node[phasebox={kcColorD}{}, right=0.45cm of p3] (p4) {
+    {\sffamily\bfseries\footnotesize\color{kcColorD} 4. EXPLOIT}\\[1pt]
+    {\scriptsize Explotación}\\[3pt]
+    \tikz\node[subtag=kcColorD] {Login Clonado};
+};
+
+% Fila 2: Fases 5 a 7
+\node[phasebox={kcColorE}{}, below=0.7cm of p2] (p5) {
+    {\sffamily\bfseries\footnotesize\color{kcColorE} 5. INSTALL}\\[1pt]
+    {\scriptsize Instalación}\\[3pt]
+    \tikz\node[subtag=kcColorE] {Web Shell / VPN};
+};
+
+\node[phasebox={kcColorF}{}, right=0.45cm of p5] (p6) {
+    {\sffamily\bfseries\footnotesize\color{kcColorF} 6. C2}\\[1pt]
+    {\scriptsize Comando / Control}\\[3pt]
+    \tikz\node[subtag=kcColorF] {Túnel HTTPS};
+};
+
+\node[phasebox={kcColorG}{}, right=0.45cm of p6] (p7) {
+    {\sffamily\bfseries\footnotesize\color{kcColorG} 7. ACTIONS}\\[1pt]
+    {\scriptsize Acciones s/Objetivo}\\[3pt]
+    \tikz\node[subtag=kcColorG] {Robo BD / Ransom};
+};
+
+% Conectores
+\draw[flowarrow] (p1.east) -- (p2.west);
+\draw[flowarrow] (p2.east) -- (p3.west);
+\draw[flowarrow] (p3.east) -- (p4.west);
+\draw[flowarrow] (p4.south) -- ++(0,-0.35) -| (p5.north);
+\draw[flowarrow] (p5.east) -- (p6.west);
+\draw[flowarrow] (p6.east) -- (p7.west);
+
+\end{tikzpicture}
+\end{center}
+
+En el presente plan, la \textit{Cyber Kill Chain} se aplica para modelar un escenario de amenaza verosímil y de alto impacto contra la UNAP: el despliegue de una campaña orquestada de \textit{Spear-Phishing} masivo y robo de credenciales en vísperas del proceso de matrícula y rectificaciones, aprovechando de forma directa las debilidades reales verificadas en la zona DNS y configuración perimetral de la institución.
+
+\section{Análisis Fase por Fase: Escenario de Intrusión Dirigida en la UNAP}
+
+\subsection*{Fase 1: Reconocimiento (\textit{Reconnaissance})}
+\begin{itemize}
+    \item \textbf{Objetivo del Adversario:} Recolección de información sobre la arquitectura tecnológica, nombres de dominio, sistemas expuestos y estructura organizativa de la UNAP sin interactuar de forma intrusiva con la red interna.
+    \item \textbf{Acciones del Atacante sustentadas en Evidencias:}
+    \begin{itemize}
+        \item Consulta pasiva de registros de Transparencia de Certificados SSL (\path{crt.sh/?q=%25.unap.edu.pe}), identificando más de 100 subdominios, entre ellos los portales centrales (\path{matricula.unap.edu.pe}, \path{campus.unap.edu.pe}), APIs de gestión (\path{api.unap.edu.pe}, \path{apibiometrico.unap.edu.pe}) y servidores de desarrollo expuestos (\path{dev.unap.edu.pe}, \path{prue1.unap.edu.pe}).
+        \item Análisis de respuestas HTTP en \path{matricula.unap.edu.pe}, descubriendo la versión exacta del servidor web perimetral mediante la cabecera \texttt{Server:\allowbreak\ nginx/1.16.1} y la presencia de cookies \texttt{.AspNetCore.\allowbreak Cookies}, revelando el stack tecnológico ASP.NET Core sobre Linux.
+        \item Extracción en fuentes abiertas (portal institucional, redes sociales, resoluciones rectorales) de la estructura de autoridades, decanos, directores de escuela y listas de correos institucionales de docentes (\texttt{@unap.edu.pe}).
+    \end{itemize}
+    \item \textbf{Vulnerabilidad Explotada:} Exposición de banners informativos del servidor (\texttt{server\_tokens} activo) y metadatos públicos en subdominios no inventariados.
+\end{itemize}
+
+\subsection*{Fase 2: Armamento (\textit{Weaponization})}
+\begin{itemize}
+    \item \textbf{Objetivo del Adversario:} Creación del artefacto malicioso y preparación de la infraestructura tecnológica apócrifa emparejando un vector de engaño con el software objetivo.
+    \item \textbf{Acciones del Atacante:}
+    \begin{itemize}
+        \item Registro de un dominio tipográfico fraudulento (\textit{typosquatting}) diseñado para inducir a error visual, tal como \path{matricula-unap-edu[.]pe} o \path{unap-tramite-academico[.]com}.
+        \item Emisión de un certificado SSL/TLS gratuito (Let's Encrypt o ZeroSSL) para desplegar el candado de seguridad en la barra de direcciones del navegador.
+        \item Clonación pixel por pixel de la interfaz gráfica del portal oficial de autenticación de matrícula de la UNAP, integrando un script en backend (PHP/Node.js) configurado para interceptar y almacenar las credenciales ingresadas (DNI, contraseña y códigos de verificación).
+        \item Redacción de una plantilla de correo electrónico persuasiva suplantando a la Oficina de Tecnologías de la Información (OTI):
+        \begin{quote}
+        \itshape ``Estimado(a) docente/estudiante: Por disposición del Vicerrectorado Académico y en el marco del inicio del ciclo de matrícula, es mandatorio validar sus credenciales institucionales antes de las 23:59 hrs para evitar la inhabilitación del acceso al sistema. Ingrese al siguiente enlace: \path{https://matricula-unap-edu[.]pe/login}''.
+        \end{quote}
+    \end{itemize}
+\end{itemize}
+
+\subsection*{Fase 3: Entrega (\textit{Delivery})}
+\begin{itemize}
+    \item \textbf{Objetivo del Adversario:} Transmitir el señuelo y enlace fraudulento a las bandejas de entrada del personal docente, directores de escuela y alumnos de la UNAP.
+    \item \textbf{Acciones del Atacante sustentadas en Evidencias de DNS:}
+    \begin{itemize}
+        \item El atacante configura su propio servidor de correo saliente (Postfix / SendGrid) para inyectar correos falsificando el encabezado de remitente \texttt{From:\allowbreak\ soporte.oti@\allowbreak unap.edu.pe}.
+        \item \textbf{Explotación de la Brecha DNS Real 1 (SPF Permisivo):} La consulta DNS sobre el dominio arrojó:
+        \begin{center}
+        \small\texttt{"v=spf1 ip4:208.70.245.162 a:sfulib10.nmsrv.com include:\_spf.google.com \~all"}
+        \end{center}
+        El modificador \texttt{\~all} (\textit{SoftFail}) no instruye a los servidores de correo receptores a descartar el mensaje, sino únicamente a catalogarlo como sospechoso o enviarlo con baja puntuación de spam.
+        \item \textbf{Explotación de la Brecha DNS Real 2 (Ausencia Total de DMARC):} La consulta DNS sobre \path{_dmarc.unap.edu.pe} devolvió \textit{Non-existent domain} (\texttt{NXDOMAIN}). Al no existir una política DMARC publicada por la universidad, los servidores de correo (Google Workspace, Microsoft 365, servidores corporativos) no reciben directivas institucionales que ordenen el rechazo (\texttt{p=reject}) o la cuarentena (\texttt{p=quarantine}) de correos falsificados en nombre de \texttt{unap.edu.pe}.
+    \end{itemize}
+    \item \textbf{Resultado:} El correo de phishing supera los filtros perimetrales y es depositado directamente en la bandeja de entrada de cientos de docentes y administrativos de la UNAP sin advertencias explícitas de suplantación de dominio.
+\end{itemize}
+
+\subsection*{Fase 4: Explotación (\textit{Exploitation})}
+\begin{itemize}
+    \item \textbf{Objetivo del Adversario:} Materializar el engaño y lograr que la víctima ejecute la acción prevista.
+    \item \textbf{Acciones del Atacante:}
+    \begin{itemize}
+        \item El docente o administrativo hace clic sobre el enlace del correo fraudulento.
+        \item \textbf{Explotación de la Brecha Web Real (Ausencia de HSTS):} Al estar desactivada la directiva \texttt{Strict-\allowbreak Transport-\allowbreak Security} en los portales universitarios (\path{campus.unap.edu.pe} y \path{matricula.unap.edu.pe}), los usuarios están habituados a transitar entre enlaces HTTP y HTTPS sin que el navegador bloquee o alerte sobre discrepancias en certificados estrictos o redirecciones en texto plano.
+        \item La víctima introduce su identificador de usuario y contraseña institucional en el portal clonado.
+        \item El script del atacante captura en tiempo real las credenciales y redirige inmediatamente al usuario a la página legítima de la UNAP (\path{matricula.unap.edu.pe/informacion}), provocando la impresión de un fallo temporal de conexión y evitando que la víctima sospeche del robo.
+    \end{itemize}
+\end{itemize}
+
+\subsection*{Fase 5: Instalación (\textit{Installation})}
+\begin{itemize}
+    \item \textbf{Objetivo del Adversario:} Establecer un punto de apoyo persistente en la infraestructura institucional utilizando el vector obtenido.
+    \item \textbf{Acciones del Atacante:}
+    \begin{itemize}
+        \item Con las credenciales comprometidas de un docente o administrador de la OTI, el atacante inicia sesión en la intranet o en el servicio de VPN institucional de la UNAP.
+        \item \textbf{Brecha Explotada: Ausencia de Autenticación Multifactor (MFA) obligatoria.} Dado que la autenticación depende exclusivamente de la contraseña estática, el atacante obtiene acceso inmediato sin requerir un segundo factor en un dispositivo físico.
+        \item Aprovechando los permisos de la cuenta docente comprometida en la plataforma de Campus Virtual / Moodle o en el sistema de admisiones, el atacante localiza formularios de carga de archivos (ej. subida de sílabos, fotos de postulantes o tareas) y elude la validación de extensiones para subir una Web Shell PHP/ASPX ofuscada en una ruta accesible (\path{/uploads/2026/shell.php}).
+    \end{itemize}
+\end{itemize}
+
+\subsection*{Fase 6: Comando y Control - C2 (\textit{Command and Control})}
+\begin{itemize}
+    \item \textbf{Objetivo del Adversario:} Abrir un canal de comunicación seguro y bidireccional entre el servidor comprometido de la UNAP y la infraestructura remota del atacante para emitir órdenes.
+    \item \textbf{Acciones del Atacante:}
+    \begin{itemize}
+        \item La Web Shell o un payload ligero descargado invoca una conexión reversa (\textit{Reverse Shell}) vía HTTPS saliente (puerto TCP 443) hacia la dirección IP del servidor C2 (\texttt{194.26.29.112}).
+        \item \textbf{Brecha Explotada: Salida a Internet sin filtrado estricto de egreso (\textit{Egress Filtering}).} Los servidores del Data Center tienen permitido tráfico TCP saliente sin inspección de contenido ni resolución a través de un proxy corporativo con inspección SSL/TLS.
+        \item El canal se mantiene activo y camuflado simulando tráfico TLS legítimo, permitiendo al atacante ejecutar comandos de consola interactivos (\texttt{whoami}, \texttt{ipconfig}, \texttt{cat /etc/passwd}) dentro del servidor web de la universidad.
+    \end{itemize}
+\end{itemize}
+
+\subsection*{Fase 7: Acciones sobre los Objetivos (\textit{Actions on Objectives})}
+\begin{itemize}
+    \item \textbf{Objetivo del Adversario:} Cumplimiento de la meta final que motivó el ataque cibernético.
+    \item \textbf{Acciones del Atacante:}
+    \begin{itemize}
+        \item \textbf{Pivote y Acceso a Datos Críticos:} Desde el servidor web comprometido, el atacante realiza conexiones internas hacia el motor de base de datos (ACT-01: Base de Datos Académica Central en PostgreSQL / Oracle), extrayendo cadenas de conexión almacenadas en archivos de configuración planos (\path{appsettings.json} o \path{.env}).
+        \item \textbf{Exfiltración de Datos Masiva:} Extracción de tablas completas que albergan DNI, nombres, domicilios, historiales académicos de estudiantes y registros de remuneraciones del personal docente, violando de forma directa la Ley N° 29733 (Ley de Protección de Datos Personales).
+        \item \textbf{Alteración Fraudulenta:} Modificación de actas de calificaciones, asignación fraudulenta de cupos en asignaturas colapsadas o inserción de cuentas de usuario ficticias con privilegios de administrador.
+        \item \textbf{Despliegue de Ransomware:} Cifrado de los discos duros virtuales de los servidores de matrícula y campus virtual con posterior extorsión económica para exigir un rescate bajo amenaza de publicar la información académica en foros de la Dark Web.
+    \end{itemize}
+\end{itemize}
+
+\newpage
+\section{Mapa del Ciclo de Ataque y Controles Defensivos de Interrupción}
+
+La fortaleza del enfoque defensivo radica en que la UNAP no requiere esperar a la fase final para detener al adversario. La siguiente tabla operacional define el mapa de controles preventivos, detectivos y correctivos destinados a quebrar la Kill Chain en cada eslabón:
+
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.28}
+\begin{longtable}{>{\bfseries\raggedright\arraybackslash}p{2.3cm} >{\raggedright\arraybackslash}p{4.2cm} >{\raggedright\arraybackslash}p{2.3cm} >{\raggedright\arraybackslash}p{6.8cm}}
 \toprule
 \rowcolor{outermarginbgcolor}
-Fase Kill Chain & Acción del Adversario en UNAP & Control Preventivo / Detectivo de Ruptura \\
+Fase Cyber Kill Chain & Acción Específica del Atacante (Escenario UNAP) & Tipo de Control & Controles Específicos para Romper el Eslabón \\
 \midrule
 \endfirsthead
 \toprule
 \rowcolor{outermarginbgcolor}
-Fase Kill Chain & Acción del Adversario en UNAP & Control Preventivo / Detectivo de Ruptura \\
+Fase Cyber Kill Chain & Acción Específica del Atacante (Escenario UNAP) & Tipo de Control & Controles Específicos para Romper el Eslabón \\
 \midrule
 \endhead
 \bottomrule
 \endfoot
-1. Reconocimiento & Rastreo de subdominios y correos & Vigilancia OSINT, reducción de huella digital y monitoreo DNS \\
+
+1. Reconocimiento & Escaneo pasivo de subdominios en \texttt{crt.sh} y recolección de versiones en \texttt{Server:\allowbreak\ nginx/1.16.1}. & Preventivo / Disuasivo & \textbullet\ Ocultamiento de cabeceras en Nginx: configurar \texttt{server\_tokens off;}.\par\vspace{2pt}\textbullet\ Dar de baja registros DNS públicos de entornos de prueba (\path{dev}, \path{dev2}, \path{prue1}, \path{remototest}).\par\vspace{2pt}\textbullet\ Deshabilitar el listado de directorios en todos los servidores web institucionales. \\
 \midrule
-2. Armamento & Montaje de web clonada de matrícula & Detección temprana de typosquatting vía Threat Intelligence \\
+
+2. Armamento & Compra de dominios tipográficos similares (\texttt{matricula-\allowbreak unap-\allowbreak edu\allowbreak[.]pe}) y clonación de interfaces. & Detectivo & \textbullet\ Servicio de Threat Intelligence para monitoreo proactivo de nuevos registros de dominios coincidentes con marcas y nombres de la UNAP.\par\vspace{2pt}\textbullet\ Implementación de marcas de agua dinámicas e invisibles en el código frontend oficial. \\
 \midrule
-3. Entrega & Envío de correo apócrifo de la UNAP & Publicación de registro DMARC estricto (\texttt{p=reject}) y SPF con \texttt{-all} \\
+
+3. Entrega & Envío de correos de Spear-Phishing con remitente suplantado \texttt{@unap.edu.pe} hacia docentes. & Preventivo (Crítico) & \textbullet\ Publicación mandatoria de DMARC: Registrar en DNS \path{_dmarc.unap.edu.pe} con política estricta: \path{v=DMARC1; p=reject; sp=reject; rua=mailto:seguridad@unap.edu.pe}.\par\vspace{2pt}\textbullet\ Ajuste estricto de SPF: Reemplazar el modificador \texttt{\~all} (SoftFail) por \texttt{-all} (HardFail).\par\vspace{2pt}\textbullet\ Firma criptográfica de correos mediante claves DKIM. \\
 \midrule
-4. Explotación & Clic en enlace apócrifo de correo & Filtrado web en endpoints y concientización antispam en usuarios \\
+
+4. Explotación & El usuario hace clic en el enlace falso e introduce sus credenciales en el portal fraudulento. & Preventivo / Formativo & \textbullet\ Habilitación de HSTS: Forzar directiva \texttt{Strict-Transport-Security: max-age=31536000; includeSubDomains; preload} en Nginx.\par\vspace{2pt}\textbullet\ Pasarela de correo con análisis de enlaces en tiempo real (\textit{Safe Links / Sandboxing}).\par\vspace{2pt}\textbullet\ Campañas periódicas de simulación de phishing para concientizar al personal universitario. \\
 \midrule
-5. Instalación & Inicio de sesión con credencial robada & Autenticación Multifactor obligatoria (MFA/TOTP) que bloquea el acceso \\
+
+5. Instalación & Intento de autenticación en la VPN/intranet y subida de Web Shell en servidores web. & Preventivo (Crítico) & \textbullet\ Despliegue de Autenticación Multifactor (MFA): Bloquea el acceso aunque el atacante posea el usuario y contraseña.\par\vspace{2pt}\textbullet\ Restricción de permisos en directorios de subida web: denegar privilegios de ejecución (\texttt{noexec}) en carpetas \path{/uploads/} o \path{/assets/}.\par\vspace{2pt}\textbullet\ Solución EDR en servidores que bloquee la creación de procesos derivados de servidores web (ej. \texttt{nginx} o \texttt{kestrel} invocando \path{cmd.exe}, \path{sh} o \path{powershell}). \\
 \midrule
-6. C2 & Túnel HTTPS saliente no filtrado & Inspección profunda SSL/TLS en firewall NGFW y bloqueo de IPs C2 \\
+
+6. Comando y Control (C2) & Apertura de túnel reverso HTTPS desde el servidor web hacia la IP externa \texttt{194.26.29.112}. & Detectivo / Correctivo & \textbullet\ Filtrado estricto de egreso (\textit{Egress Filtering}): Bloquear en Firewall perimetral tráfico saliente no autorizado desde el segmento de servidores.\par\vspace{2pt}\textbullet\ DNS institucional con capacidades de Sinkhole para interceptar consultas hacia dominios C2.\par\vspace{2pt}\textbullet\ Inspección de tráfico cifrado SSL/TLS en Firewall NGFW. \\
 \midrule
-7. Objetivos & Extracción y alteración de notas & Control RBAC estricto, inmutabilidad de actas y alertas SIEM \\
+
+7. Acción sobre el Objetivo & Extracción masiva de bases de datos de notas, alteración de registros o cifrado por ransomware. & Correctivo / Resiliencia & \textbullet\ Microsegmentación Zero Trust: Aislar la Base de Datos Académica en una VLAN privada sin acceso directo desde servidores web de facultades.\par\vspace{2pt}\textbullet\ Cifrado en reposo (TDE / BitLocker / LUKS) y en tránsito (TLS 1.3) para los datos sensibles.\par\vspace{2pt}\textbullet\ Principio de mínimo privilegio en usuarios de conexión a base de datos (prohibir usuario \path{sa} o \path{postgres} en la aplicación).\par\vspace{2pt}\textbullet\ Estrategia de Respaldo 3-2-1: Copias de seguridad inmutables y aisladas fuera de línea (\textit{Air-Gapped}) para garantizar recuperación total sin pagar rescates. \\
 \bottomrule
 \end{longtable}
+\end{center}
 
-\begin{cmdbox}{Evidencia Técnica DNS: Ausencia de DMARC y SPF Permisivo}
-# Consulta de registro DMARC en el dominio institucional
-$ dig _dmarc.unap.edu.pe TXT +short
-;; Got SERVFAIL or NXDOMAIN (Registro DMARC inexistente)
+\newpage
+\section{Diagrama del Punto de Quiebre Defensivo (Kill-Switch)}
 
-# Consulta de registro SPF en unap.edu.pe
-$ dig unap.edu.pe TXT +short
-'v=spf1 ip4:161.132.24.0/24 include:_spf.google.com ~all'
-# Diagnostico: El modificador ~all (SoftFail) permite suplantacion sin rechazo forzado
-\end{cmdbox}
+Al aplicar estos controles, el plan de ciberseguridad demuestra matemáticamente cómo se desarticula la cadena en sus etapas tempranas:
+
+\begin{center}
+\begin{tikzpicture}[
+    actionbox/.style={
+        rectangle,
+        rounded corners=5pt,
+        draw=fg!80!black,
+        fill=bg!50,
+        line width=1pt,
+        text width=5.8cm,
+        minimum height=0.9cm,
+        inner sep=5pt,
+        align=center,
+        font=\small
+    },
+    decisionbox/.style={
+        rectangle,
+        rounded corners=5pt,
+        draw=fg!90!black,
+        fill=bg!90,
+        line width=1.1pt,
+        text width=5.8cm,
+        minimum height=1.0cm,
+        inner sep=5pt,
+        align=center,
+        font=\bfseries\small
+    },
+    successbox/.style={
+        rectangle,
+        rounded corners=5pt,
+        draw=OliveGreen!90!black,
+        fill=OliveGreen!15,
+        line width=1.2pt,
+        text width=4.4cm,
+        minimum height=1.1cm,
+        inner sep=5pt,
+        align=center,
+        font=\small
+    },
+    dangerbox/.style={
+        rectangle,
+        rounded corners=5pt,
+        draw=BrickRed!90!black,
+        fill=BrickRed!12,
+        line width=1pt,
+        text width=5.8cm,
+        minimum height=0.95cm,
+        inner sep=5pt,
+        align=center,
+        font=\small
+    },
+    arrowred/.style={
+        -{Stealth[scale=1.0]},
+        line width=1.2pt,
+        color=BrickRed!90!black
+    },
+    arrowgreen/.style={
+        -{Stealth[scale=1.0]},
+        line width=1.2pt,
+        color=OliveGreen!90!black
+    },
+    arrowgray/.style={
+        -{Stealth[scale=1.0]},
+        line width=1.1pt,
+        color=black!75
+    }
+]
+
+% Nodo inicial
+\node[actionbox] (init) at (0, 0) {Atacante envía correo falsificado\\suplantando dominio institucional};
+
+% Primer punto de decisión
+\node[decisionbox] (dec1) at (0, -1.6) {¿Existe registro DMARC\\con directiva \texttt{p=reject}?};
+
+% Ramas DMARC
+\node[successbox] (succ1) at (7.3, -1.6) {
+    \textbf{Correo RECHAZADO}\\[3pt]
+    {\bfseries\scriptsize\color{OliveGreen!90!black} CADENA ROTA EN FASE 3}
+};
+
+\node[dangerbox] (fail1) at (0, -3.5) {Correo entregado en bandeja de entrada};
+
+% Acción intermedia
+\node[actionbox] (userclick) at (0, -5.0) {Usuario hace clic e ingresa\\credenciales en portal clonado};
+
+% Segundo punto de decisión
+\node[decisionbox] (dec2) at (0, -6.7) {¿Existe MFA / Segundo Factor\\de Autenticación Activo?};
+
+% Ramas MFA
+\node[successbox] (succ2) at (7.3, -6.7) {
+    \textbf{Acceso DENEGADO}\\[3pt]
+    {\bfseries\scriptsize\color{OliveGreen!90!black} CADENA ROTA EN FASE 5}
+};
+
+\node[dangerbox] (fail2) at (0, -8.7) {
+    \textbf{Acceso no autorizado a Intranet / VPN}\\[2pt]
+    {\bfseries\color{BrickRed!90!black} Movimiento lateral y exfiltración de BD}
+};
+
+% Conectores
+\draw[arrowgray] (init.south) -- (dec1.north);
+
+\draw[arrowgreen] (dec1.east) -- node[above, font=\bfseries\tiny, align=center, text=OliveGreen!90!black, yshift=1pt] {SÍ\\[-1pt](Control UNAP)} (succ1.west);
+\draw[arrowred] (dec1.south) -- node[right, font=\bfseries\scriptsize, text=BrickRed!90!black, xshift=2pt] {NO (Estado Actual)} (fail1.north);
+
+\draw[arrowgray] (fail1.south) -- (userclick.north);
+\draw[arrowgray] (userclick.south) -- (dec2.north);
+
+\draw[arrowgreen] (dec2.east) -- node[above, font=\bfseries\tiny, align=center, text=OliveGreen!90!black, yshift=1pt] {SÍ\\[-1pt](Control UNAP)} (succ2.west);
+\draw[arrowred] (dec2.south) -- node[right, font=\bfseries\scriptsize, text=BrickRed!90!black, xshift=2pt] {NO (Estado Actual)} (fail2.north);
+
+\end{tikzpicture}
+\end{center}
+
+La implementación combinada de DMARC estricto en la Fase 3 y MFA obligatorio en la Fase 5 garantiza que, aun existiendo fallos humanos o técnicos residuales, la cadena de ataque sea desarticulada antes de comprometer los servidores centrales o las bases de datos académicas de la Universidad Nacional del Altiplano.
