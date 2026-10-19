@@ -317,64 +317,50 @@ Con esta incorporación, el informe técnico queda respaldado empíricamente por
 
 \begin{itemize}
     \item \textbf{Objetivo:} Eliminar la confianza implícita de la red plana tradicional, reduciendo el radio de impacto de cualquier compromiso lateral (T1021 en MITRE ATT\&CK).
+    \item \textbf{Protocolos de Aislamiento:} Implementación de \textit{Private VLANs} (PVLAN) en switches de acceso y desactivación física de puertos en desuso en todas las dependencias.
     \item \textbf{Estructura de Microsegmentación por VLANs:}
 \end{itemize}
 
-\vspace{0.15cm}
-
-\begingroup
+\vspace{-0.2cm}
+\begin{center}
 \scriptsize
-\setlength{\tabcolsep}{3pt}
-\renewcommand{\arraystretch}{1.2}
-\begin{longtable}{>{\raggedright\bfseries}p{1.8cm} >{\raggedright}p{3.2cm} >{\centering}p{2.7cm} >{\raggedright\arraybackslash}p{6.6cm}}
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.08}
+\begin{tabular}{>{\raggedright\bfseries}p{1.6cm} >{\raggedright}p{2.9cm} >{\centering}p{2.5cm} >{\raggedright\arraybackslash}p{7.2cm}}
 \toprule
 \rowcolor{outermarginbgcolor}
-Identificador VLAN & Nombre de Segmento & Rango IP Sugerido & Descripción y Reglas de Tráfico \\
+VLAN & Nombre Segmento & Rango IP Sugerido & Descripción y Reglas de Tráfico \\
 \midrule
-\endfirsthead
-\toprule
-\rowcolor{outermarginbgcolor}
-Identificador VLAN & Nombre de Segmento & Rango IP Sugerido & Descripción y Reglas de Tráfico \\
+VLAN 10 & Data Center / Servidores & \texttt{10.10.10.0/24} & Servidores críticos (BD, NAS, Core). Denegado desde Internet; acceso solo vía Bastión con mTLS. \\
 \midrule
-\endhead
-\textbf{VLAN 10} & Data Center / Servidores Críticos & \texttt{10.10.10.0/24} & Motores de BD (ACT-01), almacenamiento NAS, switches Core. Tráfico denegado desde Internet; acceso administrativo solo vía Bastión con mTLS. \\
+VLAN 20 & Docentes y Decanatos & \texttt{10.10.20.0/23} & Equipos de profesores y directivos. Solo acceso web (HTTPS); denegado acceso a BD y consolas SSH. \\
 \midrule
-\textbf{VLAN 20} & Red Docente y Decanatos & \texttt{10.10.20.0/23} & Equipos de profesores y autoridades. Solo acceso hacia portales web (HTTPS); denegado acceso a bases de datos o consolas SSH. \\
+VLAN 30 & Red Administrativa & \texttt{10.10.30.0/23} & Tesorería, SITRAD, RRHH. Tráfico inter-estación bloqueado por switch capa 3. Bloqueo de SMB (445). \\
 \midrule
-\textbf{VLAN 30} & Red Administrativa & \texttt{10.10.30.0/23} & Tesorería, SITRAD, RRHH. Tráfico inter-estación (este-oeste) bloqueado por firewall en switch capa 3. Bloqueo de SMB (puerto 445). \\
+VLAN 40 & Laboratorios Alumnos & \texttt{10.10.40.0/22} & Aulas de cómputo (20 facultades). Aislamiento estricto (\textit{Client Isolation}); sin acceso a LAN interna. \\
 \midrule
-\textbf{VLAN 40} & Laboratorios de Estudiantes & \texttt{10.10.40.0/22} & Salas de cómputo de las 20 facultades. Aislamiento estricto de clientes (\textit{Client Isolation}); no se ven entre sí ni ven a servidores internos. \\
+VLAN 50 & Wi-Fi Invitados & \texttt{172.16.0.0/16} & Acceso abierto. Salida exclusiva a Internet; enrutamiento bloqueado hacia subredes \texttt{10.x.x.x}. \\
 \midrule
-\textbf{VLAN 50} & Wi-Fi Invitados y Campus & \texttt{172.16.0.0/16} & Redes inalámbricas abiertas. Únicamente salida a Internet; enrutamiento bloqueado hacia cualquier subred \texttt{10.x.x.x}. \\
-\midrule
-\textbf{VLAN 60} & DMZ (Servidores Públicos) & \texttt{192.168.60.0/24} & Proxies web Nginx, portales públicos (matrícula, campus). Aislados de la LAN interna; solo hablan con la base de datos por puertos específicos. \\
+VLAN 60 & DMZ Pública & \texttt{192.168.60.0/24} & Proxies Nginx y portales web. Aislados de la LAN interna; comunicación a BD restringida por puerto. \\
 \bottomrule
-\end{longtable}
-\endgroup
+\end{tabular}
+\end{center}
 
-\begin{itemize}
-    \item \textbf{Protocolos de Aislamiento:} Implementación de \textit{Private VLANs} (PVLAN) en switches de acceso de laboratorios y desactivación de puertos de red físicos en desuso en todas las dependencias.
-\end{itemize}
-
+\vspace{0.1cm}
 \subsection{Control 8: Gestión Continua de Vulnerabilidades}
 
 \begin{itemize}
     \item \textbf{Objetivo:} Detectar, priorizar y remediar proactivamente fallas de configuración y obsolescencia de software antes de que sean explotadas por ciberatacantes.
-    \item \textbf{Herramientas Operativas:} OpenVAS / Greenbone Vulnerability Management / Nessus Essentials integrado con escaneos de dependencias (Trivy para contenedores y Dependabot para código fuente ASP.NET Core).
+    \item \textbf{Herramientas Operativas:} OpenVAS / Greenbone Vulnerability Management y Nessus Essentials integrado con Trivy (contenedores) y Dependabot (código ASP.NET Core).
     \item \textbf{Procedimiento y Tiempos de Remediación (SLA):}
     \begin{itemize}
-        \item \textit{Escaneo Perimetral Automatizado:} Ejecución semanal de barridos no invasivos sobre los subdominios catalogados bajo \texttt{unap.edu.pe}.
-        \item \textit{Escaneo Interno con Credenciales:} Análisis mensual de configuración y parches en servidores del Data Center.
-        \item \textit{Ventanas de Parchado Obligatorio según Severidad CVSS v3:}
-        \begin{itemize}
-            \item \textbf{Severidad Crítica} ($\text{CVSS} \ge 9.0$): Aplicación de parche o contramedida en un plazo máximo de 48 horas.
-            \item \textbf{Severidad Alta} ($\text{CVSS } 7.0 - 8.9$): Aplicación de parche en un plazo máximo de 7 días calendario.
-            \item \textbf{Severidad Media / Baja} ($\text{CVSS} < 7.0$): Aplicación durante la ventana de mantenimiento mensual programada.
-        \end{itemize}
-        \item \textit{Actualización Específica:} Reemplazo inmediato del binario de \texttt{nginx/1.16.1} en el servidor de matrícula por la rama estable soportada (1.26+ o superior).
+        \item \textit{Escaneos Continuos:} Barridos perimetrales semanales automatizados sobre \texttt{unap.edu.pe} y auditoría interna mensual con credenciales en servidores Data Center.
+        \item \textit{Ventanas de Parchado Obligatorio (CVSS v3):} \textbf{Crítica} ($\text{CVSS} \ge 9.0$) en $\le 48$\,h; \textbf{Alta} ($\text{CVSS } 7.0 - 8.9$) en $\le 7$ días; \textbf{Media/Baja} ($< 7.0$) en ventana mensual programada.
+        \item \textit{Actualización Específica:} Reemplazo inmediato del binario de \texttt{nginx/1.16.1} en el portal de matrícula por la rama estable soportada (1.26+ o superior).
     \end{itemize}
 \end{itemize}
 
+\newpage
 \subsection{Control 9: Copias de Seguridad Inmutables y Continuidad (Backups)}
 
 \begin{itemize}
@@ -389,6 +375,7 @@ Identificador VLAN & Nombre de Segmento & Rango IP Sugerido & Descripción y Reg
     \end{itemize}
 \end{itemize}
 
+\vspace{0.2cm}
 \subsection{Control 10: Monitoreo Continuo y Operaciones de Seguridad (SOC / NOC)}
 
 \begin{itemize}
@@ -402,6 +389,7 @@ Identificador VLAN & Nombre de Segmento & Rango IP Sugerido & Descripción y Reg
     \end{itemize}
 \end{itemize}
 
+\newpage
 \subsection{Control 11: Políticas Institucionales de Seguridad de la Información (PSSI)}
 
 \begin{itemize}
@@ -414,3 +402,35 @@ Identificador VLAN & Nombre de Segmento & Rango IP Sugerido & Descripción y Reg
         \item \textbf{Política de Despliegue y Desarrollo Seguro:} Obligación para los programadores de la OTI de someter todo nuevo software a un análisis estático de código seguro (SAST) antes de su puesta en producción, prohibiendo el despliegue directo de entornos de prueba (\texttt{dev}, \texttt{prue1}) con acceso público a Internet.
     \end{itemize}
 \end{itemize}
+
+\vspace{0.3cm}
+\subsection{Matriz Consolidada de Gobernanza y Despliegue de los 11 Controles}
+
+A modo de síntesis directiva, el Cuadro~\ref{tab:matriz_11_controles} articula la totalidad de los once controles de seguridad técnica, vinculando su dominio operativo, nivel de prioridad y custodio institucional responsable en la UNAP:
+
+\vspace{0.15cm}
+\begin{center}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{cllcc}
+\toprule
+\rowcolor{outermarginbgcolor}
+\textbf{N°} & \textbf{Control de Seguridad} & \textbf{Dominio Técnico} & \textbf{Prioridad} & \textbf{Custodio Operativo} \\
+\midrule
+\textbf{01} & Autenticación Multifactor (MFA/2FA) & Identidad & Inmediata & Unidad de Sistemas / OTI \\
+\textbf{02} & Firewall de Próxima Generación (NGFW) & Perímetro y Red & Inmediata & Unidad de Redes y Conectividad \\
+\textbf{03} & Web Application Firewall (WAF) & Perímetro y Red & Inmediata & Equipo de Ciberseguridad / OTI \\
+\textbf{04} & Antivirus / Detección Endpoint (EDR) & Endpoints & Corto Plazo & Soporte Técnico y Servidores \\
+\textbf{05} & Cifrado en Tránsito (TLS 1.3) y Reposo & Datos y Cifrado & Inmediata & Administradores Web y DBA \\
+\textbf{06} & Plataforma SIEM / XDR (Wazuh) & Monitoreo & Mediano Plazo & Centro de Operaciones (SOC) \\
+\textbf{07} & Microsegmentación de Redes (VLANs) & Perímetro y Red & Corto Plazo & Unidad de Redes y Conectividad \\
+\textbf{08} & Gestión Continua de Vulnerabilidades & Endpoints & Inmediata & Analista de Seguridad OTI \\
+\textbf{09} & Respaldos Inmutables (Regla 3-2-1-1-0) & Datos y Continuidad & Inmediata & Administrador de Servidores / OTI \\
+\textbf{10} & Monitoreo Continuo (SOC / NOC) & Monitoreo & Corto Plazo & Operadores NOC/SOC - OTI \\
+\textbf{11} & Políticas Institucionales (PSSI) & Identidad y Gob. & Inmediata & Consejo Universitario / OTI \\
+\bottomrule
+\end{tabular}
+\captionof{table}{Matriz Consolidada de Gobernanza y Despliegue de los 11 Controles de Seguridad.}
+\label{tab:matriz_11_controles}
+\end{center}
