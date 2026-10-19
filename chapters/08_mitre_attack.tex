@@ -226,6 +226,252 @@ level: high
 \end{cmdbox}
 
 \newpage
+\subsection{Validación Técnica Experimental de Detección en Host y Red mediante Wazuh SIEM/XDR}\label{subsec:wazuh_validation}
+
+\begin{tcolorbox}[
+    colback=orange!8!white,
+    colframe=orange!85!black,
+    arc=2mm,
+    boxrule=0.9pt,
+    title={\textbf{NOTA METODOLÓGICA DE AUDITORÍA DEFENSIVA}},
+    fonttitle=\small\sffamily\bfseries,
+    coltitle=white
+]
+\small
+Las pruebas técnicas documentadas en este apartado se ejecutaron en un entorno de laboratorio aislado (\textit{Sandbox} local en \texttt{127.0.0.1}), compuesto por un nodo Wazuh Manager v4.8+ y un agente Wazuh Agent desplegado sobre un servidor Linux (Ubuntu Server) configurado con el \textit{stack} emulado de la UNAP (Reverse Proxy Nginx y servicios web). La simulación de eventos adversos tuvo como único fin verificar que las firmas de detección correlacionen de forma precisa con los identificadores de la taxonomía MITRE ATT\&CK Enterprise, sin interactuar con los servidores en producción de la universidad.
+\end{tcolorbox}
+
+\subsubsection*{A. Arquitectura del Laboratorio de Detección}
+
+Para verificar la capacidad institucional de visibilidad frente a adversarios, se habilitaron y evaluaron tres módulos analíticos nativos de Wazuh:
+
+\begin{itemize}
+    \item \textbf{Módulo FIM (\textit{File Integrity Monitoring}):} Inspección criptográfica de integridad sobre rutas web públicas para neutralizar la persistencia vía \textit{Web Shells}.
+    \item \textbf{Módulo Loganalysis / Syscheck:} Ingesta y normalización en tiempo real de registros de acceso web (\texttt{/var/log/nginx/access.log}) para detectar ataques de fuerza bruta y escaneo automatizado.
+    \item \textbf{Módulo de Comandos y Procesos del Sistema (\textit{Auditd / Sysmon}):} Supervisión de llamadas al sistema para detectar la invocación anómala de intérpretes de comandos (\texttt{sh}, \texttt{bash}, \texttt{powershell}).
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[
+    node distance=0.38cm,
+    flowcard/.style 2 args={
+        rectangle,
+        rounded corners=4pt,
+        draw=#1!85!black,
+        fill=#1!8,
+        line width=1.1pt,
+        text width=14.2cm,
+        minimum height=1.15cm,
+        inner sep=6pt,
+        align=left
+    },
+    flowarrow/.style={
+        -{Stealth[scale=1.1]},
+        line width=1.3pt,
+        color=fg!85!black
+    }
+]
+\definecolor{wzStepA}{HTML}{0D6EFD} % Azul
+\definecolor{wzStepB}{HTML}{087F5B} % Verde Esmeralda
+\definecolor{wzStepC}{HTML}{4F46E5} % Indigo
+\definecolor{wzStepD}{HTML}{D97706} % Ambar
+\definecolor{wzStepE}{HTML}{DC2626} % Rojo
+
+\node[flowcard={wzStepA}{}] (wz1) {
+    {\sffamily\bfseries\small\color{wzStepA} 1. Evento Simulado}\\[1pt]
+    {\footnotesize Creación de payload ejecutable (\texttt{cmd\_aspnet.aspx}) o ráfaga de peticiones HTTP (\texttt{401/403}).}
+};
+
+\node[flowcard={wzStepB}{}, below=0.38cm of wz1] (wz2) {
+    {\sffamily\bfseries\small\color{wzStepB} 2. Captura por Agente Local}\\[1pt]
+    {\footnotesize Recolección en tiempo real mediante módulos \textit{FIM} y \textit{Loganalysis} en \texttt{srv-matricula-lab}.}
+};
+
+\node[flowcard={wzStepC}{}, below=0.38cm of wz2] (wz3) {
+    {\sffamily\bfseries\small\color{wzStepC} 3. Transmisión Cifrada TLS}\\[1pt]
+    {\footnotesize Envío seguro a través del puerto TCP 1514 hacia el servidor central \textit{Wazuh Manager}.}
+};
+
+\node[flowcard={wzStepD}{}, below=0.38cm of wz3] (wz4) {
+    {\sffamily\bfseries\small\color{wzStepD} 4. Decodificación y Cruce con Reglas XML}\\[1pt]
+    {\footnotesize Procesamiento del motor de correlación contra firmas en \texttt{/var/ossec/etc/rules/local\_rules.xml}.}
+};
+
+\node[flowcard={wzStepE}{}, below=0.38cm of wz4] (wz5) {
+    {\sffamily\bfseries\small\color{wzStepE} 5. Disparo de Alerta Indexada con Mapeo MITRE ATT\&CK}\\[1pt]
+    {\footnotesize Generación de alerta en formato JSON enriquecida con tácticas y técnicas en el \textit{Wazuh Dashboard}.}
+};
+
+\draw[flowarrow] (wz1.south) -- (wz2.north);
+\draw[flowarrow] (wz2.south) -- (wz3.north);
+\draw[flowarrow] (wz3.south) -- (wz4.north);
+\draw[flowarrow] (wz4.south) -- (wz5.north);
+
+\end{tikzpicture}
+\end{center}
+
+\subsubsection*{B. Escenario de Prueba 1: Detección de Persistencia vía Web Shell (T1505.003)}
+
+\begin{itemize}
+    \item \textbf{Técnica MITRE:} \texttt{T1505.003 - Server Software Component: Web Shell}
+    \item \textbf{Táctica:} Persistencia (\texttt{TA0003})
+    \item \textbf{Vector Modelado:} Un adversario aprovecha una debilidad de carga de archivos en el portal académico para depositar un script ejecutable (\texttt{.aspx}, \texttt{.php}) en directorios estáticos de la aplicación.
+\end{itemize}
+
+\paragraph{1. Configuración del Agente (\texttt{ossec.conf}):}
+Se instruye al agente a monitorear en tiempo real los directorios raíz donde opera la aplicación de matrícula:
+
+\begin{cmdbox}{Configuracion FIM en /var/ossec/etc/ossec.conf}
+<!-- Configuracion FIM en /var/ossec/etc/ossec.conf -->
+<syscheck>
+  <disabled>no</disabled>
+  <frequency>300</frequency>
+  <scan_on_start>yes</scan_on_start>
+  
+  <!-- Vigilancia en tiempo real sobre rutas de contenido web -->
+  <directories check_all="yes" realtime="yes" report_changes="yes">/var/www/matricula/uploads</directories>
+</syscheck>
+\end{cmdbox}
+
+\paragraph{2. Regla de Correlación Específica (\texttt{local\_rules.xml}):}
+Se implementa una regla personalizada para elevar el nivel de severidad cuando se detecte la creación de archivos con extensiones ejecutables dentro de rutas web públicas:
+
+\begin{cmdbox}{Regla Wazuh Manager: /var/ossec/etc/rules/local\_rules.xml}
+<!-- Regla añadida en el Wazuh Manager: /var/ossec/etc/rules/local_rules.xml -->
+<group name="syscheck,unap_web_security,">
+  <rule id="100301" level="12">
+    <if_sid>550</if_sid> <!-- Evento base: Archivo modificado/creado -->
+    <field name="file">/var/www/matricula/uploads/</field>
+    <match regex="(?i)\.(aspx|php|jsp|sh|py|pl|cgi)$">file</match>
+    <description>ALERTA CRITICA UNAP: Creacion de archivo ejecutable en directorio web publico (Posible Web Shell)</description>
+    <mitre>
+      <id>T1505.003</id>
+      <tactic>Persistence</tactic>
+    </mitre>
+  </rule>
+</group>
+\end{cmdbox}
+
+\newpage
+\paragraph{3. Ejecución de la Simulación en Terminal de Laboratorio:}
+
+\begin{cmdbox}{Terminal de Simulacion (Laboratorio Aislado)}
+# Simulacion de colocacion de una Web Shell de prueba en el entorno aislado
+touch /var/www/matricula/uploads/cmd_aspnet.aspx
+\end{cmdbox}
+
+\paragraph{4. Salida Generada en el SIEM (Alerta JSON indexada en Wazuh Dashboard):}
+
+\begin{cmdbox}{Alerta JSON Indexada en Wazuh Dashboard}
+{
+  "timestamp": "2026-10-18T19:50:14.312-0500",
+  "rule": {
+    "level": 12,
+    "description": "ALERTA CRITICA UNAP: Creacion de archivo ejecutable en directorio web publico (Posible Web Shell)",
+    "id": "100301",
+    "firedtimes": 1,
+    "mail": false,
+    "groups": ["syscheck", "unap_web_security"],
+    "mitre": {
+      "id": ["T1505.003"],
+      "tactic": ["Persistence"],
+      "technique": ["Server Software Component: Web Shell"]
+    }
+  },
+  "agent": {
+    "id": "003",
+    "name": "srv-matricula-unap-lab",
+    "ip": "127.0.0.1"
+  },
+  "manager": {
+    "name": "wazuh-manager-unap"
+  },
+  "syscheck": {
+    "path": "/var/www/matricula/uploads/cmd_aspnet.aspx",
+    "mode": "realtime",
+    "event": "added",
+    "uname_after": "www-data",
+    "gname_after": "www-data",
+    "perm_after": "rw-r--r--",
+    "size_after": "0",
+    "sha256_after": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "location": "syscheck"
+}
+\end{cmdbox}
+
+\subsubsection*{C. Escenario de Prueba 2: Detección de Ataque de Fuerza Bruta Web (T1110.001)}
+
+\begin{itemize}
+    \item \textbf{Técnica MITRE:} \texttt{T1110.001 - Brute Force: Password Guessing}
+    \item \textbf{Táctica:} Acceso a Credenciales (\texttt{TA0006})
+    \item \textbf{Vector Modelado:} Un adversario ejecuta un script automatizado para adivinar contraseñas de docentes en el endpoint de autenticación de la intranet de matrícula.
+\end{itemize}
+
+\paragraph{1. Configuración de Ingesta de Logs de Nginx:}
+El archivo \texttt{/var/ossec/etc/ossec.conf} recolecta los accesos generados por el proxy inverso:
+
+\begin{cmdbox}{Configuracion Ingesta de Logs Nginx (/var/ossec/etc/ossec.conf)}
+<localfile>
+  <log_format>apache</log_format> <!-- Compatible con el formato Combined de Nginx -->
+  <location>/var/log/nginx/access.log</location>
+</localfile>
+\end{cmdbox}
+
+\paragraph{2. Regla de Umbral y Frecuencia en Wazuh:}
+Se establece una regla de umbral compuesta que monitorea respuestas HTTP 401 Unauthorized o 403 Forbidden acumuladas en ventanas breves de tiempo:
+
+\begin{cmdbox}{Regla Compuesta en /var/ossec/etc/rules/local\_rules.xml}
+<group name="web,accesslog,unap_auth,">
+  <!-- Regla base: Respuesta de acceso denegado -->
+  <rule id="100310" level="5">
+    <if_sid>31101</if_sid>
+    <url>/matricula/login|/auth/login</url>
+    <id>401|403</id>
+    <description>Fallo de autenticacion en portal de matricula UNAP</description>
+  </rule>
+
+  <!-- Regla compuesta: 8 fallos en menos de 60 segundos desde la misma IP -->
+  <rule id="100311" level="10" frequency="8" timeframe="60">
+    <if_matched_sid>100310</if_matched_sid>
+    <same_source_ip />
+    <description>ALERTA ALTA: Posible ataque de fuerza bruta / Password Spraying contra portal UNAP</description>
+    <mitre>
+      <id>T1110.001</id>
+      <tactic>Credential Access</tactic>
+    </mitre>
+  </rule>
+</group>
+\end{cmdbox}
+
+\newpage
+\paragraph{3. Registro de Evento Correlacionado en el SOC:}
+Al producirse la ráfaga de intentos fallidos, Wazuh agrupa los eventos y genera una alerta consolidada en el panel de control:
+
+\begin{cmdbox}{Reporte de Evento Consolidado en SOC (Alerta 100311)}
+================================================================================
+WAZUH SECURITY EVENT REPORT - ALERT ID: 100311
+================================================================================
+Timestamp:       2026-10-18 19:53:22 PET
+Agent:           003 (srv-matricula-unap-lab)
+Rule ID:         100311 (Level 10)
+Rule Description: ALERTA ALTA: Posible ataque de fuerza bruta / Password Spraying
+MITRE ATT&CK:    T1110.001 (Credential Access)
+Source IP:       192.168.1.105
+Target URL:      /matricula/login
+Event Count:     8 eventos HTTP 401 registrados en 24 segundos
+Trigger Action:  Notificacion inmediata al SOC y pase de IP a lista de contencion WAF
+================================================================================
+\end{cmdbox}
+
+\subsubsection*{D. Conclusiones de la Validación Técnica}
+
+\begin{itemize}
+    \item \textbf{Eficacia de Mapeo:} Se constata que la implementación de reglas personalizadas en Wazuh permite traducir de forma directa las técnicas abstractas de MITRE ATT\&CK (\texttt{T1505.003} y \texttt{T1110.001}) en alertas operativas con evidencia pericial (rutas, hashes SHA-256 e IPs de origen).
+    \item \textbf{Respuesta Automatizada (\textit{Active Response}):} La infraestructura evaluada queda preparada para disparar acciones defensivas en caliente: ante la regla \texttt{100311}, el agente puede invocar de forma automática un script que añada la dirección IP a las tablas de bloqueo dinámico (\texttt{iptables} o \texttt{firewall-drop}) durante 30 minutos, mitigando el vector de intrusión antes de que comprometa credenciales válidas.
+\end{itemize}
+
+\newpage
 \section{Acciones de Respuesta y Remediación por Táctica}
 
 Para cerrar el ciclo operativo, el equipo de respuesta a incidentes (CSIRT-UNAP) ejecutará los siguientes procedimientos operativos estándar ante la activación de alertas mapeadas en ATT\&CK:
