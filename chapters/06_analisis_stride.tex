@@ -87,46 +87,269 @@ El modelado STRIDE exige delimitar claramente las fronteras de confianza (\texti
 
 \subsection{Esquema Arquitectónico del DFD Nivel 1}
 
-\begin{cmdbox}{Arquitectura DFD Nivel 1 y Límites de Confianza (matricula.unap.edu.pe)}
-[ EE-01: Estudiante / Docente ]
-               |
-               |  F-01: HTTPS / GET /matricula/alumno/horario + Cookies
-               v
-=== [ LIMITE DE CONFIANZA 1: Internet / Red Publica ] ==================
-               |
-               v
-+----------------------------------------------------------------------+
-| P-01: Proxy Inverso (Nginx 1.16.1)                                   |
-|   - Terminacion SSL/TLS 1.2                                          |
-|   - Enrutamiento interno hacia socket Kestrel                        |
-+----------------------------------+-----------------------------------+
-                                   |
-                                   |  F-02: HTTP Forwarded (Cleartext)
-                                   v
-+----------------------------------------------------------------------+
-| SERVIDOR DE APLICACION ASP.NET CORE                                  |
-|                                                                      |
-|  +------------------------+      F-03      +----------------------+  |
-|  | P-02: Middleware Auth  | <------------> | D-01: Almacen Sesion |  |
-|  | (.AspNetCore.Cookies)  |                | (TempDataProvider)   |  |
-|  +-----------+------------+                +----------------------+  |
-|              | Identidad validada                                    |
-|              v                                                       |
-|  +------------------------+                +----------------------+  |
-|  | P-03: API Controller   | -------------> | P-04: Motor Reglas   |  |
-|  | (horario?start=...&end)|                | (Cupos, Cruces, Req) |  |
-|  +------------------------+                +----------+-----------+  |
-+-------------------------------------------------------|--------------+
-                                                        |
-=== [ LIMITE DE CONFIANZA 2: DMZ / Red Privada LAN ] ===|===============
-                                                        |
-                                                        |  F-04: SQL
-                                                        v
-                                             +-------------------------+
-                                             | D-02: BD Central UNAP   |
-                                             | (PostgreSQL / Oracle)   |
-                                             +-------------------------+
-\end{cmdbox}
+En la Figura~\ref{fig:dfd_nivel1_matricula} se ilustra formalmente el Diagrama de Flujo de Datos (DFD) Nivel 1 correspondiente al subdominio crítico \texttt{matricula.unap.edu.pe}. El modelo delimita con precisión los dos \textbf{límites de confianza} (Trust Boundaries) identificados en la infraestructura institucional, detallando los procesos de procesamiento, almacenes de estado y canales de comunicación expuestos.
+
+\begin{center}
+\resizebox{0.90\linewidth}{!}{%
+\begin{tikzpicture}[
+    >=Stealth,
+    font=\sffamily,
+    % Estilos de elementos DFD
+    entity/.style={
+        rectangle,
+        rounded corners=6pt,
+        draw=blue!75!black,
+        line width=1.3pt,
+        fill=blue!7,
+        align=center,
+        inner sep=7pt,
+        drop shadow={opacity=0.15, shadow xshift=1.2pt, shadow yshift=-1.2pt}
+    },
+    proxy/.style={
+        rectangle,
+        rounded corners=6pt,
+        draw=teal!80!black,
+        line width=1.3pt,
+        fill=teal!8,
+        align=center,
+        inner sep=7pt,
+        drop shadow={opacity=0.15, shadow xshift=1.2pt, shadow yshift=-1.2pt}
+    },
+    appbox/.style={
+        rectangle,
+        rounded corners=8pt,
+        draw=indigo!75!black,
+        dashed,
+        line width=1.2pt,
+        fill=indigo!3,
+        inner sep=14pt
+    },
+    applabel/.style={
+        fill=indigo!85!black,
+        text=white,
+        font=\small\bfseries,
+        rounded corners=3pt,
+        inner sep=3.5pt
+    },
+    subproc/.style={
+        rectangle,
+        rounded corners=5pt,
+        draw=teal!75!black,
+        line width=1.1pt,
+        fill=white,
+        align=center,
+        inner sep=6.5pt,
+        drop shadow={opacity=0.12, shadow xshift=1pt, shadow yshift=-1pt}
+    },
+    authproc/.style={
+        rectangle,
+        rounded corners=5pt,
+        draw=blue!75!black,
+        line width=1.1pt,
+        fill=blue!6,
+        align=center,
+        inner sep=6.5pt,
+        drop shadow={opacity=0.12, shadow xshift=1pt, shadow yshift=-1pt}
+    },
+    ruleproc/.style={
+        rectangle,
+        rounded corners=5pt,
+        draw=orange!85!black,
+        line width=1.1pt,
+        fill=orange!7,
+        align=center,
+        inner sep=6.5pt,
+        drop shadow={opacity=0.12, shadow xshift=1pt, shadow yshift=-1pt}
+    },
+    datastore/.style={
+        rectangle,
+        rounded corners=5pt,
+        draw=purple!85!black,
+        line width=1.1pt,
+        fill=purple!7,
+        align=center,
+        inner sep=6.5pt,
+        drop shadow={opacity=0.12, shadow xshift=1pt, shadow yshift=-1pt}
+    },
+    centraldb/.style={
+        rectangle,
+        rounded corners=7pt,
+        draw=violet!85!black,
+        line width=1.3pt,
+        fill=violet!9,
+        align=center,
+        inner sep=8pt,
+        drop shadow={opacity=0.18, shadow xshift=1.2pt, shadow yshift=-1.2pt}
+    },
+    % Límites de confianza
+    boundary/.style={
+        draw=red!80!black,
+        dashed,
+        line width=1.3pt,
+        dash pattern=on 7pt off 3.5pt
+    },
+    boundarylabel/.style={
+        fill=red!85!black,
+        text=white,
+        font=\scriptsize\bfseries,
+        rounded corners=3pt,
+        inner sep=3.5pt
+    },
+    % Flujos y flechas
+    flow/.style={
+        ->,
+        line width=1.2pt,
+        draw=blue!85!black
+    },
+    flowbidir/.style={
+        <->,
+        line width=1.2pt,
+        draw=purple!85!black
+    },
+    flowret/.style={
+        ->,
+        dashed,
+        line width=1.1pt,
+        draw=green!60!black
+    },
+    flowlblret/.style={
+        fill=white,
+        draw=green!60!black,
+        line width=0.6pt,
+        rounded corners=2pt,
+        inner sep=2pt,
+        font=\tiny\bfseries,
+        align=center,
+        text=green!50!black
+    }
+]
+
+    % =========================================================================
+    % TIER 1: ENTIDAD EXTERNA (INTERNET)
+    % =========================================================================
+    \node[entity, text width=12.4cm] (EE01) at (0, 0) {
+        \textbf{\textcolor{blue!80!black}{\large EE-01: Estudiante / Docente / Administrador}}\\[2pt]
+        \small Navegador Web / Terminal Móvil --- Red Pública No Confiable (Internet)\\[1pt]
+        \footnotesize Origen: IP Dinámica $\bullet$ Solicitud HTTP/S $\bullet$ Envío de Cookies de Autenticación
+    };
+
+    % =========================================================================
+    % LÍMITE DE CONFIANZA 1 (INTERNET / DMZ)
+    % =========================================================================
+    \draw[boundary] (-8.0, -2.35) -- (8.0, -2.35);
+    \node[boundarylabel, anchor=south east] at (7.8, -2.25) {LÍMITE DE CONFIANZA 1: Internet $\longleftrightarrow$ DMZ};
+
+    % F-01: Cliente -> Nginx
+    \draw[flow] (EE01.south) -- (0, -3.3) 
+        node[midway, fill=white, inner sep=2.5pt, font=\scriptsize\bfseries, text=blue!85!black, draw=blue!35, rounded corners=2pt] 
+        {\textbf{F-01}: HTTPS / TLS 1.2 --- GET \texttt{/matricula/alumno/horario} + Cookies};
+
+    % =========================================================================
+    % TIER 2: PROXY INVERSO EN DMZ
+    % =========================================================================
+    \node[proxy, text width=12.4cm] (P01) at (0, -4.4) {
+        \textbf{\textcolor{teal!90!black}{\large P-01: Servidor Web Proxy Inverso (Nginx 1.16.1)}}\\[2pt]
+        \small Terminación SSL/TLS 1.2 $\bullet$ Offloading Criptográfico $\bullet$ Inspección de Cabeceras\\[1pt]
+        \footnotesize Enrutamiento interno inverso hacia Socket Kestrel (\texttt{http://127.0.0.1:5000}) $\bullet$ Cabeceras \texttt{X-Forwarded-*}
+    };
+
+    % F-02: Nginx -> App Server
+    \draw[flow] (P01.south) -- (0, -7.8) 
+        node[pos=0.45, fill=white, inner sep=2.5pt, font=\scriptsize\bfseries, text=teal!85!black, draw=teal!35, rounded corners=2pt] 
+        {\textbf{F-02}: HTTP Forwarded (Cleartext en Socket Unix / Loopback)};
+
+    % =========================================================================
+    % TIER 3: CONTENEDOR SERVIDOR DE APLICACIONES ASP.NET CORE (KESTREL)
+    % =========================================================================
+    \node[authproc, text width=5.2cm] (P02) at (-4.0, -9.8) {
+        \textbf{\textcolor{blue!80!black}{\mbox{P-02: Middleware Auth}}}\\[2pt]
+        \small \texttt{.AspNetCore.Cookies}\\[1pt]
+        \footnotesize Validación de Ticket Criptográfico,\\
+        \footnotesize Deserialización de Claims y Roles
+    };
+
+    \node[datastore, text width=5.2cm] (D01) at (4.0, -9.8) {
+        \textbf{\textcolor{purple!80!black}{\mbox{D-01: Almacén de Sesión}}}\\[2pt]
+        \small \texttt{ITempDataProvider}\\[1pt]
+        \footnotesize Estado de Sesión en Memoria RAM,\\
+        \footnotesize Tokens Antifalsificación (CSRF)
+    };
+
+    \node[subproc, text width=5.2cm] (P03) at (-4.0, -13.8) {
+        \textbf{\textcolor{teal!80!black}{\mbox{P-03: API Controller}}}\\[2pt]
+        \small \texttt{HorarioController.cs}\\[1pt]
+        \footnotesize Despacho Endpoint: \texttt{/horario}\\
+        \footnotesize Parámetros Query: \texttt{start}, \texttt{end}
+    };
+
+    \node[ruleproc, text width=5.2cm] (P04) at (4.0, -13.8) {
+        \textbf{\textcolor{orange!85!black}{\mbox{P-04: Motor de Reglas}}}\\[2pt]
+        \small Lógica de Negocio Académica\\[1pt]
+        \footnotesize Validación de Cruces y Vacantes,\\
+        \footnotesize Prerrequisitos Curriculares
+    };
+
+    % Contenedor agrupador Kestrel
+    \begin{scope}[on background layer]
+        \node[appbox, fit=(P02) (D01) (P03) (P04)] (APPBOX) {};
+    \end{scope}
+    % Etiqueta de pestaña para el contenedor
+    \node[applabel, anchor=south west] at ([xshift=8pt, yshift=1pt]APPBOX.north west) 
+        {\;\;SERVIDOR DE APLICACIONES ASP.NET CORE (.NET 8 / KESTREL) --- DMZ\;\;};
+
+    % F-03: P-02 <-> D-01 (Sesión)
+    \draw[flowbidir] (P02.east) -- (D01.west) 
+        node[midway, fill=white, inner sep=2pt, font=\scriptsize\bfseries, text=purple!85!black, draw=purple!35, rounded corners=2pt] 
+        {\textbf{F-03}: Estado Sesión};
+
+    % Flujo interno P-02 -> P-03
+    \draw[flow] (P02.south) -- (P03.north) 
+        node[midway, right=3pt, font=\scriptsize\bfseries, text=blue!75!black] 
+        {Identidad Validada};
+
+    % Flujo interno P-03 -> P-04
+    \draw[flow] (P03.east) -- (P04.west) 
+        node[midway, fill=white, inner sep=2pt, font=\scriptsize\bfseries, text=orange!85!black, draw=orange!35, rounded corners=2pt] 
+        {Reglas Académicas};
+
+    % =========================================================================
+    % LÍMITE DE CONFIANZA 2 (DMZ / RED PRIVADA LAN)
+    % =========================================================================
+    \draw[boundary] (-8.0, -16.8) -- (8.0, -16.8);
+    \node[boundarylabel, anchor=south west] at (-7.8, -16.7) {LÍMITE DE CONFIANZA 2: DMZ $\longleftrightarrow$ VLAN 10 Interna};
+
+    % =========================================================================
+    % TIER 4: BASE DE DATOS CENTRAL UNAP
+    % =========================================================================
+    \node[centraldb, text width=12.4cm] (D02) at (0, -19.2) {
+        \textbf{\textcolor{violet!90!black}{\large D-02: Base de Datos Central UNAP}}\\[2pt]
+        \textbf{\footnotesize\textcolor{violet!80!black}{(Data Center OTI --- Segmento Seguro VLAN 10)}}\\[2pt]
+        \small Motor RDBMS Relacional Corporativo (PostgreSQL 14 / Oracle Database)\\[1pt]
+        \footnotesize Tablas: Planes Curriculares, Historial Académico, Actas de Evaluación, Asignación de Cupos y Matrículas
+    };
+
+    % F-04: P-04 -> D-02 (SQL)
+    \draw[flow] (P04.south) -- (P04.south |- D02.north) 
+        node[midway, fill=white, inner sep=2.5pt, font=\scriptsize\bfseries, text=violet!85!black, draw=violet!35, rounded corners=2pt, align=center] 
+        {\textbf{F-04}: Consultas SQL Transaccionales\\Puerto TCP 5432 / Stored Procedures};
+
+    % F-05: Retorno Payload (Nginx -> Cliente)
+    \draw[flowret] (P01.west) to[out=135, in=225] 
+        node[midway, left=4pt, flowlblret] 
+        {\textbf{F-05}: Retorno Payload JSON\\HTTP 200 OK Cifrado TLS} 
+        (EE01.west);
+
+    % Retorno interno App -> Nginx
+    \draw[flowret] (P03.west) to[out=155, in=205] 
+        node[midway, left=3pt, font=\tiny\bfseries, text=green!50!black] 
+        {Payload JSON} 
+        (P01.south west);
+
+\end{tikzpicture}%
+}
+\captionof{figure}{Diagrama de Flujo de Datos (DFD) Nivel 1 del Sistema de Matrícula Institucional y Delimitación de Límites de Confianza.}
+\label{fig:dfd_nivel1_matricula}
+\end{center}
 
 \clearpage
 
