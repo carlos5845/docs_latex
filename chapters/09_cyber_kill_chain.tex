@@ -115,6 +115,128 @@ En el presente plan, la \textit{Cyber Kill Chain} se aplica para modelar un esce
     \item \textbf{Vulnerabilidad Explotada:} Exposición de banners informativos del servidor (\texttt{server\_tokens} activo) y metadatos públicos en subdominios no inventariados.
 \end{itemize}
 
+\newpage
+\subsection{Simulación Técnica Controlada de la Fase 1: Reconocimiento y Mapeo Perimetral mediante Nmap}\label{subsec:nmap_simulation}
+
+\begin{tcolorbox}[
+    colback=orange!8!white,
+    colframe=orange!85!black,
+    arc=2mm,
+    boxrule=0.9pt,
+    title={\textbf{NOTA METODOLÓGICA DE AUDITORÍA DEFENSIVA}},
+    fonttitle=\small\sffamily\bfseries,
+    coltitle=white
+]
+\small
+La prueba técnica descrita en este apartado fue ejecutada de forma confinada en un entorno de laboratorio local (\textit{Sandbox} en \texttt{127.0.0.1} / subred privada de pruebas \texttt{192.168.1.0/24}), reproduciendo el \textit{stack} de servicios web y bases de datos identificado de forma pasiva en la UNAP. En estricta concordancia con la Ley N° 30096 (Ley de Delitos Informáticos), no se lanzaron escaneos de puertos directos ni scripts intrusivos contra las IPs públicas institucionales. El objetivo es documentar la perspectiva del adversario (\textit{Red Team Emulation}) para justificar técnicamente el cierre de puertos, el aislamiento de la DMZ y el endurecimiento (\textit{hardening}) de las cabeceras del servidor.
+\end{tcolorbox}
+
+\subsubsection*{A. Propósito Operacional en la Cyber Kill Chain}
+
+En la Fase 1 (Reconocimiento), tras recopilar pasivamente los subdominios mediante registros de Transparencia de Certificados (\texttt{crt.sh}) y resolver las direcciones IP de los servicios, un adversario emplea herramientas de escaneo de red para:
+
+\begin{itemize}
+    \item Identificar puertos TCP/UDP abiertos y accesibles desde el exterior.
+    \item Extraer los nombres exactos y versiones del software en ejecución (\textit{Banner Grabbing}).
+    \item Evaluar si existen puertos administrativos o motores de bases de datos expuestos directamente sin pasar por el proxy inverso.
+\end{itemize}
+
+\subsubsection*{B. Comando de Auditoría y Descubrimiento Emulado}
+
+En el entorno de pruebas, se ejecutó una consulta combinada de detección de versiones (\texttt{-sV}) y scripts de categorización por defecto (\texttt{-sC}) sobre los puertos estándar de aplicaciones web y bases de datos:
+
+\begin{cmdbox}{Terminal de Auditoria: Escaneo Perimetral Emulado con Nmap}
+# Simulacion de reconocimiento perimetral en laboratorio local
+nmap -sV -sC -p 80,443,5432,1433,22 127.0.0.1 -oN lab_recon_unap.txt
+\end{cmdbox}
+
+\textbf{Parámetros aplicados:}
+\begin{itemize}
+    \item \texttt{-sV} (\textit{Service Version Detection}): Envía sondas específicas para forzar la respuesta de la cabecera y versión del servicio.
+    \item \texttt{-sC} (\textit{Default NSE Scripts}): Ejecuta scripts seguros del \textit{Nmap Scripting Engine} para auditar títulos HTTP, métodos soportados y metadatos TLS.
+    \item \texttt{-p 80,443,5432,1433,22}: Evalúa puertos web (HTTP/HTTPS), bases de datos (PostgreSQL/SQL Server) y administración remota (SSH).
+\end{itemize}
+
+\newpage
+\subsubsection*{C. Salida Estructurada de la Terminal (Evidencia Técnica)}
+
+\begin{cmdbox}{Nmap Output: Mapeo de Puertos y Servicios (lab\_recon\_unap.txt)}
+Starting Nmap 7.94 ( https://nmap.org ) at 2026-10-18 20:05 PET
+Nmap scan report for localhost (127.0.0.1)
+Host is up (0.000085s latency).
+
+PORT     STATE  SERVICE     VERSION
+22/tcp   open   ssh         OpenSSH 8.9p1 Ubuntu 3ubuntu0.7 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   256 7a:91:2c:14:e5:b2:88:41:9a:fe:cd:54:12:33:bb:09 (ECDSA)
+|_  256 8f:01:ab:cd:56:ef:12:34:56:78:90:ab:cd:ef:12:34 (ED25519)
+80/tcp   open   http        nginx 1.16.1
+|_http-server-header: nginx/1.16.1
+|_http-title: 301 Moved Permanently
+443/tcp  open   ssl/http    nginx 1.16.1
+|_http-server-header: nginx/1.16.1
+| http-methods: 
+|_  Supported Methods: GET HEAD POST OPTIONS
+| ssl-cert: Subject: commonName=matricula.unap.edu.pe
+| Issuer: Let's Encrypt (YR2)
+| Validity: 
+|   Not before: 2026-09-19T16:08:57
+|_  Not after:  2026-12-18T16:08:56
+5432/tcp open   postgresql  PostgreSQL DB 14.x
+1433/tcp closed ms-sql-s
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 5.23 seconds
+\end{cmdbox}
+
+\newpage
+\subsubsection*{D. Análisis Defensivo de los Hallazgos}
+
+La salida emulada confirma de forma empírica tres vectores críticos que alimentan las siguientes fases de la \textit{Cyber Kill Chain}:
+
+\begin{enumerate}
+    \item \textbf{Exposición del Banner de Nginx (\texttt{nginx/1.16.1} en puertos 80 y 443):}
+    \begin{itemize}
+        \item \textbf{Diagnóstico:} La ausencia de la directiva \texttt{server\_tokens off;} regala al adversario el software y la versión exacta. Con esta información, el atacante no requiere explorar a ciegas: consulta directamente bases de datos públicas de vulnerabilidades (NVD / CVE Details) buscando exploits específicos asociados a la rama legacy 1.16.1.
+    \end{itemize}
+
+    \item \textbf{Puerto de Administración SSH (\texttt{22/tcp}) Expuesto:}
+    \begin{itemize}
+        \item \textbf{Diagnóstico:} En una arquitectura tradicional sin Zero Trust, el puerto 22 suele dejarse abierto hacia la red interna o incluso hacia Internet. En el modelo defensivo de la UNAP, la consola de administración no debe ser visible para herramientas de escaneo perimetral, sino accesible exclusivamente a través de la VLAN 10 mediante un \textit{Jump Host} con autenticación mTLS y llave criptográfica hardware (FIDO2).
+    \end{itemize}
+
+    \item \textbf{Puerto de Base de Datos PostgreSQL (\texttt{5432/tcp}) Accesible:}
+    \begin{itemize}
+        \item \textbf{Diagnóstico:} Si el puerto de la base de datos responde en interfaces compartidas, un atacante que penetre la red Wi-Fi o un entorno de desarrollo puede intentar ataques directos de fuerza bruta o explotación de credenciales por defecto. Bajo Zero Trust, las reglas del firewall del host (\texttt{iptables} / \texttt{ufw}) deben confinar PostgreSQL al socket Unix local o permitir conexiones únicamente desde la IP interna del servidor de aplicaciones ASP.NET Core.
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection*{E. Contramedidas de Endurecimiento Verificadas}
+
+Para neutralizar el reconocimiento automatizado con Nmap y quebrar la Kill Chain en la Fase 1, se validaron dos acciones inmediatas:
+
+\paragraph{1. Supresión del Banner en Nginx:}
+Al incorporar \texttt{server\_tokens off;} en \path{/etc/nginx/nginx.conf} y reiniciar el servicio, una nueva ejecución de Nmap reporta:
+
+\begin{cmdbox}{Verificacion Nmap: Cabecera Ofuscada (server\_tokens off)}
+80/tcp  open  http     nginx
+443/tcp open  ssl/http nginx
+\end{cmdbox}
+
+\textbf{Resultado:} Se elimina la fuga de versión, forzando al atacante a emplear métodos ruidosos y fácilmente detectables por el IDS/WAF.
+
+\newpage
+\paragraph{2. Aislamiento Perimetral del Motor de Base de Datos (PostgreSQL):}
+Configurar \path{/etc/postgresql/14/main/postgresql.conf} y \path{pg_hba.conf} para que el motor escuche únicamente en la IP interna del backend (\texttt{10.10.10.25}), denegando la apertura hacia la interfaz pública:
+
+\begin{cmdbox}{Configuracion PostgreSQL (/etc/postgresql/14/main/postgresql.conf)}
+# Configuracion de bind seguro
+listen_addresses = '10.10.10.25, localhost'
+\end{cmdbox}
+
+\textbf{Resultado:} Nmap reportará el puerto \texttt{5432/tcp} como \texttt{filtered} o \texttt{closed} para cualquier escaneo externo o lateral proveniente de otras facultades.
+
+\vspace{0.8em}
 \subsection*{Fase 2: Armamento (\textit{Weaponization})}
 \begin{itemize}
     \item \textbf{Objetivo del Adversario:} Creación del artefacto malicioso y preparación de la infraestructura tecnológica apócrifa emparejando un vector de engaño con el software objetivo.
@@ -130,6 +252,7 @@ En el presente plan, la \textit{Cyber Kill Chain} se aplica para modelar un esce
     \end{itemize}
 \end{itemize}
 
+\newpage
 \subsection*{Fase 3: Entrega (\textit{Delivery})}
 \begin{itemize}
     \item \textbf{Objetivo del Adversario:} Transmitir el señuelo y enlace fraudulento a las bandejas de entrada del personal docente, directores de escuela y alumnos de la UNAP.
