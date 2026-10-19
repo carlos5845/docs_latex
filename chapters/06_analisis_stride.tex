@@ -506,3 +506,114 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 \end{cmdbox}
+
+\clearpage
+
+\section{Auditoría Pasiva de Aplicaciones Web con OWASP ZAP y Correlación OWASP Top 10}
+
+\begin{tcolorbox}[colback=orange!8!white, colframe=orange!85!black, arc=2mm, boxrule=0.9pt, title={\textbf{NOTA METODOLÓGICA DE AUDITORÍA DEFENSIVA}}, fonttitle=\small\sffamily\bfseries, coltitle=white]
+La evaluación técnica documentada a continuación se realizó configurando la herramienta de auditoría de aplicaciones web \textbf{OWASP ZAP (Zed Attack Proxy v2.14)} en modo estrictamente \textbf{PASIVO} (\textit{Passive Scan Only}). No se realizaron inyecciones activas, fuerza bruta ni peticiones destructivas sobre la red de producción de la UNAP, cumpliendo estrictamente con la Ley N° 30096 (Ley de Delitos Informáticos del Estado Peruano).
+\end{tcolorbox}
+
+\subsection{Validación Técnica Pasiva mediante OWASP ZAP y Correlación con OWASP Top 10}
+
+Mientras que el modelado STRIDE analiza las amenazas a nivel de diseño funcional y flujos de datos (DFD), el estándar internacional OWASP Top 10 clasifica los riesgos de implementación más críticos en aplicaciones web. La articulación de ambas metodologías permite constatar que las amenazas de \textit{Tampering} (T) e \textit{Information Disclosure} (I) descubiertas en el flujo transaccional de matrícula (\texttt{matricula.unap.edu.pe}) corresponden directamente a la categoría \textbf{A05:2021 -- Security Misconfiguration} (Configuración de Seguridad Defectuosa).
+
+\subsubsection{A. Procedimiento de Inspección Pasiva}
+\begin{itemize}[itemsep=3pt,topsep=2pt,parsep=0pt]
+    \item \textbf{Intercepción Pasiva de Flujo:} Se vinculó el navegador a OWASP ZAP configurado como proxy local (\texttt{127.0.0.1:8080}) durante una consulta ordinaria y autorizada del cronograma académico (\texttt{GET /matricula/alumno/horario?start=...\&end=...}).
+    \item \textbf{Evaluación de Cabeceras y Descriptores:} Los motores pasivos de OWASP ZAP analizaron las cabeceras HTTP devueltas por el proxy Nginx y los atributos de emisión de cookies generadas por ASP.NET Core (\texttt{.AspNetCore.\allowbreak Cookies} y \texttt{.AspNetCore.\allowbreak Mvc.\allowbreak CookieTempDataProvider}).
+\end{itemize}
+
+\subsubsection{B. Matriz de Hallazgos Técnicos: OWASP ZAP vs. STRIDE}
+La Tabla~\ref{tab:owasp_zap_stride} detalla la correlación sistemática entre las alertas levantadas por el escaneo pasivo de OWASP ZAP, las debilidades del estándar OWASP Top 10, los componentes arquitectónicos del DFD Nivel 1 y las categorías de amenaza STRIDE:
+
+\begingroup
+\setlength{\tabcolsep}{2.5pt}
+\scriptsize
+\begin{longtable}{p{1.5cm} p{2.4cm} p{2.1cm} p{1.8cm} >{\centering\arraybackslash}p{1.6cm} p{4.2cm}}
+\caption{Matriz de Correlación Técnica: Alertas Pasivas OWASP ZAP vs. Modelo STRIDE.} \label{tab:owasp_zap_stride} \\
+\toprule
+\rowcolor{fg}
+\textcolor{white}{Alerta ZAP} & \textcolor{white}{Regla OWASP} & \textcolor{white}{OWASP Top 10} & \textcolor{white}{Elemento DFD} & \textcolor{white}{Nivel / STRIDE} & \textcolor{white}{Evidencia y Brecha Técnica Detectada} \\
+\midrule
+\endfirsthead
+\toprule
+\rowcolor{fg}
+\textcolor{white}{Alerta ZAP} & \textcolor{white}{Regla OWASP} & \textcolor{white}{OWASP Top 10} & \textcolor{white}{Elemento DFD} & \textcolor{white}{Nivel / STRIDE} & \textcolor{white}{Evidencia y Brecha Técnica Detectada} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\texttt{ZAP-10035} & Strict-Transport-Security (HSTS) Header Not Set & A05:2021 (Security Misconfiguration) & Límite 1 / Flujo F-01 & \textbf{Medio} \newline Tampering (MitM) & Cabecera HSTS ausente en la respuesta HTTPS. Los navegadores de estudiantes en redes Wi-Fi públicas del campus quedan expuestos a ataques de degradación de cifrado (SSL Stripping). \\ \midrule
+\texttt{ZAP-10038} & Content Security Policy (CSP) Header Not Set & A05:2021 (Security Misconfiguration) & EE-01 / Límite 1 & \textbf{Medio} \newline Tampering & Ausencia total de la directiva Content-Security-Policy. La aplicación carece de restricciones sobre qué orígenes pueden inyectar scripts, estilos o marcos en el navegador del alumno. \\ \midrule
+\texttt{ZAP-10020} & X-Frame-Options Header Not Set & A05:2021 (Security Misconfiguration) & Proceso P-01 (Nginx Proxy) & \textbf{Medio} \newline Tampering (Clickjacking) & Falta la cabecera \texttt{X-Frame-Options: SAMEORIGIN}. El portal de matrícula puede ser embebido en páginas externas dentro de iframes transparentes para interceptar clics del usuario. \\ \midrule
+\texttt{ZAP-10037} & Server Leaks Information via "Server" Header & A05:2021 (Security Misconfiguration) & Proceso P-01 (Nginx Proxy) & \textbf{Bajo} \newline Information Disclosure & El servidor expone explícitamente \texttt{Server: nginx/1.16.1}. La fuga de versión permite a un atacante perfilar el software base y buscar vulnerabilidades públicas asociadas a dicha rama. \\ \midrule
+\texttt{ZAP-10054} & Cookie without Secure Flag & A05:2021 (Security Misconfiguration) & Almacén D-01 / Cookies & \textbf{Medio} \newline Information Disclosure & La cookie temporal \texttt{.AspNetCore.\allowbreak Mvc.\allowbreak CookieTemp\allowbreak DataProvider} no incluye el atributo \texttt{Secure} en su cabecera \texttt{Set-Cookie}, posibilitando su transmisión en texto claro en canales no cifrados. \\ \midrule
+\texttt{ZAP-10021} & X-Content-Type-Options Header Missing & A05:2021 (Security Misconfiguration) & Flujo F-05 (Payload JSON) & \textbf{Bajo} \newline Information Disclosure & Falta la directiva \texttt{nosniff}, permitiendo que navegadores antiguos intenten interpretar respuestas JSON como HTML o ejecutables. \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\subsubsection{C. Registro Técnico Estructurado de OWASP ZAP (Evidencia de Auditoría)}
+A continuación, se documenta el extracto de telemetría emitido por el motor de análisis pasivo de OWASP ZAP durante la auditoría del subdominio institucional:
+
+\begin{cmdbox}{OWASP ZAP v2.14 - Reporte de Auditoría Pasiva (matricula.unap.edu.pe)}
+================================================================================
+             OWASP ZAP v2.14 - REPORTE DE AUDITORIA PASIVA (UNAP)
+================================================================================
+Host Objetivo: https://matricula.unap.edu.pe
+Endpoint:      /matricula/alumno/horario
+Metodo:        GET (HTTP/1.1)
+Modo:          Passive Scan (Non-Intrusive)
+
+[ALERTA DETECTADA 1: Insecure Transport Security Header Missing]
+- Plugin ID: 10035
+- Riesgo: Medio | Confianza: Alta
+- Referencia CWE: CWE-319 (Cleartext Transmission of Sensitive Information)
+- Descripcion: La cabecera Strict-Transport-Security no esta configurada.
+  Los clientes no forzaran conexiones seguras por defecto.
+
+[ALERTA DETECTADA 2: Information Leak - Server Header Banner]
+- Plugin ID: 10037
+- Riesgo: Bajo | Confianza: Alta
+- Referencia CWE: CWE-200 (Exposure of Sensitive Information)
+- Evidencia Capturada: Server: nginx/1.16.1
+- Descripcion: Divulgacion innecesaria de software y version del reverse proxy.
+
+[ALERTA DETECTADA 3: Cookie Storage Security Attribute Incomplete]
+- Plugin ID: 10054
+- Riesgo: Medio | Confianza: Media
+- Referencia CWE: CWE-614 (Sensitive Cookie Without 'Secure' Attribute)
+- Evidencia Capturada: Set-Cookie: .AspNetCore.Mvc.CookieTempDataProvider=; 
+  path=/; samesite=lax; httponly
+================================================================================
+\end{cmdbox}
+
+\subsubsection{D. Acciones de Remediación Verificadas en Laboratorio}
+Para subsanar las alertas emitidas por OWASP ZAP y cerrar las brechas STRIDE correspondientes, se verificó en entorno de laboratorio controlado la inyección de los siguientes bloques de configuración en el proxy perimetral Nginx y en la capa de middleware de ASP.NET Core:
+
+\begin{cmdbox}{Hardening de Cabeceras en Nginx (/etc/nginx/conf.d/security.conf)}
+# Ocultamiento de version (ZAP-10037 / Information Disclosure)
+server_tokens off;
+
+# Forzado de HTTPS y proteccion contra MitM (ZAP-10035 / Tampering)
+add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+
+# Mitigacion de Clickjacking y MIME-Sniffing (ZAP-10020 y ZAP-10021)
+add_header X-Frame-Options "SAMEORIGIN" always;
+add_header X-Content-Type-Options "nosniff" always;
+
+# Mitigacion de inyecciones de contexto (ZAP-10038)
+add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:;" always;
+\end{cmdbox}
+
+\begin{cmdbox}{Aseguramiento de Cookies en ASP.NET Core (Program.cs)}
+// Correccion de ZAP-10054 (Fuerza el atributo Secure en todas las cookies emitidas)
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    options.HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always;
+    options.Secure = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
+    options.MinimumSameSitePolicy = Microsoft.AspNetCore.Http.SameSiteMode.Strict;
+});
+\end{cmdbox}
