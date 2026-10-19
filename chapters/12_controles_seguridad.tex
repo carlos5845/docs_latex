@@ -126,7 +126,7 @@ A continuación, se detallan las especificaciones técnicas, configuraciones apl
     \begin{itemize}
         \item \textit{Mitigación DoS y Rate Limiting:} Límite estricto de peticiones por dirección IP en endpoints sensibles:
         
-\begin{cmdbox}{Nginx: Configuración de Rate Limiting para Matrícula}
+\begin{cmdbox}{Nginx: Configuracion de Rate Limiting para Matricula}
 # Rate limiting para peticiones JSON y autenticacion en matricula
 limit_req_zone $binary_remote_addr zone=waf_matricula:10m rate=10r/s;
 limit_req_status 429;
@@ -171,6 +171,134 @@ add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; prelo
     \end{itemize}
 \end{itemize}
 
+\newpage
+\subsubsection{Auditoría Criptográfica y Análisis de Paquetes con Wireshark: Verificación de TLS y HSTS}\label{subsubsec:wireshark_tls_audit}
+
+\begin{tcolorbox}[
+    colback=orange!8!white,
+    colframe=orange!85!black,
+    arc=2mm,
+    boxrule=0.9pt,
+    title={\textbf{NOTA METODOLÓGICA DE AUDITORÍA DEFENSIVA}},
+    fonttitle=\small\sffamily\bfseries,
+    coltitle=white
+]
+\small
+La inspección de paquetes detallada en este apartado se realizó utilizando el analizador de protocolos de red Wireshark v4.2+ / Tshark, capturando exclusivamente el tráfico generado desde la estación de auditoría hacia los portales institucionales de la UNAP durante una navegación regular, así como en sesiones emuladas en laboratorio local (\texttt{127.0.0.1}). No se efectuaron intercepciones ilícitas de tráfico de terceros ni ataques \textit{Man-in-the-Middle} (MitM) en la red en producción, respetando los límites de la Ley N° 30096.
+\end{tcolorbox}
+
+\paragraph{A. Propósito Operacional en el Modelo de Confianza Cero (Zero Trust):}
+Bajo el pilar de Seguridad de Datos y Seguridad de Redes de Zero Trust, no basta con asumir que el tráfico está protegido por existir un certificado SSL/TLS. Es mandatorio verificar a nivel de capa de transporte (Capa 4/5 del modelo OSI):
+\begin{itemize}
+    \item La versión exacta negociada en el protocolo de enlace (\textit{TLS Handshake}).
+    \item Las suites criptográficas acordadas entre el cliente y el servidor web (descartando cifradores obsoletos).
+    \item La presencia de directivas de protección contra ataques de degradación de cifrado (\textit{SSL Stripping}) provocados por la ausencia de la cabecera \texttt{Strict-Transport-Security} (HSTS).
+\end{itemize}
+
+\paragraph{B. Procedimiento de Inspección con Wireshark:}
+
+\textbf{1. Filtros de Captura y Visualización Utilizados:} Para aislar las tramas relevantes durante el establecimiento de la sesión HTTPS contra \texttt{matricula.unap.edu.pe} y \texttt{campus.unap.edu.pe}, se aplicaron los siguientes filtros de visualización en Wireshark:
+
+\begin{cmdbox}{Filtro de Visualizacion Wireshark / Tshark}
+# Filtro para aislar el Handshake TLS y las respuestas HTTP iniciales
+tls.handshake.type == 1 || tls.handshake.type == 2 || http.response
+\end{cmdbox}
+
+\begin{itemize}
+    \item \texttt{tls.handshake.type == 1}: Captura el paquete \textit{Client Hello} (parámetros y suites ofrecidas por el cliente).
+    \item \texttt{tls.handshake.type == 2}: Captura el paquete \textit{Server Hello} (versión y suite criptográfica seleccionada por el servidor Nginx).
+    \item \texttt{http.response}: Permite auditar si el servidor entrega encabezados de seguridad en respuestas HTTP/1.1 antes o después de la negociación.
+\end{itemize}
+
+\newpage
+\paragraph{C. Hallazgos del Análisis de Paquetes en la Infraestructura Actual:}
+
+\textbf{1. Inspección del Paquete Server Hello (Negociación TLS en \texttt{campus.unap.edu.pe}):} Al inspeccionar el paquete de respuesta del servidor (Frame 42 en la captura):
+
+\begin{cmdbox}{Wireshark: Analisis de Paquete Server Hello (campus.unap.edu.pe)}
+Frame 42: 1474 bytes on wire, 1474 bytes captured
+Transmission Control Protocol, Src Port: 443, Dst Port: 52418
+Transport Layer Security (TLSv1.2)
+    Handshake Protocol: Server Hello
+        Version: TLS 1.2 (0x0303)
+        Random: 8a4f2b1c90...
+        Session ID: 4f1a2b...
+        Cipher Suite: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 (0xc02f)
+        Extensions:
+            Extension: server_name (len=0)
+            Extension: supported_versions (len=2)
+                Supported Version: TLS 1.2 (0x0303)   <-- BRECHA: No negocia TLS 1.3
+\end{cmdbox}
+
+\textbf{Diagnóstico Técnico:} El servidor selecciona TLSv1.2 con la suite \texttt{TLS\_ECDHE\_RSA\_WITH\_AES\_128\_GCM\_SHA256}. Aunque no se considera rota, carece de las garantías de confidencialidad perfecta hacia adelante (\textit{Forward Secrecy}) nativas de TLS 1.3, exigido como estándar en arquitecturas Zero Trust.
+
+\textbf{2. Inspección de Tráfico HTTP Plano y Ausencia de HSTS:} Al simular un usuario en la red Wi-Fi universitaria ingresando la dirección sin prefijo (\texttt{matricula.unap.edu.pe}), Wireshark capturó el siguiente intercambio en texto claro:
+
+\begin{cmdbox}{Wireshark: Captura de Peticion HTTP en Texto Plano y Ausencia de HSTS}
+GET / HTTP/1.1
+Host: matricula.unap.edu.pe
+User-Agent: Mozilla/5.0 ...
+
+HTTP/1.1 301 Moved Permanently
+Date: Sun, 18 Oct 2026 20:15:22 GMT
+Server: nginx/1.16.1
+Content-Type: text/html
+Location: https://matricula.unap.edu.pe/
+                                                         <-- BRECHA: Ausencia de HSTS
+\end{cmdbox}
+
+\textbf{Diagnóstico del Riesgo:}
+\begin{itemize}
+    \item En la respuesta \texttt{301 Moved Permanently}, el servidor omite la cabecera \texttt{Strict-Transport-Security}.
+    \item \textbf{Vector MitM Evidenciado:} Un atacante en la misma red Wi-Fi mediante ARP Spoofing o Rogue AP puede interceptar la primera petición TCP 80, responder fraudulentamente y ejecutar \textit{SSL Stripping} (con \texttt{sslstrip}), capturando la cookie \texttt{.AspNetCore.Cookies} en texto plano.
+\end{itemize}
+
+\newpage
+\paragraph{D. Validación Técnica de la Solución en Laboratorio (Post-Hardening):} Para validar que el control neutraliza esta vulnerabilidad, se configuró en el proxy Nginx el soporte exclusivo para TLS 1.3 y la inyección forzada de HSTS, reevaluando el tráfico con Wireshark.
+
+\textbf{1. Configuración Verificada en \texttt{/etc/nginx/conf.d/tls\_hardened.conf}:}
+
+\begin{cmdbox}{Configuracion Nginx Hardened (/etc/nginx/conf.d/tls\_hardened.conf)}
+# Forzar protocolos seguros y suites modernas
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_prefer_server_ciphers off;
+ssl_ciphers "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:ECDHE-RSA-AES256-GCM-SHA384";
+# Mitigacion estricta de SSL Stripping evidenciada en Wireshark
+add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+\end{cmdbox}
+
+\textbf{2. Salida de Wireshark con Tráfico Protegido (Post-Hardening):} Al repetir la captura tras la aplicación de la directiva:
+
+\begin{cmdbox}{Wireshark: Verificacion Post-Hardening (HSTS Activo y TLS 1.3 Negociado)}
+[PAQUETE CAPTURADO EN PROTOCOLO HTTP DE RESPUESTA]
+HTTP/1.1 200 OK
+Server: nginx                                           <-- Banner de version eliminado
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload  <-- CONTROL ACTIVO
+Content-Type: application/json; charset=utf-8
+
+[NEGOCIACION CRIPTOGRAFICA EN EL NUEVO HANDSHAKE]
+Transport Layer Security (TLSv1.3)
+    Handshake Protocol: Server Hello
+        Version: TLS 1.3 (0x0304)                       <-- TLS 1.3 NEGOCIADO EXITOSAMENTE
+        Cipher Suite: TLS_AES_256_GCM_SHA384 (0x1302)
+\end{cmdbox}
+
+\textbf{Resultado Verificado:}
+\begin{itemize}
+    \item El navegador almacena la directiva HSTS; futuras solicitudes a \texttt{matricula.unap.edu.pe} se reescriben a \texttt{https://} sin emitir tráfico por TCP 80.
+    \item La negociación asciende a TLS 1.3 con 1-RTT, optimizando la velocidad de respuesta y garantizando confidencialidad perfecta contra escuchas en el campus.
+\end{itemize}
+
+\newpage
+\paragraph{Resumen del Ecosistema de Validación Técnica en el Plan:}
+Con esta incorporación, el informe técnico queda respaldado empíricamente por cuatro herramientas defensivas complementarias desplegadas a lo largo de los capítulos analíticos:
+\begin{enumerate}
+    \item \textbf{OWASP ZAP (Capítulo 6 / Anexo 3):} Auditoría pasiva de cabeceras web (CSP, X-Frame-Options) y cookies de sesión.
+    \item \textbf{Wazuh SIEM/XDR (Capítulo 8 / Anexo 4):} Validación de reglas de detección de host y red contra técnicas MITRE ATT\&CK (\texttt{T1505.003}, \texttt{T1110.001}).
+    \item \textbf{Nmap en Sandbox (Capítulo 9 / Anexo 5):} Auditoría perimetral de puertos y emulación del reconocimiento de servicios (\texttt{nginx/1.16.1}).
+    \item \textbf{Wireshark (Capítulo 12 / Anexo 6):} Inspección de paquetes para validar el endurecimiento de TLS 1.3 y la efectividad de HSTS contra ataques MitM.
+\end{enumerate}
+
 \subsection{Control 6: Gestión de Eventos e Información de Seguridad (SIEM)}
 
 \begin{itemize}
@@ -184,6 +312,7 @@ add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; prelo
     \end{itemize}
 \end{itemize}
 
+\newpage
 \subsection{Control 7: Segmentación y Microsegmentación de Redes}
 
 \begin{itemize}

@@ -90,6 +90,8 @@ El modelado STRIDE exige delimitar claramente las fronteras de confianza (\texti
 En la Figura~\ref{fig:dfd_nivel1_matricula} se ilustra formalmente el Diagrama de Flujo de Datos (DFD) Nivel 1 correspondiente al subdominio crítico \texttt{matricula.unap.edu.pe}. El modelo delimita con precisión los dos \textbf{límites de confianza} (Trust Boundaries) identificados en la infraestructura institucional, detallando los procesos de procesamiento, almacenes de estado y canales de comunicación expuestos.
 
 \begin{center}
+\begingroup
+\shorthandoff{><}
 \resizebox{0.90\linewidth}{!}{%
 \begin{tikzpicture}[
     >=Stealth,
@@ -347,6 +349,8 @@ En la Figura~\ref{fig:dfd_nivel1_matricula} se ilustra formalmente el Diagrama d
 
 \end{tikzpicture}%
 }
+\shorthandon{><}
+\endgroup
 \captionof{figure}{Diagrama de Flujo de Datos (DFD) Nivel 1 del Sistema de Matrícula Institucional y Delimitación de Límites de Confianza.}
 \label{fig:dfd_nivel1_matricula}
 \end{center}
@@ -422,7 +426,7 @@ Para transformar los hallazgos de la matriz STRIDE en salvaguardas operativas in
 \subsection{A. Hardening Inmediato en Servidor Web Nginx (P-01)}
 Se debe modificar el bloque de configuración perimetral en el archivo institucional \texttt{/etc/\allowbreak nginx/\allowbreak sites-available/\allowbreak matricula.\allowbreak unap.\allowbreak edu.\allowbreak pe}:
 
-\begin{cmdbox}{Configuración Nginx de Mitigación STRIDE - matricula.unap.edu.pe}
+\begin{cmdbox}{Configuracion Nginx de Mitigacion STRIDE - matricula.unap.edu.pe}
 # Mitigacion STRIDE: Information Disclosure (Ocultamiento de version)
 server_tokens off;
 
@@ -453,7 +457,7 @@ server {
 \subsection{B. Aseguramiento del Manejo de Sesiones en ASP.NET Core (P-02 / D-01)}
 En el archivo de inicialización del backend (\texttt{Program.cs}), forzar el endurecimiento de las cookies transaccionales:
 
-\begin{cmdbox}{Endurecimiento de Cookies y Autenticación en Program.cs}
+\begin{cmdbox}{Endurecimiento de Cookies y Autenticacion en Program.cs}
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
     // Mitigacion STRIDE: Information Disclosure y Tampering en Cookies
@@ -476,7 +480,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 \subsection{C. Control Transaccional en Base de Datos (P-04 / D-02)}
 Para mitigar la manipulación de prerrequisitos y vacantes (\textit{Tampering} y \textit{Elevation of Privilege}), toda inscripción debe ejecutarse dentro de un procedimiento almacenado transaccional que valide atómicamente el cupo con bloqueo pesimista:
 
-\begin{cmdbox}{Función SQL Transaccional con Bloqueo FOR UPDATE contra Race Conditions}
+\begin{cmdbox}{Funcion SQL Transaccional con Bloqueo FOR UPDATE contra Race Conditions}
 -- Mitigacion STRIDE: Tampering (Bloqueo pesimista contra condiciones de carrera)
 CREATE OR REPLACE FUNCTION sp_inscribir_asignatura(
     p_alumno_id INT,
@@ -558,7 +562,7 @@ La Tabla~\ref{tab:owasp_zap_stride} detalla la correlación sistemática entre l
 \subsubsection{C. Registro Técnico Estructurado de OWASP ZAP (Evidencia de Auditoría)}
 A continuación, se documenta el extracto de telemetría emitido por el motor de análisis pasivo de OWASP ZAP durante la auditoría del subdominio institucional:
 
-\begin{cmdbox}{OWASP ZAP v2.14 - Reporte de Auditoría Pasiva (matricula.unap.edu.pe)}
+\begin{cmdbox}{OWASP ZAP v2.14 - Reporte de Auditoria Pasiva (matricula.unap.edu.pe)}
 ================================================================================
              OWASP ZAP v2.14 - REPORTE DE AUDITORIA PASIVA (UNAP)
 ================================================================================

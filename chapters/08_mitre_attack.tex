@@ -337,7 +337,7 @@ Se instruye al agente a monitorear en tiempo real los directorios raíz donde op
 Se implementa una regla personalizada para elevar el nivel de severidad cuando se detecte la creación de archivos con extensiones ejecutables dentro de rutas web públicas:
 
 \begin{cmdbox}{Regla Wazuh Manager: /var/ossec/etc/rules/local\_rules.xml}
-<!-- Regla añadida en el Wazuh Manager: /var/ossec/etc/rules/local_rules.xml -->
+<!-- Regla agregada en el Wazuh Manager: /var/ossec/etc/rules/local_rules.xml -->
 <group name="syscheck,unap_web_security,">
   <rule id="100301" level="12">
     <if_sid>550</if_sid> <!-- Evento base: Archivo modificado/creado -->
